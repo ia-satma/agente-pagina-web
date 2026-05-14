@@ -42,16 +42,13 @@ pnpm-debug.log*
 .data/
 
 # Output del pipeline — datos de clientes, no van al template
-# (si quieres versionar un cliente específico, hazlo en su propio sub-repo o
-#  quita la línea correspondiente puntualmente)
-output/*/
-!output/.gitkeep
+plugins/agente-pagina-web/output/*/
+!plugins/agente-pagina-web/output/.gitkeep
 
 # Briefs de clientes reales — NO commitear datos de clientes al template público
-# (el template _template/ SÍ se commitea)
-briefs/*/
-!briefs/_template/
-!briefs/.gitkeep
+plugins/agente-pagina-web/briefs/*/
+!plugins/agente-pagina-web/briefs/_template/
+!plugins/agente-pagina-web/briefs/.gitkeep
 
 # Zips y binarios pesados ocasionales
 *.zip

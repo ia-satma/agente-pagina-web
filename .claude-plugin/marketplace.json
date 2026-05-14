@@ -15,7 +15,7 @@
         "email": "ia@satma.mx"
       },
       "category": "development",
-      "source": ".",
+      "source": "./plugins/agente-pagina-web",
       "homepage": "https://github.com/ia-satma/agente-pagina-web"
     }
   ]
