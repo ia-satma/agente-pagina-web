@@ -145,6 +145,8 @@ Desde cualquier sesión de Claude Code:
 /plugin install ia-satma/agente-pagina-web
 ```
 
+> **¿Quieres usarlo desde web o iPhone?** Ver [docs/CLOUD.md](docs/CLOUD.md) — opciones de Remote Control y Claude Code en la Web.
+
 Tras instalar:
 - Los 10 agentes quedan disponibles globalmente vía `Agent({ subagent_type: '...' })`.
 - Los permisos de `settings.json` aplican por defecto.
