@@ -1,0 +1,519 @@
+---
+/**
+ * WorldsGrid — Cinco capitulos canonicos en cards EDITORIALES UNIFORMES.
+ *
+ * Diseno: 5 cards de IGUAL tamano alineadas en grid. Cada una mantiene
+ * carácter propio mediante:
+ *   - Acento cromatico tonal (cyan / red / pink / yellow / blue) en hover
+ *   - Glyph SVG unico
+ *   - Numeral monumental compacto como background-art
+ *   - Tags + readtime + live-dot + CTA pill editorial
+ *
+ * Layout uniforme:
+ *   Desktop ≥1100px → 5 cols (todas iguales)
+ *   Tablet 600–1100  → 2 cols (5to span 2 columnas para que no quede impar)
+ *   Mobile <600      → 1 col
+ *
+ * Todas las cards tienen mismo min-height (380px) y mismo layout interno,
+ * con padding compacto. Sin jerarquia asimetrica — ritmo visual uniforme.
+ */
+import { pathFor, t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const w = (dict as any).worlds as {
+  eyebrow: string;
+  title: string;
+  body: string;
+  items: { n: string; key: string; title: string; body: string }[];
+};
+
+const isES = locale === 'es';
+
+/* Tags contextuales — 2 keywords por mundo (compacto) */
+const TAGS: Record<string, string[]> = isES
+  ? {
+      origen:    ['Mito',       'Linaje'],
+      'la-salsa':['Cobalto',    'Cata'],
+      recetario: ['20 recetas', 'Cocina'],
+      mesas:     ['Monterrey',  'Boutique'],
+      concierge: ['Prensa',     'Regalo'],
+    }
+  : {
+      origen:    ['Myth',       'Lineage'],
+      'la-salsa':['Cobalt',     'Tasting'],
+      recetario: ['20 recipes', 'Cuisine'],
+      mesas:     ['Monterrey',  'Boutique'],
+      concierge: ['Press',      'Gift'],
+    };
+
+const READTIME: Record<string, string> = {
+  origen:    isES ? '~6 min' : '~6 min',
+  'la-salsa':isES ? '~4 min' : '~4 min',
+  recetario: isES ? '20 fichas'  : '20 cards',
+  mesas:     isES ? '2 destinos' : '2 places',
+  concierge: isES ? 'Form'       : 'Form',
+};
+
+/* Acento tonal por mundo (solo aparece en hover) */
+const TONE: Record<string, string> = {
+  origen:    '#2DBBD8',
+  'la-salsa':'#E22319',
+  recetario: '#DD2396',
+  mesas:     '#FFC03A',
+  concierge: '#0055B7',
+};
+
+const ctaLabel = isES ? 'Entrar' : 'Enter';
+---
+
+<section class="worlds" data-worlds id="mundos">
+  <div class="worlds__inner">
+    <header class="worlds__header">
+      <p class="eyebrow worlds__eyebrow" data-anim="up">{w.eyebrow}</p>
+      <h2 class="worlds__title" data-anim="up" set:html={w.title}></h2>
+      <p class="worlds__body" data-anim="up">{w.body}</p>
+    </header>
+
+    <ul class="worlds__list" role="list">
+      {w.items.map((item, i) => {
+        const tags = TAGS[item.key] ?? [];
+        const tone = TONE[item.key] ?? '#E22319';
+        const readtime = READTIME[item.key] ?? '';
+        return (
+          <li
+            class:list={['worlds__item', `worlds__item--${item.key}`]}
+            data-anim="up"
+            style={`--i:${i}; --tone: ${tone};`}
+          >
+            <a class="worlds__card" href={pathFor(locale, item.key)} data-cursor="hover">
+              {/* Numeral monumental al fondo (background art) */}
+              <span class="worlds__num-bg" aria-hidden="true">{item.n}</span>
+
+              {/* Top: chapter tag + live dot */}
+              <header class="worlds__card-head">
+                <span class="worlds__chapter-tag">
+                  <span class="worlds__live-dot" aria-hidden="true"></span>
+                  {isES ? 'Cap.' : 'Ch.'} {item.n}
+                </span>
+                <span class="worlds__readtime">{readtime}</span>
+              </header>
+
+              {/* Glyph SVG */}
+              <span class="worlds__glyph" aria-hidden="true">
+                {item.key === 'origen' && (
+                  <svg viewBox="0 0 60 80" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <rect x="6" y="2" width="48" height="6" />
+                    <rect x="10" y="8" width="40" height="4" stroke-width="1.1" />
+                    <path d="M14 12v52M22 12v52M30 12v52M38 12v52M46 12v52" stroke-width="1.1" />
+                    <rect x="6" y="64" width="48" height="6" />
+                    <rect x="2" y="70" width="56" height="8" />
+                  </svg>
+                )}
+                {item.key === 'la-salsa' && (
+                  <svg viewBox="0 0 50 80" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <rect x="20" y="4" width="10" height="14" />
+                    <path d="M16 22 L34 22 L36 32 L36 70 Q36 76 30 76 L20 76 Q14 76 14 70 L14 32 Z" />
+                    <rect x="18" y="38" width="14" height="20" stroke-width="0.9" />
+                    <line x1="22" y1="46" x2="28" y2="46" stroke-width="0.7" />
+                    <line x1="22" y1="50" x2="28" y2="50" stroke-width="0.7" />
+                  </svg>
+                )}
+                {item.key === 'recetario' && (
+                  <svg viewBox="0 0 70 80" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <ellipse cx="20" cy="14" rx="6" ry="9" />
+                    <line x1="20" y1="23" x2="20" y2="74" />
+                    <line x1="46" y1="6" x2="46" y2="34" />
+                    <line x1="50" y1="6" x2="50" y2="34" />
+                    <line x1="54" y1="6" x2="54" y2="34" />
+                    <rect x="44" y="32" width="12" height="4" />
+                    <line x1="50" y1="36" x2="50" y2="74" />
+                  </svg>
+                )}
+                {item.key === 'mesas' && (
+                  <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <ellipse cx="40" cy="32" rx="22" ry="6" />
+                    <ellipse cx="40" cy="32" rx="14" ry="3" stroke-width="0.9" />
+                    <circle cx="40" cy="32" r="1.5" fill="currentColor" />
+                    <line x1="22" y1="34" x2="18" y2="74" />
+                    <line x1="58" y1="34" x2="62" y2="74" />
+                    <line x1="14" y1="74" x2="66" y2="74" />
+                  </svg>
+                )}
+                {item.key === 'concierge' && (
+                  <svg viewBox="0 0 80 60" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <rect x="6" y="10" width="68" height="42" />
+                    <path d="M6 10 L40 36 L74 10" />
+                    <circle cx="60" cy="40" r="6" stroke-width="1.2" />
+                    <path d="M57 40 L60 43 L63 38" stroke-width="1.2" />
+                  </svg>
+                )}
+              </span>
+
+              {/* Contenido */}
+              <h3 class="worlds__cardTitle">{item.title}</h3>
+              <p class="worlds__cardBody">{item.body}</p>
+
+              {/* Tags compactos */}
+              {tags.length > 0 && (
+                <ul class="worlds__tags" role="list">
+                  {tags.map((tag) => (
+                    <li>{tag}</li>
+                  ))}
+                </ul>
+              )}
+
+              {/* CTA inferior */}
+              <span class="worlds__cta">
+                <span class="worlds__cta-line"></span>
+                <span class="worlds__cta-label">{ctaLabel}</span>
+                <span class="worlds__cta-arrow">
+                  <svg width="13" height="9" viewBox="0 0 14 10" fill="none">
+                    <path d="M0 5h13M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+              </span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .worlds {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 8%, transparent);
+  }
+  .worlds__inner { max-width: 1320px; margin: 0 auto; }
+
+  .worlds__header {
+    text-align: center;
+    margin: 0 auto clamp(2.5rem, 4vw, 3.5rem);
+    max-width: 48rem;
+  }
+  .worlds__eyebrow {
+    margin: 0 0 1.15rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.36em;
+  }
+  .worlds__title {
+    margin: 0 0 1.15rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.6rem, 6vw, 4.8rem);
+    line-height: 1.02;
+    letter-spacing: 0.015em;
+    color: var(--navy);
+    text-wrap: balance;
+  }
+  .worlds__title :global(em) { font-style: normal; color: var(--red); }
+  .worlds__body {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    line-height: 1.55;
+    color: var(--navy);
+    opacity: 0.72;
+    text-wrap: balance;
+  }
+
+  /* ─── Grid uniforme — 5 cols todas iguales en desktop ─── */
+  .worlds__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: clamp(0.85rem, 1.2vw, 1.25rem);
+  }
+  @media (max-width: 1100px) {
+    .worlds__list { grid-template-columns: repeat(2, 1fr); }
+    /* 5to item span 2 cols para que no quede impar */
+    .worlds__item:last-child { grid-column: span 2; }
+  }
+  @media (max-width: 560px) {
+    .worlds__list { grid-template-columns: 1fr; }
+    .worlds__item:last-child { grid-column: span 1; }
+  }
+
+  /* ─── Card uniforme: navy editorial compacta ─── */
+  .worlds__item {
+    list-style: none;
+  }
+  .worlds__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 360px;
+    padding: 1.5rem 1.35rem 1.5rem;
+    text-decoration: none;
+    color: var(--cream);
+    background: var(--navy);
+    border: 1px solid color-mix(in srgb, var(--cream) 8%, transparent);
+    border-radius: 6px;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+      transform var(--dur-medium) var(--ease-medium),
+      border-color var(--dur-medium) var(--ease-medium),
+      box-shadow var(--dur-medium) var(--ease-medium);
+  }
+  /* Linea inferior tonal en hover */
+  .worlds__card::before {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 2px;
+    background: var(--tone);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 4;
+  }
+  .worlds__card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--cream) 22%, transparent);
+    box-shadow:
+      0 24px 50px -30px color-mix(in srgb, var(--navy) 80%, transparent),
+      0 12px 24px -14px color-mix(in srgb, var(--tone) 28%, transparent);
+  }
+  .worlds__card:hover::before { transform: scaleX(1); }
+
+  /* Numeral MONUMENTAL como background-art bottom-right */
+  .worlds__num-bg {
+    position: absolute;
+    right: -0.5rem;
+    bottom: -1rem;
+    z-index: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(5.5rem, 9vw, 8rem);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: color-mix(in srgb, var(--cream) 7%, transparent);
+    font-variant-numeric: lining-nums;
+    pointer-events: none;
+    user-select: none;
+    transition: color var(--dur-medium) var(--ease-medium),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  .worlds__card:hover .worlds__num-bg {
+    color: color-mix(in srgb, var(--tone) 16%, transparent);
+    transform: scale(1.04);
+  }
+
+  /* ─── Header de card: chapter tag + readtime ─── */
+  .worlds__card-head {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .worlds__chapter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.58rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--cream) 62%, transparent);
+    transition: color var(--dur-medium) var(--ease-medium);
+  }
+  .worlds__card:hover .worlds__chapter-tag {
+    color: var(--tone);
+  }
+  .worlds__live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: worlds-pulse 2.4s ease-in-out infinite;
+  }
+  .worlds__card:hover .worlds__live-dot {
+    background: var(--tone);
+  }
+  @keyframes worlds-pulse {
+    0%, 100% { box-shadow: 0 0 0 0   color-mix(in srgb, var(--red) 60%, transparent); opacity: 1; }
+    70%      { box-shadow: 0 0 0 6px transparent; opacity: 0.6; }
+  }
+  .worlds__readtime {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--cream) 45%, transparent);
+  }
+
+  /* ─── Glyph SVG ─── */
+  .worlds__glyph {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 52px;
+    height: 52px;
+    margin: 0 0 1rem;
+    color: color-mix(in srgb, var(--cream) 48%, transparent);
+    transition: color var(--dur-medium) var(--ease-medium),
+                transform var(--dur-medium) var(--ease-medium);
+    animation: worlds-glyph-float 7s ease-in-out infinite;
+  }
+  .worlds__glyph svg { display: block; width: 100%; height: 100%; }
+  .worlds__card:hover .worlds__glyph {
+    color: var(--tone);
+    transform: scale(1.08) rotate(-3deg);
+    animation-play-state: paused;
+  }
+  @keyframes worlds-glyph-float {
+    0%, 100% { transform: rotate(0deg)   translateY(0); }
+    50%      { transform: rotate(0.5deg) translateY(-2px); }
+  }
+
+  /* ─── Texto editorial ─── */
+  .worlds__cardTitle {
+    position: relative;
+    z-index: 2;
+    margin: 0 0 0.55rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.25rem, 1.6vw, 1.5rem);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    color: var(--cream);
+    text-wrap: balance;
+  }
+  .worlds__cardBody {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--cream) 72%, transparent);
+    max-width: 28ch;
+  }
+
+  /* ─── Tags compactos (2 chips) ─── */
+  .worlds__tags {
+    position: relative;
+    z-index: 2;
+    list-style: none;
+    margin: 0.85rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .worlds__tags li {
+    padding: 0.28rem 0.6rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.54rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--cream) 58%, transparent);
+    background: color-mix(in srgb, var(--cream) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--cream) 12%, transparent);
+    border-radius: 999px;
+    transition:
+      color var(--dur-medium) var(--ease-medium),
+      border-color var(--dur-medium) var(--ease-medium);
+  }
+  .worlds__card:hover .worlds__tags li {
+    color: color-mix(in srgb, var(--cream) 88%, transparent);
+    border-color: color-mix(in srgb, var(--tone) 30%, transparent);
+  }
+
+  /* ─── CTA editorial ─── */
+  .worlds__cta {
+    position: relative;
+    z-index: 2;
+    margin-top: auto;
+    padding-top: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--cream) 70%, transparent);
+    transition:
+      color var(--dur-medium) var(--ease-medium),
+      gap var(--dur-medium) var(--ease-medium);
+  }
+  .worlds__cta-line {
+    width: 22px;
+    height: 1px;
+    background: currentColor;
+    transition: width var(--dur-medium) var(--ease-medium);
+  }
+  .worlds__cta-arrow {
+    display: inline-flex;
+    align-items: center;
+    transition: transform var(--dur-medium) var(--ease-medium);
+  }
+  .worlds__card:hover .worlds__cta {
+    color: var(--tone);
+    gap: 0.95rem;
+  }
+  .worlds__card:hover .worlds__cta-line  { width: 38px; }
+  .worlds__card:hover .worlds__cta-arrow { transform: translateX(4px); }
+
+  /* ─── Reveal stagger ─── */
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity var(--dur-divine) var(--ease-divine),
+      transform var(--dur-divine) var(--ease-divine);
+    transition-delay: calc(var(--i, 0) * 65ms);
+  }
+  [data-anim='up'].is-in { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .worlds__card:hover { transform: none; }
+    .worlds__card:hover .worlds__glyph { transform: none; }
+    .worlds__card:hover .worlds__num-bg { transform: none; }
+    .worlds__glyph,
+    .worlds__live-dot { animation: none; }
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  if ('IntersectionObserver' in window) {
+    const sec = document.querySelector<HTMLElement>('[data-worlds]');
+    if (sec) {
+      const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            items.forEach((el) => el.classList.add('is-in'));
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      io.observe(sec);
+    }
+  } else {
+    document.querySelectorAll('[data-worlds] [data-anim="up"]').forEach((el) => el.classList.add('is-in'));
+  }
+</script>

@@ -1,0 +1,37 @@
+---
+export const prerender = true;
+/**
+ * /en/tables/restaurants — list of select restaurants serving AMBROSIA.
+ */
+import Base from '~/layouts/Base.astro';
+import PageHero from '~/components/PageHero.astro';
+import Restaurants from '~/components/Restaurants.astro';
+import Footer from '~/components/Footer.astro';
+import { t } from '~/i18n';
+import { isVisible } from '~/lib/settings';
+
+const locale = 'en' as const;
+
+const eyebrow = 'Select tables';
+const title = 'The <em>eight</em> tables';
+const body = "Restaurants that understand an author's sauce deserves its own menu line.";
+---
+
+<Base
+  title="AMBROSIA — Restaurants"
+  locale={locale}
+  description="AMBROSIA is served at Jabalina (Michelin Guide Mexico 2025), Pujol, Quintonil, Alcalde, Lardo, Casa Oaxaca, Rosetta, Sud 777 and Le Chique. Direct points of sale: Jabalina and Carnes Ramos in Monterrey."
+>
+  <PageHero
+    eyebrow={eyebrow}
+    title={title}
+    body={body}
+    accent="red"
+    sealVariant="magenta"
+    locale={locale}
+  />
+
+  {isVisible('mesas.restaurants') && <Restaurants locale={locale} />}
+
+  <Footer locale={locale} />
+</Base>

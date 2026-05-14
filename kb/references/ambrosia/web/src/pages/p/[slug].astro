@@ -1,0 +1,228 @@
+---
+/**
+ * /p/[slug] — Renderer publico de paginas personalizadas (SSR).
+ *
+ * Lee de la BD, renderiza solo si status='published'.
+ * Usa el Layout Base del sitio para consistencia editorial.
+ */
+import Base from '~/layouts/Base.astro';
+import Footer from '~/components/Footer.astro';
+import { findPageBySlug, type Block } from '~/lib/pages';
+import { marked } from 'marked';
+
+const slug = Astro.params.slug ?? '';
+const page = findPageBySlug(slug);
+
+if (!page || page.status !== 'published') {
+  return Astro.redirect('/404', 302);
+}
+
+const locale = 'es' as const;
+const title = page.title_es;
+const description = page.description_es ?? `${page.title_es} — AMBROSIA`;
+
+// Helper para renderizar markdown a HTML
+function md(s: string | undefined | null): string {
+  if (!s) return '';
+  return marked.parse(s, { breaks: true, async: false }) as string;
+}
+
+// Sanitiza URLs internas/externas basicas
+function safeHref(href: string | undefined): string {
+  if (!href) return '#';
+  if (href.startsWith('/') || href.startsWith('http://') || href.startsWith('https://') || href.startsWith('mailto:')) return href;
+  return '#';
+}
+---
+
+<Base title={`AMBROSIA — ${title}`} description={description} locale={locale}>
+  <main class="custom-page">
+    {page.blocks.map((b: Block) => {
+      if (b.type === 'hero') {
+        return (
+          <section class="cp-hero">
+            {b.data.image && <img class="cp-hero__bg" src={b.data.image} alt="" loading="eager" />}
+            <div class="cp-hero__inner">
+              {b.data.title    && <h1 class="cp-hero__title" set:html={b.data.title}></h1>}
+              {b.data.subtitle && <p  class="cp-hero__sub"   set:html={b.data.subtitle}></p>}
+            </div>
+          </section>
+        );
+      }
+
+      if (b.type === 'section') {
+        return (
+          <section class="cp-section">
+            <div class="cp-section__inner">
+              {b.data.heading && <h2 class="cp-section__heading" set:html={b.data.heading}></h2>}
+              {b.data.body    && <div class="cp-section__body" set:html={md(b.data.body)}></div>}
+            </div>
+          </section>
+        );
+      }
+
+      if (b.type === 'image') {
+        return (
+          <figure class="cp-image">
+            {b.data.src && <img src={b.data.src} alt={b.data.alt ?? ''} loading="lazy" />}
+            {b.data.caption && <figcaption set:html={b.data.caption}></figcaption>}
+          </figure>
+        );
+      }
+
+      if (b.type === 'quote') {
+        return (
+          <blockquote class="cp-quote">
+            {b.data.quote && <p class="cp-quote__text" set:html={b.data.quote}></p>}
+            {b.data.author && <cite class="cp-quote__author">— {b.data.author}</cite>}
+          </blockquote>
+        );
+      }
+
+      if (b.type === 'cta') {
+        return (
+          <div class="cp-cta">
+            <a class="btn btn--primary btn--lg" href={safeHref(b.data.href)} set:html={b.data.label ?? 'Continuar'}></a>
+          </div>
+        );
+      }
+
+      if (b.type === 'divider') {
+        return <hr class="cp-divider" />;
+      }
+
+      return null;
+    })}
+  </main>
+
+  <Footer locale={locale} />
+</Base>
+
+<style>
+  .custom-page {
+    background: var(--bg-page);
+    color: var(--navy);
+    overflow-x: clip;
+  }
+
+  /* Hero */
+  .cp-hero {
+    position: relative;
+    min-height: 60vh;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: clamp(6rem, 12vw, 10rem) 1.5rem;
+    overflow: hidden;
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--red) 6%, var(--bg-page)) 0%,
+        var(--bg-page) 70%);
+  }
+  .cp-hero__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0.18;
+  }
+  .cp-hero__inner { position: relative; z-index: 1; max-width: 44rem; margin: 0 auto; }
+  .cp-hero__title {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2rem, 5vw, 3.75rem);
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--navy);
+  }
+  .cp-hero__sub {
+    margin: 0 auto;
+    max-width: 32rem;
+    font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+    line-height: 1.6;
+    color: var(--navy);
+    opacity: 0.78;
+  }
+
+  /* Section */
+  .cp-section { padding: clamp(3rem, 6vw, 5rem) 1.5rem; }
+  .cp-section__inner { max-width: 44rem; margin: 0 auto; }
+  .cp-section__heading {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    line-height: 1.1;
+    color: var(--navy);
+  }
+  .cp-section__body {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--navy);
+    opacity: 0.85;
+  }
+  .cp-section__body :global(p) { margin: 0 0 1rem; }
+  .cp-section__body :global(a) { color: var(--red); }
+  .cp-section__body :global(strong) { color: var(--navy); }
+  .cp-section__body :global(em) { color: var(--red); font-style: italic; }
+
+  /* Image */
+  .cp-image {
+    margin: clamp(2rem, 4vw, 3rem) auto;
+    max-width: 1080px;
+    padding: 0 1.5rem;
+  }
+  .cp-image img {
+    width: 100%; height: auto;
+    border-radius: 4px;
+    display: block;
+  }
+  .cp-image figcaption {
+    margin-top: 0.85rem;
+    font-size: 0.85rem;
+    color: var(--navy);
+    opacity: 0.65;
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* Quote */
+  .cp-quote {
+    max-width: 38rem;
+    margin: clamp(2rem, 5vw, 4rem) auto;
+    padding: 0 1.5rem;
+    text-align: center;
+  }
+  .cp-quote__text {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 2.4vw, 1.65rem);
+    line-height: 1.4;
+    color: var(--navy);
+  }
+  .cp-quote__author {
+    font-size: 0.78rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-style: normal;
+  }
+
+  /* CTA */
+  .cp-cta {
+    text-align: center;
+    padding: clamp(2rem, 4vw, 3rem) 1.5rem;
+  }
+
+  /* Divider */
+  .cp-divider {
+    border: 0;
+    height: 1px;
+    background: color-mix(in srgb, var(--navy) 18%, transparent);
+    max-width: 200px;
+    margin: clamp(2rem, 4vw, 3rem) auto;
+  }
+</style>

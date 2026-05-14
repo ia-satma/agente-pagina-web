@@ -1,0 +1,291 @@
+---
+/**
+ * Hero editorial para paginas internas.
+ * - accent: red | cyan | purple | yellow | blue | pink — define --page-accent
+ * - Aplica un fondo sutil con el accent (tinte 8%) para diferenciar de home
+ * - Breadcrumb "← INICIO" refuerza navegacion
+ */
+import FloralRule from '~/components/FloralRule.astro';
+import Seal from '~/components/Seal.astro';
+import Phonetic from '~/components/Phonetic.astro';
+
+type Accent = 'red' | 'cyan' | 'purple' | 'yellow' | 'blue' | 'pink';
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  body: string;
+  accent?: Accent;
+  sealVariant?: 'magenta' | 'purple' | 'silver' | 'brown';
+  showRule?: boolean;
+  showPhonetic?: boolean;
+  locale?: 'es' | 'en';
+  /** Si se pasa, el PageHero usa este video como fondo con overlay negro */
+  videoBg?: { webm?: string; mp4: string };
+  /** Opacity del overlay negro sobre el video (0–1). Default 0.62 */
+  videoOverlayOpacity?: number;
+  /* legacy — ignorado, mantenido para compatibilidad */
+  bg?: string;
+}
+
+const {
+  eyebrow,
+  title,
+  body,
+  accent = 'red',
+  sealVariant = 'purple',
+  showRule = true,
+  showPhonetic = false,
+  locale = 'es',
+  videoBg,
+  videoOverlayOpacity = 0.62,
+} = Astro.props;
+
+const accentMap: Record<Accent, string> = {
+  red:    'var(--color-red)',
+  cyan:   'var(--color-cyan)',
+  purple: 'var(--navy)',
+  yellow: 'var(--color-yellow)',
+  blue:   'var(--navy)',
+  pink:   'var(--color-pink)',
+};
+const accentVar = accentMap[accent];
+const homeHref = locale === 'es' ? '/' : '/en';
+const backLabel = locale === 'es' ? '← Inicio' : '← Home';
+---
+
+<section
+  class:list={['page-hero', `page-hero--accent-${accent}`, videoBg && 'page-hero--has-video']}
+  style={`--page-accent: ${accentVar}; --video-overlay: ${videoOverlayOpacity};`}
+>
+  {videoBg && (
+    <video class="page-hero__video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+      {videoBg.webm && <source src={videoBg.webm} type="video/webm" />}
+      <source src={videoBg.mp4} type="video/mp4" />
+    </video>
+  )}
+  {videoBg && <div class="page-hero__video-overlay" aria-hidden="true"></div>}
+
+  <a class="page-hero__back link-rule" href={homeHref} data-anim="up">{backLabel}</a>
+  <div class="page-hero__inner">
+    <p class="eyebrow page-hero__eyebrow" data-stagger="chars" set:html={eyebrow}></p>
+    <h1 class="page-hero__title" data-anim="up" set:html={title}></h1>
+    {showPhonetic && (
+      <p class="page-hero__phon" data-anim="up"><Phonetic tone="auto" /></p>
+    )}
+    <p class="page-hero__body" data-anim="up" set:html={body}></p>
+
+    {showRule && (
+      <div class="page-hero__rule" data-anim="up">
+        <FloralRule variant="mini" tone="ink" />
+      </div>
+    )}
+
+    <div class="page-hero__seal" data-anim="up">
+      <Seal variant={sealVariant} size="sm" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    position: relative;
+    min-height: 48vh;
+    min-height: 48svh;
+    padding: clamp(4rem, 8vw, 7rem) 1.5rem clamp(2.5rem, 5vw, 4rem);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--page-accent) 6%, var(--bg-page)) 0%,
+        var(--bg-page) 65%);
+    color: var(--navy);
+    overflow: hidden;
+  }
+  /* Halo de color accent en la esquina superior — sello del brandbook */
+  .page-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 60% 40% at 50% 0%,
+      color-mix(in srgb, var(--page-accent) 14%, transparent) 0%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── Variant con video de fondo ─── */
+  .page-hero--has-video {
+    background: var(--navy); /* fallback antes de que el video cargue */
+    color: var(--cream);
+  }
+  .page-hero--has-video::before {
+    display: none; /* sin halo de accent sobre el video */
+  }
+  .page-hero__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    /* Desenfoque sutil ~15% (6px) para abstraer el video tras el texto.
+       Scale 1.05 compensa los bordes transparentes que produce el blur. */
+    filter: blur(6px);
+    transform: scale(1.05);
+  }
+  .page-hero__video-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, calc(var(--video-overlay, 0.62) * 0.85)) 0%,
+      rgba(0, 0, 0, var(--video-overlay, 0.62)) 50%,
+      rgba(0, 0, 0, calc(var(--video-overlay, 0.62) + 0.1)) 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+  /* Texto sobre video: blanco/cream para legibilidad */
+  .page-hero--has-video .page-hero__eyebrow,
+  .page-hero--has-video .page-hero__title,
+  .page-hero--has-video .page-hero__body,
+  .page-hero--has-video .page-hero__phon {
+    color: #FFFFFF;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+  }
+  .page-hero--has-video .page-hero__title :global(em) {
+    color: var(--page-accent);
+  }
+  .page-hero--has-video .page-hero__body,
+  .page-hero--has-video .page-hero__phon {
+    opacity: 0.9;
+  }
+  .page-hero--has-video .page-hero__back {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.32);
+    color: #FFFFFF;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .page-hero--has-video .page-hero__back:hover {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--navy);
+    border-color: rgba(255, 255, 255, 0.92);
+  }
+  .page-hero--has-video .page-hero__rule {
+    color: var(--page-accent);
+    opacity: 0.85;
+  }
+
+  .page-hero__inner {
+    max-width: 44rem;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .page-hero__back {
+    position: absolute;
+    top: clamp(5rem, 8vw, 7rem);
+    left: clamp(1.5rem, 4vw, 3rem);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.1rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.68rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--red);
+    text-decoration: none;
+    background: color-mix(in srgb, var(--red) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
+    border-radius: 999px;
+    transition: background-color var(--dur-fast) var(--ease-fast),
+                border-color var(--dur-fast) var(--ease-fast),
+                color var(--dur-fast) var(--ease-fast),
+                transform var(--dur-medium) var(--ease-medium);
+    z-index: 2;
+  }
+  .page-hero__back:hover {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--cream);
+    transform: translateX(-4px);
+  }
+
+  .page-hero__eyebrow {
+    margin: 0 0 1.25rem;
+    color: var(--page-accent, var(--navy));
+    opacity: 0.78;
+  }
+
+  .page-hero__title {
+    margin: 0 0 1.5rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.8rem, 6.5vw, 5.2rem);
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    color: var(--navy);
+    text-transform: uppercase;
+  }
+
+  .page-hero__phon {
+    margin: -0.5rem 0 1rem;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    opacity: 0.5;
+  }
+
+  .page-hero__body {
+    margin: 0 auto;
+    max-width: 32rem;
+    font-size: clamp(0.95rem, 1.05vw, 1.05rem);
+    line-height: 1.65;
+    color: var(--navy);
+    opacity: 0.78;
+  }
+
+  .page-hero__rule {
+    margin: 2.5rem auto 1.25rem;
+    max-width: 280px;
+    color: var(--page-accent, var(--navy));
+    opacity: 0.7;
+  }
+
+  .page-hero__seal {
+    display: inline-flex;
+    justify-content: center;
+    margin-top: 0.75rem;
+    opacity: 0.85;
+  }
+
+  /* Animaciones */
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine, 1200ms) var(--ease-divine), transform var(--dur-divine, 1200ms) var(--ease-divine);
+  }
+  [data-anim='up'].is-in { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  const sec = document.querySelector<HTMLElement>('.page-hero');
+  if (sec) {
+    const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+    items.forEach((el, i) => {
+      // Cascada recalibrada (was 100 + i*110): 5 items pasan de 540ms → 340ms
+      setTimeout(() => el.classList.add('is-in'), 60 + i * 70);
+    });
+  }
+</script>

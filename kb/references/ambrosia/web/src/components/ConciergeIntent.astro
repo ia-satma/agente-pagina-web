@@ -1,0 +1,236 @@
+---
+/**
+ * ConciergeIntent — 3 tarjetas (HORECA / Prensa / Regalo corporativo).
+ * Al hacer click, se preselecciona el intent en el form (#concierge-form)
+ * y se hace scroll suave hasta el form.
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const intent = (dict as any).pages.conciergeIntent as {
+  eyebrow: string;
+  title: string;
+  items: { key: string; label: string; body: string }[];
+};
+---
+
+<section class="concierge-intent" data-concierge-intent>
+  <div class="concierge-intent__inner">
+    <header class="concierge-intent__header">
+      <p class="eyebrow concierge-intent__eyebrow" data-anim="up">{intent.eyebrow}</p>
+      <h2 class="concierge-intent__title" data-anim="up">{intent.title}</h2>
+    </header>
+
+    <ul class="concierge-intent__list" role="list">
+      {intent.items.map((it, i) => (
+        <li class="concierge-intent__item" data-anim="up" style={`--i:${i}`}>
+          <button class="concierge-intent__card" type="button" data-intent={it.key}>
+            <span class="concierge-intent__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="concierge-intent__cardTitle">{it.label}</h3>
+            <p class="concierge-intent__cardBody">{it.body}</p>
+            <span class="concierge-intent__arrow" aria-hidden="true">
+              <svg width="16" height="11" viewBox="0 0 14 10" fill="none">
+                <path d="M0 5h13M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .concierge-intent {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3.5rem, 7vw, 6rem) 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 8%, transparent);
+  }
+  .concierge-intent__inner { max-width: 1180px; margin: 0 auto; }
+  .concierge-intent__header {
+    text-align: center;
+    margin: 0 auto clamp(2.5rem, 4vw, 4rem);
+    max-width: 36rem;
+  }
+  .concierge-intent__eyebrow { margin: 0 0 1.25rem; }
+  .concierge-intent__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.85rem, 3.6vw, 2.8rem);
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    color: var(--navy);
+  }
+
+  .concierge-intent__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  @media (max-width: 880px) { .concierge-intent__list { grid-template-columns: 1fr; } }
+
+  /* ─── Luxury silencioso uniforme — alineado con WorldsGrid y TablesSplit.
+     Default: fondo de pagina, texto navy, borde sutil.
+     Hover / activo (seleccionado): la tarjeta toma navy, el texto pasa a cream.
+     El unico acento cromatico es el rojo brand (numeral, flecha, barra inferior). */
+  .concierge-intent__card {
+    position: relative;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.75rem 1.5rem 2rem;
+    background: var(--bg-page);
+    border: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    border-radius: 4px;
+    color: var(--navy);
+    font-family: inherit;
+    overflow: hidden;
+    transition:
+      background-color var(--dur-medium) var(--ease-medium),
+      border-color var(--dur-medium) var(--ease-medium),
+      color var(--dur-medium) var(--ease-medium),
+      transform var(--dur-medium) var(--ease-medium),
+      box-shadow var(--dur-medium) var(--ease-medium);
+  }
+  .concierge-intent__card::before {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-medium) var(--ease-medium);
+    z-index: 1;
+  }
+  .concierge-intent__card:hover,
+  .concierge-intent__card[data-active="true"] {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: var(--cream);
+    transform: translateY(-3px);
+    box-shadow: 0 18px 38px -20px color-mix(in srgb, var(--navy) 55%, transparent);
+  }
+  .concierge-intent__card:hover::before,
+  .concierge-intent__card[data-active="true"]::before { transform: scaleX(1); }
+
+  .concierge-intent__num {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    color: var(--red);
+    opacity: 0.85;
+    transition: color var(--dur-medium) var(--ease-medium), opacity var(--dur-medium) var(--ease-medium);
+  }
+  .concierge-intent__card:hover .concierge-intent__num,
+  .concierge-intent__card[data-active="true"] .concierge-intent__num {
+    color: var(--cream);
+    opacity: 0.7;
+  }
+  .concierge-intent__cardTitle {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.2rem, 1.6vw, 1.5rem);
+    line-height: 1.15;
+    letter-spacing: 0.005em;
+    color: inherit;
+    transition: color var(--dur-medium) var(--ease-medium);
+  }
+  .concierge-intent__cardBody {
+    margin: 0;
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: inherit;
+    opacity: 0.78;
+    transition: opacity var(--dur-medium) var(--ease-medium);
+  }
+  .concierge-intent__card:hover .concierge-intent__cardBody,
+  .concierge-intent__card[data-active="true"] .concierge-intent__cardBody { opacity: 0.82; }
+
+  .concierge-intent__arrow {
+    align-self: flex-start;
+    color: var(--red);
+    opacity: 0.7;
+    transition:
+      transform var(--dur-medium) var(--ease-medium),
+      color var(--dur-medium) var(--ease-medium),
+      opacity var(--dur-medium) var(--ease-medium);
+  }
+  .concierge-intent__card:hover .concierge-intent__arrow,
+  .concierge-intent__card[data-active="true"] .concierge-intent__arrow {
+    opacity: 1;
+    color: var(--cream);
+    transform: translateX(4px);
+  }
+
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+    transition-delay: calc(var(--i, 0) * 65ms);
+  }
+  [data-anim='up'].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  // Reveal observer
+  if ('IntersectionObserver' in window) {
+    const sec = document.querySelector<HTMLElement>('[data-concierge-intent]');
+    if (sec) {
+      const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            items.forEach((el) => el.classList.add('is-in'));
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      io.observe(sec);
+    }
+  } else {
+    document.querySelectorAll('[data-concierge-intent] [data-anim="up"]').forEach((el) => el.classList.add('is-in'));
+  }
+
+  // Click handler: preselecciona el intent en el form y hace scroll
+  const cards = document.querySelectorAll<HTMLButtonElement>('.concierge-intent__card[data-intent]');
+  cards.forEach((card) => {
+    card.addEventListener('click', () => {
+      const intent = card.dataset.intent;
+      if (!intent) return;
+
+      cards.forEach((c) => c.removeAttribute('data-active'));
+      card.setAttribute('data-active', 'true');
+
+      const select = document.querySelector<HTMLSelectElement>('#concierge-form select[name="intent"]');
+      if (select) {
+        select.value = intent;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      const form = document.getElementById('concierge-form');
+      form?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>

@@ -1,0 +1,174 @@
+---
+/**
+ * Brand Feature — seccion full-width con imagen editorial + caption sutil.
+ * Imagen con vineta + blend en bordes para mezclarse con el fondo cream.
+ * parallax: number 0–1 (default 0.25) — speed factor para el efecto parallax.
+ */
+interface Props {
+  src: string;
+  alt: string;
+  caption?: string;
+  eyebrow?: string;
+  height?: 'sm' | 'md' | 'lg';
+  align?: 'center' | 'left' | 'right';
+  variant?: 'cover' | 'contain';
+  blend?: 'soft' | 'medium' | 'strong';
+  parallax?: number;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  caption,
+  eyebrow,
+  height = 'md',
+  align = 'center',
+  variant = 'cover',
+  blend = 'medium',
+  parallax = 0.25,
+  class: className = '',
+} = Astro.props;
+---
+
+<section class:list={['brand-feature', `brand-feature--${height}`, `brand-feature--${variant}`, `brand-feature--blend-${blend}`, className]} data-brand-feature>
+  <div class="brand-feature__frame" data-parallax-speed={parallax}>
+    <img
+      class="brand-feature__img"
+      src={src}
+      alt={alt}
+      loading="eager"
+      decoding="async"
+    />
+    <div class="brand-feature__overlay" aria-hidden="true"></div>
+    <div class="brand-feature__vignette" aria-hidden="true"></div>
+  </div>
+
+  {(eyebrow || caption) && (
+    <div class:list={['brand-feature__text', `brand-feature__text--${align}`]} data-reveal>
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      {caption && <p class="brand-feature__caption">{caption}</p>}
+    </div>
+  )}
+</section>
+
+<style>
+  .brand-feature {
+    position: relative;
+    width: 100%;
+    background: var(--bg-page);
+    padding: clamp(1.5rem, 4vw, 3rem) 1.5rem;
+  }
+
+  .brand-feature__frame {
+    position: relative;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--navy) 6%, var(--bg-page));
+    /* Mask-image en bordes — hace que la imagen "fade" hacia el fondo cream */
+    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 55%, transparent 100%);
+            mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 55%, transparent 100%);
+  }
+  /* Variantes de blend — que tan agresivo el fade */
+  .brand-feature--blend-soft .brand-feature__frame {
+    -webkit-mask-image: radial-gradient(ellipse 110% 110% at 50% 50%, black 70%, transparent 100%);
+            mask-image: radial-gradient(ellipse 110% 110% at 50% 50%, black 70%, transparent 100%);
+  }
+  .brand-feature--blend-medium .brand-feature__frame {
+    -webkit-mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 60%, transparent 100%);
+            mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 60%, transparent 100%);
+  }
+  .brand-feature--blend-strong .brand-feature__frame {
+    -webkit-mask-image: radial-gradient(ellipse 95% 95% at 50% 50%, black 45%, transparent 100%);
+            mask-image: radial-gradient(ellipse 95% 95% at 50% 50%, black 45%, transparent 100%);
+  }
+
+  /* Heights — proportional aspect ratios */
+  .brand-feature--sm .brand-feature__frame { aspect-ratio: 21 / 9; }
+  .brand-feature--md .brand-feature__frame { aspect-ratio: 16 / 9; }
+  .brand-feature--lg .brand-feature__frame { aspect-ratio: 4 / 3; }
+
+  .brand-feature__img {
+    width: 100%;
+    height: 110%; /* extra para parallax — el desplazamiento Y revela los extremos */
+    display: block;
+    transform: scale(1);
+    transition: transform 8s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Sutil saturacion + warmth para integrar con el cream */
+    filter: saturate(0.92) contrast(0.96);
+  }
+  .brand-feature--cover .brand-feature__img { object-fit: cover; }
+  .brand-feature--contain .brand-feature__img { object-fit: contain; }
+
+  /* Overlay sutil para legibilidad si hay texto */
+  .brand-feature__overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 70%,
+      color-mix(in srgb, var(--navy) 18%, transparent) 100%
+    );
+    opacity: 0;
+    transition: opacity var(--dur-medium) var(--ease-medium);
+  }
+
+  /* Vignette interna — oscurece bordes hacia el centro para foco editorial */
+  .brand-feature__vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 75% 90% at 50% 50%,
+      transparent 50%,
+      color-mix(in srgb, var(--navy) 14%, transparent) 100%
+    );
+    mix-blend-mode: multiply;
+  }
+
+  /* Text caption */
+  .brand-feature__text {
+    max-width: 1280px;
+    margin: 1.25rem auto 0;
+    padding: 0 0.5rem;
+  }
+  .brand-feature__text--center { text-align: center; }
+  .brand-feature__text--left   { text-align: left; }
+  .brand-feature__text--right  { text-align: right; }
+
+  .brand-feature__text .eyebrow {
+    margin: 0 0 0.5rem;
+    color: var(--navy);
+    opacity: 0.55;
+  }
+  .brand-feature__caption {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+    color: var(--navy);
+    opacity: 0.85;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-luxury, 0.18em);
+  }
+
+  /* Reveal */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-reveal].is-in { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .brand-feature__img { transition: none; }
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+  }
+</style>

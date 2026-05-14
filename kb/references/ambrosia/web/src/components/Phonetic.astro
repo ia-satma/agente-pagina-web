@@ -1,0 +1,61 @@
+---
+/**
+ * Marca fonetica recurrente: ( am'brozhe )
+ * Renderiza cada caracter en un span con margin lateral minimo
+ * para conseguir el spacing tipo IPA del brand book.
+ *
+ * tone:
+ *   - "auto" (default) — hereda currentColor
+ *   - "cyan" — el "color del susurro"
+ *   - "red"  — para ediciones especiales
+ *
+ * size:
+ *   - "sm" (default) — 0.62rem
+ *   - "xs" — 0.55rem
+ */
+
+interface Props {
+  text?: string;
+  size?: 'xs' | 'sm';
+  tone?: 'auto' | 'cyan' | 'red';
+  class?: string;
+}
+
+const {
+  text = "( am'brozhe )",
+  size = 'sm',
+  tone = 'auto',
+  class: className = '',
+} = Astro.props;
+---
+
+<span
+  class:list={['phonetic', `phonetic--${size}`, `phonetic--${tone}`, className]}
+  aria-hidden="true"
+>
+  {text.split('').map((ch) => (
+    <span class="phonetic__ch">{ch === ' ' ? ' ' : ch}</span>
+  ))}
+</span>
+
+<style>
+  .phonetic {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.62rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: lowercase;
+    opacity: 0.55;
+    line-height: 1;
+  }
+  .phonetic--xs { font-size: 0.55rem; }
+  .phonetic--cyan { color: var(--color-cyan); opacity: 0.75; }
+  .phonetic--red  { color: var(--color-red); }
+  .phonetic--auto { color: currentColor; }
+  .phonetic__ch {
+    display: inline-block;
+    margin: 0 0.04em;
+  }
+</style>

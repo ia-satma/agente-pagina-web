@@ -1,0 +1,117 @@
+---
+/**
+ * Floating Decor — ilustracion monocroma posicionada como acento ambiental.
+ * Estilo Cloud23: pieza grande en una esquina, ocupando ~30-50% del lateral.
+ *
+ * placement:
+ *   - 'bottom-left'   — esquina inferior izquierda (default Cloud23 hero)
+ *   - 'bottom-right'  — esquina inferior derecha
+ *   - 'top-left'      — esquina superior izquierda
+ *   - 'top-right'     — esquina superior derecha
+ *   - 'left'          — lateral izquierdo centrado
+ *   - 'right'         — lateral derecho centrado
+ *
+ * size: 'sm' | 'md' | 'lg' | 'xl' (default 'lg' — Cloud23 usa BIG)
+ *
+ * IMPORTANT: el padre debe tener `position: relative`. Si no, se apoya en el body.
+ */
+interface Props {
+  src: string;
+  alt?: string;
+  placement?: 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right' | 'left' | 'right' | 'top-center' | 'bottom-center' | 'center';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  opacity?: number;
+  parallax?: number;
+  rotate?: number;
+  flip?: boolean;
+  class?: string;
+}
+
+const {
+  src,
+  alt = '',
+  placement = 'bottom-left',
+  size = 'lg',
+  opacity = 0.7,
+  parallax = 0.15,
+  rotate = 0,
+  flip = false,
+  class: className = '',
+} = Astro.props;
+
+const sizeMap = {
+  sm: 'clamp(180px, 22vw, 320px)',
+  md: 'clamp(260px, 32vw, 460px)',
+  lg: 'clamp(340px, 42vw, 620px)',
+  xl: 'clamp(420px, 55vw, 820px)',
+};
+
+// Posiciones por placement
+const placementStyles: Record<string, string> = {
+  'bottom-left':   'bottom: -10%; left: -8%;',
+  'bottom-right':  'bottom: -10%; right: -8%;',
+  'top-left':      'top: -10%; left: -8%;',
+  'top-right':     'top: -10%; right: -8%;',
+  'left':          'top: 50%; left: -10%; transform-origin: left center; --decor-anchor: translateY(-50%);',
+  'right':         'top: 50%; right: -10%; transform-origin: right center; --decor-anchor: translateY(-50%);',
+  'top-center':    'top: -8%; left: 50%; transform-origin: center top; --decor-anchor: translateX(-50%);',
+  'bottom-center': 'bottom: -8%; left: 50%; transform-origin: center bottom; --decor-anchor: translateX(-50%);',
+  'center':        'top: 50%; left: 50%; transform-origin: center; --decor-anchor: translate(-50%, -50%);',
+};
+
+const styles = [
+  `--decor-opacity: ${opacity}`,
+  `--decor-rotate: ${rotate}deg`,
+  `--decor-size: ${sizeMap[size]}`,
+  placementStyles[placement] || '',
+].filter(Boolean).join(' ');
+---
+
+<img
+  src={src}
+  alt={alt}
+  aria-hidden="true"
+  class:list={['floating-decor', `floating-decor--${placement}`, flip && 'floating-decor--flip', className]}
+  loading="lazy"
+  decoding="async"
+  style={styles}
+  data-parallax-speed={parallax}
+/>
+
+<style>
+  .floating-decor {
+    position: absolute;
+    width: var(--decor-size, 460px);
+    height: auto;
+    opacity: var(--decor-opacity, 0.4);
+    pointer-events: none;
+    z-index: 1;             /* sobre bg solido, debajo del contenido textual (z-index 2+) */
+    /* Hue shift agresivo: violet Pantone (#430098) → navy brand (#15173d).
+       Calibrado para empujar más allá del lila/morado intermedio hasta
+       aterrizar en el azul navy con la depth correcta de la paleta. */
+    filter: hue-rotate(-42deg) saturate(0.42) brightness(0.60);
+    transform: var(--decor-anchor, none) rotate(var(--decor-rotate, 0deg));
+    will-change: transform;
+    /* Vineta estilo Hero — fade suave de centro hacia bordes */
+    -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 35%, rgba(0,0,0,0.7) 65%, transparent 100%);
+            mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 35%, rgba(0,0,0,0.7) 65%, transparent 100%);
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .floating-decor--flip {
+    transform: var(--decor-anchor, none) rotate(var(--decor-rotate, 0deg)) scaleX(-1);
+  }
+
+  /* Mobile: visibles pero mas chicos y con menor opacity */
+  @media (max-width: 768px) {
+    .floating-decor {
+      opacity: calc(var(--decor-opacity, 0.7) * 0.7);
+      width: calc(var(--decor-size, 460px) * 0.6);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .floating-decor {
+      transform: var(--decor-anchor, none) rotate(var(--decor-rotate, 0deg)) !important;
+    }
+  }
+</style>

@@ -1,0 +1,764 @@
+---
+/**
+ * BottleAnatomy — Infografia editorial de la botella original cobalto.
+ *
+ * Diseno:
+ *   Layout 55/45 — botella enorme a la izquierda, lista editorial de specs
+ *   a la derecha tipo "ficha tecnica de museo". Sin dots punteados sobre la
+ *   botella (eso era visualmente confuso). Cada spec es una entrada limpia
+ *   con numero monumental + titulo + descripcion + separador fino.
+ *
+ *   El fondo blanco de la imagen se elimina visualmente con `mix-blend-mode:
+ *   darken` sobre el bg-page (cream) — el blanco se funde con el papel y solo
+ *   se ve la silueta de la botella (cobalto + lacre rojo + etiqueta otomi).
+ *
+ * Datos del brandbook: Pantone 485 · Otomi Hidalgo · cobalto soplado · 200 ml ·
+ * 6 chiles · 90 dias reposo · lote 001 · 2024 · Monterrey.
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+
+const isES = locale === 'es';
+
+const eyebrow = isES ? 'La pieza' : 'The piece';
+const title   = isES
+  ? 'Anatomia de una <em>edicion</em>'
+  : 'Anatomy of an <em>edition</em>';
+const lead    = isES
+  ? 'Seis decisiones de oficio convertidas en una sola botella. Cada elemento es trazable, cada parte tiene firma.'
+  : 'Six craft decisions converted into a single bottle. Every element is traceable, every part is signed.';
+
+type Annotation = {
+  n: string;
+  title: string;
+  body: string;
+};
+
+const annotations: Annotation[] = isES
+  ? [
+      { n: '01', title: 'Cuello sellado',     body: 'Lacre rojo Pantone 485 aplicado a mano. Sella el lote y certifica la integridad de la formula.' },
+      { n: '02', title: 'Etiqueta Otomi',     body: 'Patron tradicional de Hidalgo, ilustracion impresa a mano sobre papel de archivo.' },
+      { n: '03', title: 'Cobalto soplado',    body: 'Vidrio cobalto soplado en taller mexicano. El color preserva el sabor de la luz directa.' },
+      { n: '04', title: '200 ml ceremonial',  body: 'Pequeno formato pensado para servir gota a gota. Una sola basta para transformar un plato.' },
+      { n: '05', title: 'Formula 2024',       body: 'Seis chiles seleccionados, especias enteras del Mediterraneo y centro de Mexico, 90 dias de reposo.' },
+      { n: '06', title: 'Firmada a mano',     body: 'Cada botella se embotella, sella y numera en pequeno lote. La firma es el nombre del oficio.' },
+    ]
+  : [
+      { n: '01', title: 'Sealed neck',        body: 'Pantone 485 red wax applied by hand. Seals the batch and certifies formula integrity.' },
+      { n: '02', title: 'Otomi label',        body: 'Traditional Hidalgo pattern, illustration hand-printed on archival paper.' },
+      { n: '03', title: 'Blown cobalt',       body: 'Cobalt glass blown in a Mexican workshop. The color preserves flavor from direct light.' },
+      { n: '04', title: '200 ml ceremonial',  body: 'Small format made to serve drop by drop. One is enough to transform a dish.' },
+      { n: '05', title: '2024 formula',       body: 'Six selected chiles, whole spices from the Mediterranean and central Mexico, 90 days of rest.' },
+      { n: '06', title: 'Hand-signed',        body: 'Each bottle is bottled, sealed and numbered in small batch. The signature is the name of the craft.' },
+    ];
+
+const locationTag = isES ? 'Monterrey · MX' : 'Monterrey · MX';
+---
+
+<section class="bottle-anatomy" data-bottle-anatomy>
+  <div class="bottle-anatomy__inner">
+    <header class="bottle-anatomy__head">
+      <p class="eyebrow" data-anim="up">{eyebrow}</p>
+      <h2 class="bottle-anatomy__title" data-anim="up" set:html={title}></h2>
+      <p class="bottle-anatomy__lead" data-anim="up">{lead}</p>
+    </header>
+
+    <div class="bottle-anatomy__stage">
+      {/* ─── Columna izquierda: BOTELLA GRANDE protagonista ─── */}
+      <figure class="bottle-anatomy__bottle">
+        <span class="bottle-anatomy__halo" aria-hidden="true"></span>
+
+        {/* Glifo ornamental otomi muy sutil de fondo */}
+        <svg class="bottle-anatomy__ornament" viewBox="0 0 400 400" aria-hidden="true">
+          <g opacity="0.07">
+            {[0, 60, 120, 180, 240, 300].map((deg) => (
+              <ellipse
+                transform={`rotate(${deg} 200 200) translate(0 -150)`}
+                cx="200" cy="200"
+                rx="6" ry="14"
+                fill="currentColor"
+              />
+            ))}
+            <circle cx="200" cy="200" r="3" fill="currentColor" />
+            <circle cx="200" cy="200" r="160" fill="none" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 6" />
+          </g>
+        </svg>
+
+        {/* Zoom-frame: contiene img + hotspots, escala juntos al hacer click */}
+        <div class="bottle-anatomy__zoom-frame" data-zoom-frame>
+          <img
+            src="/images/bottle/bottle-original-transparent.webp"
+            alt={isES
+              ? 'Botella AMBROSIA edicion original — vidrio cobalto con etiqueta Otomi y lacre rojo Pantone 485'
+              : 'AMBROSIA original edition bottle — cobalt glass with Otomi label and Pantone 485 red wax'}
+            loading="eager"
+            decoding="async"
+            width="1792"
+            height="2400"
+            class="bottle-anatomy__img"
+          />
+
+          {/* Hotspots reactivos posicionados anatomicamente */}
+          <ol class="bottle-anatomy__hotspots" role="list">
+            {annotations.map((a, i) => {
+              /* Posiciones anatomicas reales sobre la botella:
+                 01 cuello (top), 02 etiqueta otomi (lower-right),
+                 03 cobalto (middle-left), 04 200ml, 05 formula (etiqueta roja), 06 firmada */
+              const positions = [
+                { top: '14%', left: '50%' }, // 01 cuello sellado
+                { top: '58%', left: '64%' }, // 02 etiqueta otomi
+                { top: '42%', left: '36%' }, // 03 cobalto
+                { top: '78%', left: '50%' }, // 04 200 ml
+                { top: '32%', left: '50%' }, // 05 formula
+                { top: '86%', left: '50%' }, // 06 firmada
+              ];
+              const pos = positions[i];
+              return (
+                <li
+                  class="bottle-anatomy__hotspot"
+                  data-hotspot-i={i}
+                  data-hotspot-x={pos.left}
+                  data-hotspot-y={pos.top}
+                  style={`top:${pos.top}; left:${pos.left};`}
+                >
+                  <button
+                    type="button"
+                    class="bottle-anatomy__hotspot-btn"
+                    data-anatomy-trigger
+                    data-target={a.n}
+                    aria-label={`${a.n} ${a.title}`}
+                  >
+                    <span class="bottle-anatomy__hotspot-pulse" aria-hidden="true"></span>
+                    <span class="bottle-anatomy__hotspot-num" aria-hidden="true">{a.n}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
+        {/* Boton de reset — aparece solo cuando hay zoom activo */}
+        <button
+          type="button"
+          class="bottle-anatomy__zoom-reset"
+          data-zoom-reset
+          aria-label={isES ? 'Quitar zoom' : 'Reset zoom'}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+          <span>{isES ? 'Quitar zoom' : 'Reset'}</span>
+        </button>
+
+
+        <figcaption class="bottle-anatomy__plinth">
+          <span class="bottle-anatomy__plinth-line"></span>
+          <span class="bottle-anatomy__plinth-text">{locationTag}</span>
+          <span class="bottle-anatomy__plinth-line"></span>
+        </figcaption>
+      </figure>
+
+      {/* ─── Columna derecha: lista editorial de 6 specs ─── */}
+      <aside class="bottle-anatomy__specs" aria-label={isES ? 'Detalles de la edicion' : 'Edition details'}>
+        <header class="bottle-anatomy__specs-head" data-anim="up">
+          <span class="bottle-anatomy__specs-marker"></span>
+          <p class="bottle-anatomy__specs-label">{isES ? 'Ficha tecnica' : 'Technical sheet'}</p>
+        </header>
+
+        <ol class="bottle-anatomy__list" role="list">
+          {annotations.map((a, i) => (
+            <li class="anatomy-row" style={`--i:${i};`} data-anim="up" data-row={a.n}>
+              <span class="anatomy-row__num">{a.n}</span>
+              <div class="anatomy-row__content">
+                <h3 class="anatomy-row__title">{a.title}</h3>
+                <p class="anatomy-row__body">{a.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bottle-anatomy {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3.5rem, 7vw, 6rem) 1.5rem clamp(3rem, 6vw, 5rem);
+    border-top: 1px solid color-mix(in srgb, var(--navy) 8%, transparent);
+    /* Garantizar que el bg-page sea solido detras de la botella para que el
+       mix-blend-mode: darken funcione consistentemente. */
+    isolation: isolate;
+  }
+  .bottle-anatomy__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .bottle-anatomy__head {
+    text-align: center;
+    max-width: 50rem;
+    margin: 0 auto clamp(2.75rem, 5vw, 4rem);
+  }
+  .bottle-anatomy__head .eyebrow {
+    font-size: 0.78rem;
+    letter-spacing: 0.36em;
+  }
+  .bottle-anatomy__title {
+    margin: 1.15rem 0 1.15rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+    line-height: 1.02;
+    letter-spacing: 0.015em;
+    color: var(--navy);
+    text-wrap: balance;
+  }
+  .bottle-anatomy__title :global(em) {
+    font-style: normal;
+    color: var(--red);
+  }
+  .bottle-anatomy__lead {
+    margin: 0 auto;
+    max-width: 40rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    line-height: 1.55;
+    color: var(--navy);
+    opacity: 0.72;
+    text-wrap: balance;
+  }
+
+  /* ─── Stage: 55/45 split ─── */
+  .bottle-anatomy__stage {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    align-items: center;
+    column-gap: clamp(2rem, 5vw, 5rem);
+  }
+
+  /* ─── Botella protagonista ─── */
+  .bottle-anatomy__bottle {
+    position: relative;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 620px;
+    background: var(--bg-page); /* CRUCIAL para que darken funcione */
+  }
+
+  /* Halo radial cobalto sutil de fondo */
+  .bottle-anatomy__halo {
+    position: absolute;
+    top: 48%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 105%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      color-mix(in srgb, #1A48A8 12%, transparent) 0%,
+      color-mix(in srgb, #1A48A8 5%, transparent) 35%,
+      transparent 70%
+    );
+    z-index: 0;
+    pointer-events: none;
+    animation: anatomy-halo-pulse 8s ease-in-out infinite;
+  }
+
+  /* Glifo otomi ornamental detras de la botella */
+  .bottle-anatomy__ornament {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -52%);
+    width: 78%;
+    height: auto;
+    color: var(--navy);
+    z-index: 0;
+    pointer-events: none;
+    animation: anatomy-spin 80s linear infinite;
+  }
+
+  /* ─── Zoom frame: contiene la imagen + hotspots; aplica scale+transform-origin ─── */
+  .bottle-anatomy__zoom-frame {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 560px;
+    aspect-ratio: 3 / 4;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 4px;
+    transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+    transition: transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: zoom-in;
+  }
+  .bottle-anatomy__zoom-frame.is-zoomed {
+    transform: scale(2.2);
+    cursor: zoom-out;
+  }
+
+  /* Imagen con alpha real (fondo transparente procesado con ImageMagick) */
+  .bottle-anatomy__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    filter:
+      drop-shadow(0 32px 50px color-mix(in srgb, #1A48A8 38%, transparent))
+      drop-shadow(0 14px 24px color-mix(in srgb, var(--navy) 28%, transparent));
+    animation: anatomy-float 7s ease-in-out infinite;
+  }
+  /* Cuando hay zoom, pausamos el float (la imagen ya esta enfocada en su detalle) */
+  .bottle-anatomy__zoom-frame.is-zoomed .bottle-anatomy__img {
+    animation-play-state: paused;
+  }
+
+  /* ─── Hotspots reactivos dentro del zoom-frame ─── */
+  .bottle-anatomy__hotspots {
+    position: absolute;
+    inset: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .bottle-anatomy__hotspot {
+    position: absolute;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+    transition:
+      opacity var(--dur-medium) var(--ease-medium),
+      transform var(--dur-medium) var(--ease-medium);
+  }
+  /* En estado zoom: hotspots no activos se desvanecen, el activo se compensa
+     escalando inverso al zoom (1/2.2 = ~0.45) para mantener tamaño legible */
+  .bottle-anatomy__zoom-frame.is-zoomed .bottle-anatomy__hotspot {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .bottle-anatomy__zoom-frame.is-zoomed .bottle-anatomy__hotspot.is-active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.46);
+    pointer-events: auto;
+  }
+  .bottle-anatomy__hotspot-btn {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: #FFFFFF;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    transition: transform var(--dur-fast) var(--ease-fast);
+  }
+  .bottle-anatomy__hotspot-num {
+    position: relative;
+    z-index: 2;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--red);
+    color: #FFFFFF;
+    border-radius: 50%;
+    border: 2px solid var(--bg-page);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--red) 40%, transparent);
+    font-size: 0.6rem;
+    font-variant-numeric: lining-nums;
+    transition: transform var(--dur-fast) var(--ease-fast);
+  }
+  .bottle-anatomy__hotspot-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--red) 35%, transparent);
+    animation: anatomy-hotspot-pulse 2.6s ease-out infinite;
+    z-index: 1;
+  }
+  @keyframes anatomy-hotspot-pulse {
+    0%   { transform: scale(0.85); opacity: 0.55; }
+    70%  { transform: scale(1.9);  opacity: 0; }
+    100% { transform: scale(1.9);  opacity: 0; }
+  }
+  .bottle-anatomy__hotspot-btn:hover .bottle-anatomy__hotspot-num,
+  .bottle-anatomy__hotspot.is-active .bottle-anatomy__hotspot-num {
+    transform: scale(1.25);
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--red) 55%, transparent);
+  }
+  .bottle-anatomy__hotspot-btn:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 4px;
+    border-radius: 50%;
+  }
+
+  /* ─── Boton de reset zoom ─── */
+  .bottle-anatomy__zoom-reset {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    z-index: 7;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem 0.95rem 0.55rem 0.75rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    background: var(--navy);
+    border: 1px solid color-mix(in srgb, #FFFFFF 18%, transparent);
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 22px -10px color-mix(in srgb, var(--navy) 50%, transparent);
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition:
+      opacity var(--dur-medium) var(--ease-medium),
+      transform var(--dur-medium) var(--ease-medium),
+      background-color var(--dur-fast) var(--ease-fast);
+  }
+  .bottle-anatomy__bottle.has-zoom .bottle-anatomy__zoom-reset {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .bottle-anatomy__zoom-reset:hover {
+    background: var(--red);
+  }
+
+  /* Chips flotantes contextuales — esquinas opuestas */
+  /* Pedestal text "embotellada en monterrey" */
+  .bottle-anatomy__plinth {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.5;
+  }
+  .bottle-anatomy__plinth-line {
+    width: clamp(28px, 4vw, 48px);
+    height: 1px;
+    background: currentColor;
+  }
+
+  /* ─── Lista de specs editorial ─── */
+  .bottle-anatomy__specs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-block: 1rem;
+  }
+
+  .bottle-anatomy__specs-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  .bottle-anatomy__specs-marker {
+    width: 28px;
+    height: 1px;
+    background: var(--red);
+  }
+  .bottle-anatomy__specs-label {
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .bottle-anatomy__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .anatomy-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 1.25rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 10%, transparent);
+    transition: background-color var(--dur-medium) var(--ease-medium);
+  }
+  .anatomy-row:first-child {
+    border-top: 1px solid color-mix(in srgb, var(--navy) 18%, transparent);
+  }
+  .anatomy-row:last-child {
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 18%, transparent);
+  }
+  .anatomy-row:hover,
+  .anatomy-row.is-active {
+    background: color-mix(in srgb, var(--red) 5%, transparent);
+  }
+  .anatomy-row.is-active .anatomy-row__num {
+    transform: scale(1.1);
+  }
+  .anatomy-row__num {
+    transition: transform var(--dur-fast) var(--ease-fast);
+  }
+
+  .anatomy-row__num {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--red);
+    font-variant-numeric: lining-nums;
+    padding-top: 0.15rem;
+  }
+  .anatomy-row__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .anatomy-row__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    color: var(--navy);
+  }
+  .anatomy-row__body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--navy);
+    opacity: 0.72;
+    max-width: 38ch;
+  }
+
+  /* Animaciones */
+  @keyframes anatomy-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  @keyframes anatomy-halo-pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.85; }
+    50%      { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+  }
+  @keyframes anatomy-spin {
+    from { transform: translate(-50%, -52%) rotate(0deg); }
+    to   { transform: translate(-50%, -52%) rotate(360deg); }
+  }
+
+  /* Reveal stagger */
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+    transition-delay: calc(var(--i, 0) * 60ms);
+  }
+  [data-anim='up'].is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── Tablet / Mobile ─── */
+  @media (max-width: 980px) {
+    .bottle-anatomy__stage {
+      grid-template-columns: 1fr;
+      row-gap: 2.5rem;
+    }
+    .bottle-anatomy__bottle { min-height: 480px; }
+    .bottle-anatomy__img { max-width: 380px; }
+  }
+  @media (max-width: 560px) {
+    .bottle-anatomy__bottle { min-height: 400px; }
+    .bottle-anatomy__img { max-width: 280px; }
+    .anatomy-row {
+      grid-template-columns: 40px 1fr;
+      gap: 0.85rem;
+      padding: 0.95rem 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bottle-anatomy__img,
+    .bottle-anatomy__halo,
+    .bottle-anatomy__ornament { animation: none; }
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  const sec = document.querySelector<HTMLElement>('[data-bottle-anatomy]');
+  if (sec) {
+    // ─── Reveal ───
+    const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            items.forEach((el) => el.classList.add('is-in'));
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      io.observe(sec);
+    } else {
+      items.forEach((el) => el.classList.add('is-in'));
+    }
+
+    // ─── Reactividad hotspot ↔ row + ZOOM al click ───
+    const hotspots  = sec.querySelectorAll<HTMLElement>('.bottle-anatomy__hotspot');
+    const triggers  = sec.querySelectorAll<HTMLButtonElement>('[data-anatomy-trigger]');
+    const rows      = sec.querySelectorAll<HTMLElement>('.anatomy-row');
+    const bottle    = sec.querySelector<HTMLElement>('.bottle-anatomy__bottle');
+    const zoomFrame = sec.querySelector<HTMLElement>('[data-zoom-frame]');
+    const zoomReset = sec.querySelector<HTMLButtonElement>('[data-zoom-reset]');
+
+    let activeTarget: string | null = null;
+
+    function activate(target: string) {
+      hotspots.forEach((h) => {
+        const btn = h.querySelector<HTMLButtonElement>('[data-anatomy-trigger]');
+        const isMatch = btn?.dataset.target === target;
+        h.classList.toggle('is-active', !!isMatch);
+      });
+      rows.forEach((r) => {
+        r.classList.toggle('is-active', r.dataset.row === target);
+      });
+    }
+
+    function clearActive() {
+      // Solo limpia el hover-highlight si NO hay zoom activo
+      if (activeTarget !== null) return;
+      hotspots.forEach((h) => h.classList.remove('is-active'));
+      rows.forEach((r) => r.classList.remove('is-active'));
+    }
+
+    function zoomToHotspot(hotspot: HTMLElement, target: string) {
+      if (!zoomFrame || !bottle) return;
+      const x = hotspot.dataset.hotspotX ?? '50%';
+      const y = hotspot.dataset.hotspotY ?? '50%';
+      // Aplica el transform-origin al frame
+      zoomFrame.style.setProperty('--zoom-x', x);
+      zoomFrame.style.setProperty('--zoom-y', y);
+      zoomFrame.classList.add('is-zoomed');
+      bottle.classList.add('has-zoom');
+      activeTarget = target;
+      activate(target);
+    }
+
+    function resetZoom() {
+      if (!zoomFrame || !bottle) return;
+      zoomFrame.classList.remove('is-zoomed');
+      bottle.classList.remove('has-zoom');
+      activeTarget = null;
+      clearActive();
+    }
+
+    triggers.forEach((btn) => {
+      const target = btn.dataset.target;
+      if (!target) return;
+
+      btn.addEventListener('mouseenter', () => {
+        if (activeTarget === null) activate(target);
+      });
+      btn.addEventListener('focus', () => {
+        if (activeTarget === null) activate(target);
+      });
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const hotspot = btn.closest<HTMLElement>('.bottle-anatomy__hotspot');
+        if (!hotspot) return;
+
+        // Toggle: si ya está zoom en este hotspot, resetea
+        if (activeTarget === target) {
+          resetZoom();
+        } else {
+          zoomToHotspot(hotspot, target);
+          // Scroll suave a la fila correspondiente
+          const row = sec.querySelector<HTMLElement>(`.anatomy-row[data-row="${target}"]`);
+          row?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    });
+
+    // Click en row → tambien hace zoom al hotspot correspondiente
+    rows.forEach((row) => {
+      const target = row.dataset.row;
+      if (!target) return;
+      row.addEventListener('mouseenter', () => {
+        if (activeTarget === null) activate(target);
+      });
+      row.addEventListener('click', () => {
+        const hotspot = sec.querySelector<HTMLElement>(`.bottle-anatomy__hotspot [data-target="${target}"]`)
+          ?.closest<HTMLElement>('.bottle-anatomy__hotspot');
+        if (!hotspot) return;
+        if (activeTarget === target) {
+          resetZoom();
+        } else {
+          zoomToHotspot(hotspot, target);
+        }
+      });
+      row.style.cursor = 'pointer';
+    });
+
+    // Boton reset
+    zoomReset?.addEventListener('click', resetZoom);
+
+    // Click en el frame fuera de hotspots (cuando hay zoom) → toggle reset
+    zoomFrame?.addEventListener('click', (e) => {
+      if (e.target === zoomFrame || (e.target as HTMLElement).classList.contains('bottle-anatomy__img')) {
+        if (activeTarget !== null) resetZoom();
+      }
+    });
+
+    // ESC → reset
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && activeTarget !== null) resetZoom();
+    });
+
+    // Mouseleave del stage entero → limpia hover (no zoom)
+    const stage = sec.querySelector<HTMLElement>('.bottle-anatomy__stage');
+    stage?.addEventListener('mouseleave', clearActive);
+  }
+</script>

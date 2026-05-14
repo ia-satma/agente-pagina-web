@@ -1,0 +1,36 @@
+---
+export const prerender = true;
+/**
+ * /mesas/restaurantes — listado de restaurantes selectos donde se sirve AMBROSIA.
+ */
+import Base from '~/layouts/Base.astro';
+import PageHero from '~/components/PageHero.astro';
+import Restaurants from '~/components/Restaurants.astro';
+import Footer from '~/components/Footer.astro';
+import SEOSchema from '~/components/SEOSchema.astro';
+import { t } from '~/i18n';
+import { isVisible } from '~/lib/settings';
+
+const locale = 'es' as const;
+const dict = t(locale);
+
+const eyebrow = 'Mesas selectas';
+const title = 'Las <em>ocho</em> mesas';
+const body = 'Restaurantes que entienden que una salsa de autor merece su propio menu.';
+---
+
+<Base title="AMBROSIA — Restaurantes" locale={locale} description="AMBROSIA se sirve en Jabalina (Michelin Guide Mexico 2025), Pujol, Quintonil, Alcalde, Lardo, Casa Oaxaca, Rosetta, Sud 777 y Le Chique. Puntos de venta directa: Jabalina y Carnes Ramos en Monterrey.">
+  <SEOSchema type="restaurant-list" locale={locale} />
+  <PageHero
+    eyebrow={eyebrow}
+    title={title}
+    body={body}
+    accent="red"
+    sealVariant="magenta"
+    locale={locale}
+  />
+
+  {isVisible('mesas.restaurants') && <Restaurants locale={locale} />}
+
+  <Footer locale={locale} />
+</Base>

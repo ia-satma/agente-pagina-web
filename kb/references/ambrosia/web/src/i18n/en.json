@@ -1,0 +1,253 @@
+{
+  "nav": {
+    "origen": "Origin",
+    "la-salsa": "The Sauce",
+    "recetario": "Recipe Book",
+    "mesas": "Tables",
+    "concierge": "Concierge",
+    "historia": "Story",
+    "producto": "Product",
+    "coleccion": "Collection",
+    "horeca": "Restaurants",
+    "diario": "Journal",
+    "contacto": "Contact"
+  },
+  "worlds": {
+    "eyebrow": "Five worlds",
+    "title": "One sauce, <em class=\"brand\">five chapters</em>",
+    "body": "Each world is a different entrance to the same ritual.",
+    "items": [
+      { "n": "01", "key": "origen",    "title": "The Origin",     "body": "The myth, the chiles, the family notebook." },
+      { "n": "02", "key": "la-salsa",  "title": "The Sauce",      "body": "Notes, pairings, edition and boutique." },
+      { "n": "03", "key": "recetario", "title": "The Recipe Book","body": "Twenty signed recipes featuring the sauce." },
+      { "n": "04", "key": "mesas",     "title": "Select Tables",  "body": "Restaurants and boutiques that hold it." },
+      { "n": "05", "key": "concierge", "title": "Concierge",      "body": "Press, select distribution, gifting." }
+    ]
+  },
+  "citation": {
+    "eyebrow": "Trust",
+    "quote": "<em>A sauce that doesn't ask permission.</em> It arrives, sits down, transforms.",
+    "author": "— Editorial notebook",
+    "place": "Mexico City · 2024"
+  },
+  "recipeTeaser": {
+    "eyebrow": "Desire",
+    "title": "Three recipes to <em>begin the ritual</em>",
+    "body": "Twenty signed dishes use AMBROSIA as the lead ingredient. These three are the entrance.",
+    "cta": "See the full recipe book"
+  },
+  "community": {
+    "eyebrow": "Belonging",
+    "title": "Mesa AMBROSIA",
+    "body": "Early access to every batch, chef-signed recipes and reserved conversations. No algorithm. Only when there's something to say.",
+    "cta": "Join the table"
+  },
+  "hero": {
+    "eyebrow": "Salsa",
+    "title": "AMBROSIA",
+    "tagline": "The Divine Sauce of Gods",
+    "phonetic": "( am·brozhe )",
+    "cta": "Discover the ritual",
+    "scroll_hint": "scroll to discover"
+  },
+  "mito": {
+    "eyebrow": "Manifesto",
+    "title": "The elixir of the <em class=\"brand\">gods</em>",
+    "body": "In ancient mythology, AMBROSIA was the food that granted <em>immortality</em> to the Olympian gods. Today it is a sauce: small, decisive, made to honor the table. A single drop is enough to <em>transform</em> a dish."
+  },
+  "origen": {
+    "eyebrow": "Origin",
+    "title": "From an ancient myth to a contemporary table",
+    "body": "The word AMBROSIA spans centuries. To the Greeks it was the food that granted immortality; to us, the name of a family recipe that travelled three generations before being bottled. Each batch is made small: slow cooking, whole spices, prolonged rest."
+  },
+  "ritual": {
+    "eyebrow": "The ritual",
+    "title": "A single drop <em class=\"brand\">transforms</em> a dish.",
+    "body": "The gods ate AMBROSIA; men learned to bottle it. <em>Offered by hand. Received at the table.</em>"
+  },
+  "manifesto": {
+    "title": "THE DIVINE SAUCE OF GODS",
+    "caption": "One formula. <em class=\"brand\">A thousand rituals.</em>",
+    "phonetic": "( am·brozhe )"
+  },
+  "interlude": {
+    "quote": "The gods ate <em>AMBROSIA</em>; men learned to <em>bottle it</em>."
+  },
+  "closing": {
+    "text": "<em>Offered by hand.</em> Received at the table."
+  },
+  "edicion": {
+    "eyebrow": "2024 Edition",
+    "title": "One edition. <em>A thousand rituals.</em>",
+    "specs": [
+      { "label": "Volume",  "value": "200 ml" },
+      { "label": "Bottles", "value": "1,200" },
+      { "label": "Rest",    "value": "90 days" },
+      { "label": "Origin",  "value": "Mexico" }
+    ]
+  },
+  "sabor": {
+    "eyebrow": "Tasting notes",
+    "title": "Eight notes. One single voice.",
+    "notes": [
+      { "n": "01", "name": "Ancho chile",   "note": "Sweet, deep body. The base of the entire symphony." },
+      { "n": "02", "name": "Morita chile",  "note": "Slow smoke, dry-cured. The memory of fire." },
+      { "n": "03", "name": "Roasted tomato","note": "Tempered acidity and an enveloping sweetness." },
+      { "n": "04", "name": "Confit garlic", "note": "Cooked slowly until it turns to butter." },
+      { "n": "05", "name": "Cumin",         "note": "Warm earth. The spice that ties it all." },
+      { "n": "06", "name": "Aged vinegar",  "note": "A clean edge, a final shine." },
+      { "n": "07", "name": "Sea salt",      "note": "Pure crystal. The line that defines the silhouette." },
+      { "n": "08", "name": "Rest",          "note": "The last ingredient: time, darkness, patience." }
+    ]
+  },
+  "maridajes": {
+    "eyebrow": "Pairings",
+    "title": "Where the sauce becomes myth.",
+    "items": [
+      { "n": "01", "plato": "Roasted bone marrow",      "nota": "A drop tempers the fat, intensifies the smoke." },
+      { "n": "02", "plato": "Pan-fried eggs",           "nota": "The simplest act, transformed into an offering." },
+      { "n": "03", "plato": "Salt-baked fish",          "nota": "A clean edge over white flesh and mineral crust." },
+      { "n": "04", "plato": "Aged cheeses",             "nota": "Heat against ageing — a conversation." },
+      { "n": "05", "plato": "Roast lamb",               "nota": "Brings out the deep sweetness of slow cooking." }
+    ]
+  },
+  "donde": {
+    "eyebrow": "Select distribution",
+    "title": "Where to find it",
+    "body": "Available on chosen tables — by private inquiry.",
+    "restaurantes": [
+      "Pujol · Mexico City",
+      "Quintonil · Mexico City",
+      "Alcalde · Guadalajara",
+      "Lardo · Mexico City",
+      "Casa Oaxaca · Oaxaca",
+      "Rosetta · Mexico City",
+      "Sud 777 · Mexico City",
+      "Le Chique · Cancun"
+    ],
+    "compra": {
+      "eyebrow": "Where to find it",
+      "title": "Where to <em class=\"brand\">buy it</em>",
+      "body": "Available to the public at two select spaces in Monterrey. For corporate or private distribution, write to our concierge.",
+      "puntos": [
+        {
+          "nombre": "Restaurante Jabalina",
+          "lugar": "Monterrey, NL · Barrio Antiguo + Armida",
+          "desc": "Chef Manuel Orozco's author table, built on 20+ years of research into Northeastern Mexican cuisine.",
+          "distincion": "MICHELIN Guide Mexico 2025",
+          "instagram": "https://www.instagram.com/jabalinamx/",
+          "facebook": "https://www.facebook.com/Jabalinamx/",
+          "web": "https://www.opentable.com/r/jabalina-barrio-antiguo-monterrey",
+          "cta": "Book a table",
+          "ctaHref": "https://www.opentable.com/r/jabalina-barrio-antiguo-monterrey"
+        },
+        {
+          "nombre": "Carnes Ramos",
+          "lugar": "Monterrey, NL · metropolitan area",
+          "desc": "Boutique butcher shop with over 40 years of tradition. Direct retail and home delivery service.",
+          "distincion": "Tradition since 1985",
+          "instagram": "https://www.instagram.com/carnesramos/",
+          "facebook": "https://www.facebook.com/CarnesRamos/",
+          "web": "https://x.com/carnesramos",
+          "cta": "Visit store",
+          "ctaHref": "https://www.facebook.com/CarnesRamos/"
+        }
+      ]
+    }
+  },
+  "pages": {
+    "origen": {
+      "eyebrow": "Chapter I — The Origin",
+      "title": "The elixir that <em class=\"brand\">survived</em> time",
+      "body": "From Olympus to Tenochtitlan, the word AMBROSIA crossed centuries before being bottled. Every drop we serve today is the inheritance of a myth that learned to become cooking."
+    },
+    "la-salsa": {
+      "eyebrow": "Chapter II — The Sauce",
+      "title": "One formula. <em class=\"brand\">A thousand rituals.</em>",
+      "body": "Eight notes. Five pairings. Two hundred milliliters that perform when it matters. This is the sauce: how it's made, how it tastes, where to find it."
+    },
+    "recetario": {
+      "eyebrow": "Chapter III — The Recipe Book",
+      "title": "Twenty ways to <em>transform</em> the day",
+      "body": "Twenty signed recipes that use AMBROSIA as the lead ingredient. From simple breakfasts to long-table pieces, each dish is an invitation to the ritual."
+    },
+    "mesas": {
+      "eyebrow": "Chapter IV — Select Tables",
+      "title": "Where the sauce <em class=\"brand\">becomes myth</em>",
+      "body": "Restaurants that understand what we serve. Boutiques that hold it as a piece. A select distribution — by private inquiry — that respects each batch's scale."
+    },
+    "concierge": {
+      "eyebrow": "Chapter V — Concierge",
+      "title": "Conversations that <em class=\"brand\">deserve a bottle</em>",
+      "body": "For press, select distribution and corporate gifting. Three paths, one single attention. We reply in 48 hours and only when the conversation is worthwhile."
+    },
+    "timeline": {
+      "eyebrow": "Timeline",
+      "title": "Four <em>milestones</em>, one inheritance",
+      "items": [
+        { "year": "800 BCE",   "place": "Olympus",         "text": "Greek gods eat AMBROSIA: the food of immortality." },
+        { "year": "1500",      "place": "Tenochtitlan",    "text": "Mexica sauces are offered as a ceremonial act on the table." },
+        { "year": "1962",      "place": "Central Mexico",  "text": "The formula is recorded in a family notebook; three generations guard it." },
+        { "year": "2024",      "place": "Mexico",          "text": "AMBROSIA is bottled under its own name for the first time." }
+      ]
+    },
+    "conciergeIntent": {
+      "eyebrow": "Three paths",
+      "title": "What brings you to the table?",
+      "items": [
+        { "key": "horeca",     "label": "HORECA distribution", "body": "For restaurants, hotels and author bars that wish to add AMBROSIA to their menu." },
+        { "key": "prensa",     "label": "Press & editorial",   "body": "Sample requests, fact sheets, interviews and photoshoots." },
+        { "key": "corporativo","label": "Corporate gifting",   "body": "Signed boxes, dedications and special packaging for clients and teams." }
+      ],
+      "form": {
+        "name": "Name",
+        "email": "Email",
+        "company": "Company or outlet",
+        "message": "Message",
+        "cta": "Send inquiry",
+        "note": "We reply within 48 business hours."
+      }
+    },
+    "historia": {
+      "eyebrow": "Chapter I",
+      "title": "Story",
+      "body": "AMBROSIA was born where mythology meets the kitchen. The original formula was recorded in a family recipe book in central Mexico in 1962; in 1998 the chile balance was adjusted and prolonged rest was added; in 2024 it was bottled for the first time under the Salsa AMBROSIA mark."
+    },
+    "producto": {
+      "eyebrow": "Original edition",
+      "title": "One formula. A thousand rituals.",
+      "body": "AMBROSIA is born from a closed recipe: hand-selected chiles, spices from the Mediterranean and central Mexico, and a resting time that settles every note. The cobalt-blue bottle preserves color and flavor; the red wax seals the ritual. 200 ml · Mexico · 2024."
+    },
+    "coleccion": {
+      "eyebrow": "2024 Edition",
+      "title": "1,200 bottles. 90 days of rest.",
+      "body": "Each batch is made small. We don't chase yield — we chase a result that is worth the ritual. Distribution is by select channel and private inquiry — write to us if you'd like to taste it."
+    },
+    "horeca": {
+      "eyebrow": "HORECA",
+      "title": "For chosen tables",
+      "body": "We serve restaurants that understand an author's sauce deserves its own menu line: Pujol, Quintonil, Alcalde, Lardo, Casa Oaxaca, Rosetta, Sud 777, Le Chique. Concierge service, staff training, discreet co-branding."
+    },
+    "diario": {
+      "eyebrow": "Notebook",
+      "title": "Journal",
+      "body": "Kitchen notes, launches, chef-signed recipes and conversations with those who have tasted what we serve. An editorial notebook, no algorithm, published only when there is something to say."
+    },
+    "contacto": {
+      "eyebrow": "Concierge",
+      "title": "Contact",
+      "body": "For press, select distribution and corporate gifting. We reply in 48 hours and only when the conversation is worthwhile. Vague questions deserve vague answers; precise ones deserve a bottle."
+    }
+  },
+  "footer": {
+    "tagline": "Offered by hand. Received at the table.",
+    "made_in": "Made in Mexico · Hand-bottled",
+    "rights": "All rights reserved.",
+    "newsletter": {
+      "title": "Receive our batches before anyone else",
+      "body": "AMBROSIA editions are limited. Subscribe and receive early access, chef-signed recipes, and news on the next bottling.",
+      "placeholder": "Your email",
+      "cta": "Subscribe"
+    }
+  }
+}

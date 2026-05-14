@@ -1,0 +1,218 @@
+---
+import '~/styles/global.css';
+import Nav from '~/components/Nav.astro';
+import ChatBubble from '~/components/ChatBubble.tsx';
+import { getElevenLabsAgentId } from '~/lib/settings';
+import type { Locale } from '~/i18n';
+
+const ELEVENLABS_AGENT_ID = getElevenLabsAgentId();
+
+interface Props {
+  title: string;
+  description?: string;
+  locale: Locale;
+  /** OG image absoluta o relativa al site. Default: label-macro.webp */
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = 'AMBROSIA — The Divine Sauce of Gods',
+  locale,
+  ogImage = '/images/brand/label-macro.webp',
+} = Astro.props;
+
+// Canonical absoluto a partir de Astro.site + Astro.url.pathname.
+// Astro.site se define en astro.config.mjs como https://ambrosiasauceofgods.com
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).toString();
+
+// Preload de imagenes criticas del scroll en /origen — empiezan a bajar
+// inmediatamente al parsear el HTML, antes de que la seccion entre en viewport.
+const path = Astro.url.pathname.replace(/\/$/, '');
+const isOrigenPage = path === '/origen' || path === '/en/origin';
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={canonicalURL} />
+    {/* Preload de fuentes oficiales del brandbook — evita FOIT */}
+    <link rel="preload" href="/fonts/OptimusPrinceps.ttf"         as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/fonts/OptimusPrincepsSemiBold.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/fonts/MonktonIncisedSolid.otf"     as="font" type="font/otf" crossorigin />
+
+    {/* Preload de los 3 cuadros barrocos novohispanos en /origen — empiezan
+        a bajar antes de que el usuario llegue a las secciones. Reduce el
+        delay perceptual entre scroll y aparicion de la imagen. */}
+    {isOrigenPage && (
+      <>
+        <link rel="preload" href="/images/brand/mito-tezcatlipoca.webp" as="image" fetchpriority="high" />
+        <link rel="preload" href="/images/brand/origen-molcajete.webp"  as="image" />
+        <link rel="preload" href="/images/ritual-guardianes.webp"        as="image" />
+      </>
+    )}
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="author" content="AMBROSIA — The Divine Sauce of Gods" />
+
+    {/* GEO meta tags — Monterrey, Nuevo León, México (sede de AMBROSIA).
+        Importante para búsquedas locales tipo "salsa picante lujo Monterrey". */}
+    <meta name="geo.region" content="MX-NLE" />
+    <meta name="geo.placename" content="Monterrey" />
+    <meta name="geo.position" content="25.6866;-100.3161" />
+    <meta name="ICBM" content="25.6866, -100.3161" />
+
+    {/* Open Graph */}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:locale" content={locale === 'es' ? 'es_MX' : 'en_US'} />
+    <meta property="og:locale:alternate" content={locale === 'es' ? 'en_US' : 'es_MX'} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
+    <meta property="og:image:alt" content="Botella AMBROSIA con etiqueta Otomi" />
+    <meta property="og:site_name" content="AMBROSIA" />
+
+    {/* Twitter card */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site).toString()} />
+
+    {/* hreflang ES/EN — duplicate-content prevention para Google */}
+    {(() => {
+      const p = Astro.url.pathname;
+      const esPath = p.startsWith('/en/') ? p.replace(/^\/en\//, '/') : (p === '/en' ? '/' : p);
+      const enPath = p.startsWith('/en') ? p : (p === '/' ? '/en' : `/en${p}`);
+      const esURL = new URL(esPath, Astro.site).toString();
+      const enURL = new URL(enPath, Astro.site).toString();
+      return (
+        <>
+          <link rel="alternate" hreflang="es-MX" href={esURL} />
+          <link rel="alternate" hreflang="en-US" href={enURL} />
+          <link rel="alternate" hreflang="x-default" href={esURL} />
+        </>
+      );
+    })()}
+
+    {/* ─── <model-viewer> web component (Google) para mostrar el .glb 3D ───
+        Carga diferida (type="module" es deferred por defecto), peso ~30KB.
+        Solo se descarga si la página tiene un <model-viewer>; el componente
+        respeta lazy-loading. Versión 4.0 estable. */}
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  </head>
+  <body class="paper">
+    {/* Skip link a11y: keyboard users saltan al contenido principal */}
+    <a class="skip-link" href="#main-content">
+      {locale === 'es' ? 'Saltar al contenido' : 'Skip to content'}
+    </a>
+    <Nav locale={locale} />
+    <main id="main-content" tabindex="-1">
+      <slot />
+    </main>
+    {/* ─── ChatBubble AMBROSIA con agente ElevenLabs ───
+        UI mensajeria custom (burbujas + texto + voz), 100% AMBROSIA:
+        navy + red Pantone 485 + Optimus Princeps. Sin orbe, sin shadow DOM.
+        Usa @elevenlabs/react para voz (WebRTC) + texto. Locale-aware. */}
+    {ELEVENLABS_AGENT_ID && (
+      <ChatBubble client:idle agentId={ELEVENLABS_AGENT_ID} locale={locale} />
+    )}
+    <div class="grain" aria-hidden="true"></div>
+
+    {/* ─── Scroll restoration manual + jump-to-top en links de home.
+        - Cada entrada a una página comienza desde el top
+        - Clic en logo AMBROSIA o cualquier "Inicio" → top (smooth si
+          ya estás en home, hard si navegas a otra ruta) */}
+    <script is:inline>
+      // 1. Disable browser scroll restoration
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      // Helper: scroll a top sin animacion (instant), solo si no hay hash
+      function _topNow() {
+        if (location.hash) return;
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      }
+      // 2. Top on first paint
+      _topNow();
+      // 3. Top on DOMContentLoaded (DOM listo, antes de imagenes/fonts)
+      document.addEventListener('DOMContentLoaded', _topNow);
+      // 4. Top on window.load (todo cargado: imagenes, fonts, scripts diferidos)
+      window.addEventListener('load', _topNow);
+      // 5. Top on pageshow (bfcache + back/forward)
+      window.addEventListener('pageshow', _topNow);
+      // 6. Defensa contra scroll-anchoring + hidratacion del 3D model + Lenis:
+      //    durante el primer segundo, re-aplicamos scroll-top cada 100ms.
+      //    Si el usuario hace scroll deliberado, salimos del loop.
+      var _userScrolled = false;
+      var _scrollGuard = function () { _userScrolled = true; };
+      window.addEventListener('wheel', _scrollGuard, { passive: true, once: true });
+      window.addEventListener('touchstart', _scrollGuard, { passive: true, once: true });
+      window.addEventListener('keydown', _scrollGuard, { once: true });
+      var _ticks = 0;
+      var _resetInterval = setInterval(function () {
+        if (_userScrolled || _ticks >= 10) { clearInterval(_resetInterval); return; }
+        _topNow();
+        _ticks++;
+      }, 100);
+      // 4. Click delegation para links a home — si ya estás en home,
+      //    smooth scroll al top. Si estás en otra ruta, navegación
+      //    normal (el pageshow handler te scrollea al top al cargar).
+      document.addEventListener('click', function (e) {
+        var t = e.target;
+        if (!(t instanceof Element)) return;
+        var a = t.closest('a');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        if (!href) return;
+        // Match exacto a rutas raíz (con/sin trailing slash)
+        var isHome = href === '/' || href === '/en' || href === '/en/';
+        if (!isHome) return;
+        // Normaliza pathname actual y target
+        var current = location.pathname.replace(/\/$/, '') || '/';
+        var target = href.replace(/\/$/, '') || '/';
+        if (current === target) {
+          // Mismo path → smooth scroll al top
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        // Diferente path → permitir navegación normal; el handler
+        // pageshow al cargar la nueva página scrolleará al top.
+      });
+    </script>
+
+    {/* Title skew observer global (fallback ligero — funciona sin GSAP) */}
+    <script>
+      if ('IntersectionObserver' in window) {
+        const titles = document.querySelectorAll<HTMLElement>('.title-skew');
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              (entry.target as HTMLElement).classList.add('is-in');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.25 });
+        titles.forEach((el) => io.observe(el));
+      } else {
+        document.querySelectorAll('.title-skew').forEach((el) => el.classList.add('is-in'));
+      }
+    </script>
+
+    {/* GSAP motion orchestrator — carga diferida tras paint */}
+    <script>
+      // Cargar motion.ts despues del primer paint para no bloquear LCP
+      const loadMotion = () => import('~/scripts/motion.ts');
+      if ('requestIdleCallback' in window) {
+        (window as any).requestIdleCallback(loadMotion, { timeout: 1500 });
+      } else {
+        setTimeout(loadMotion, 200);
+      }
+    </script>
+  </body>
+</html>

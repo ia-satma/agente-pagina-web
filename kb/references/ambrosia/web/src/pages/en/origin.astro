@@ -1,0 +1,139 @@
+---
+export const prerender = true;
+/**
+ * /en/origin — The Origin (Chapter I, World 01).
+ *
+ * Gathers the myth storytelling that lived scattered across the home,
+ * /story, /product. Editorial structure:
+ *   PageHero → Diptych myth → Interlude → Diptych origin → Ritual → TimelineCultural
+ */
+import Base from '~/layouts/Base.astro';
+import Hero from '~/components/Hero.astro';
+import PageHero from '~/components/PageHero.astro';
+import Diptych from '~/components/Diptych.astro';
+import Interlude from '~/components/Interlude.astro';
+import Ritual from '~/components/Ritual.astro';
+import TimelineCultural from '~/components/TimelineCultural.astro';
+import Footer from '~/components/Footer.astro';
+import { t } from '~/i18n';
+import { isVisible } from '~/lib/settings';
+
+const locale = 'en' as const;
+const dict = t(locale);
+const page = (dict as any).pages.origen;
+---
+
+<Base
+  title={`AMBROSIA — ${page.eyebrow}`}
+  locale={locale}
+  description="The mythical origin of AMBROSIA hot sauce: from the nectar of the Olympic gods to the Mexica molcajete, a Mexican hot sauce hand-bottled in Monterrey."
+  ogImage="/images/brand/mito-tezcatlipoca.webp"
+>
+  {/* Floating back link over Hero (same pattern as PageHero back, but overlay) */}
+  <a class="origen-back" href="/en">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d="M9 2 L4 7 L9 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    <span>Home</span>
+  </a>
+
+  {/* Original scroll-driven pin Hero (god-mexica + god-greco + bottle handover) */}
+  {isVisible('origen.hero') && <Hero locale={locale} />}
+
+  <PageHero
+    eyebrow={page.eyebrow}
+    title={page.title}
+    body={page.body}
+    accent="purple"
+    sealVariant="purple"
+    showPhonetic
+    locale={locale}
+  />
+
+  {isVisible('origen.diptychMito') && (
+    <Diptych
+      id="myth"
+      eyebrow={dict.mito.eyebrow}
+      title={dict.mito.title}
+      body={dict.mito.body}
+      image="/images/brand/mito-tezcatlipoca.webp"
+      imageAlt="Novohispano Baroque oil painting of Tezcatlipoca descending from the night sky with the Salsa AMBROSIA bottle"
+      align="left"
+      bg="white"
+      priority
+    />
+  )}
+
+  {isVisible('origen.interlude') && <Interlude locale={locale} />}
+
+  {isVisible('origen.diptychOrigen') && (
+    <Diptych
+      id="origin-mexica"
+      eyebrow={dict.origen.eyebrow}
+      title={dict.origen.title}
+      body={dict.origen.body}
+      image="/images/brand/origen-molcajete.webp"
+      imageAlt="Novohispano Baroque still life: volcanic basalt molcajete with freshly ground red chile and the Salsa AMBROSIA bottle as the bottled descendant of Mexica lineage"
+      align="right"
+      bg="white"
+    />
+  )}
+
+  {isVisible('origen.ritual') && <Ritual locale={locale} />}
+
+  {/* Cultural timeline: from myth to AMBROSIA today */}
+  {isVisible('origen.timeline') && <TimelineCultural locale={locale} />}
+
+  <Footer locale={locale} />
+</Base>
+
+<style>
+  .origen-back {
+    position: fixed;
+    top: clamp(5rem, 9vh, 6.5rem);
+    left: clamp(1rem, 2.5vw, 2rem);
+    z-index: 50;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem 0.55rem 0.75rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    background: color-mix(in srgb, var(--navy) 78%, transparent);
+    border: 1px solid color-mix(in srgb, #FFFFFF 18%, transparent);
+    border-radius: 999px;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.4);
+    transition:
+      background-color var(--dur-medium) var(--ease-medium),
+      border-color var(--dur-medium) var(--ease-medium),
+      transform var(--dur-medium) var(--ease-medium),
+      gap var(--dur-medium) var(--ease-medium);
+  }
+  .origen-back:hover {
+    background: var(--red);
+    border-color: var(--red);
+    transform: translateX(-2px);
+    gap: 0.75rem;
+  }
+  .origen-back svg {
+    transition: transform var(--dur-medium) var(--ease-medium);
+  }
+  .origen-back:hover svg {
+    transform: translateX(-3px);
+  }
+  @media (max-width: 600px) {
+    .origen-back {
+      top: 4.5rem;
+      left: 1rem;
+      padding: 0.45rem 0.85rem 0.45rem 0.65rem;
+      font-size: 0.6rem;
+    }
+  }
+</style>

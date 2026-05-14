@@ -1,0 +1,167 @@
+---
+/**
+ * /admin/contenido — Editor nativo de i18n.
+ * Lista las 18 secciones top-level + toggle ES/EN + click → editor.
+ */
+import AdminLayout from '~/layouts/AdminLayout.astro';
+import { getCurrentUser } from '~/lib/auth';
+import { listSections, type Locale } from '~/lib/i18n-cms';
+
+const user = (await getCurrentUser(Astro))!;
+
+const localeParam = (Astro.url.searchParams.get('locale') as Locale) || 'es';
+const locale: Locale = localeParam === 'en' ? 'en' : 'es';
+
+const sections = await listSections(locale);
+const flash = Astro.url.searchParams.get('flash');
+---
+
+<AdminLayout title="Contenido" user={user} active="content">
+  {flash === 'saved' && <p class="flash flash--success">Cambios guardados.</p>}
+
+  <section class="panel">
+    <header class="panel__head">
+      <h2 class="panel__title">Editor de contenido</h2>
+      <div class="locale-toggle" role="tablist" aria-label="Idioma">
+        <a
+          href="/admin/contenido?locale=es"
+          class:list={['locale-toggle__btn', locale === 'es' && 'is-active']}
+          role="tab"
+          aria-selected={locale === 'es'}
+        >
+          🇲🇽 Español
+        </a>
+        <a
+          href="/admin/contenido?locale=en"
+          class:list={['locale-toggle__btn', locale === 'en' && 'is-active']}
+          role="tab"
+          aria-selected={locale === 'en'}
+        >
+          🇺🇸 English
+        </a>
+      </div>
+    </header>
+    <p class="panel__hint">
+      Edita los textos del sitio en <strong>{locale === 'es' ? 'español' : 'inglés'}</strong>.
+      Cada sección abre su propio editor con todos los campos visibles. Los cambios se guardan
+      directamente y el sitio recarga en vivo.
+    </p>
+
+    <div class="sections-grid">
+      {sections.map((s) => (
+        <a class="section-card" href={`/admin/contenido/${s.key}?lang=${locale}`}>
+          <div class="section-card__head">
+            <span class="section-card__key">{s.key}</span>
+            <span class="section-card__arrow" aria-hidden="true">→</span>
+          </div>
+          <h3 class="section-card__label">{s.label}</h3>
+          {s.desc && <p class="section-card__desc">{s.desc}</p>}
+          {s.preview && <p class="section-card__preview" set:html={s.preview}></p>}
+        </a>
+      ))}
+    </div>
+  </section>
+</AdminLayout>
+
+<style>
+  .locale-toggle {
+    display: inline-flex;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .locale-toggle__btn {
+    padding: 0.45rem 0.95rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--navy);
+    text-decoration: none;
+    border-radius: 999px;
+    transition: background 200ms, color 200ms;
+    opacity: 0.6;
+  }
+  .locale-toggle__btn:hover { opacity: 1; }
+  .locale-toggle__btn.is-active {
+    background: var(--navy);
+    color: var(--cream);
+    opacity: 1;
+  }
+
+  .sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.85rem;
+  }
+  .section-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.1rem 1.25rem;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--navy);
+    transition: border-color 200ms, transform 200ms, box-shadow 200ms;
+    min-height: 132px;
+  }
+  .section-card:hover {
+    border-color: var(--navy);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px -16px rgba(21, 23, 61, 0.22);
+  }
+  .section-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-card__key {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-weight: 700;
+    opacity: 0.85;
+  }
+  .section-card__arrow {
+    font-size: 0.85rem;
+    color: var(--navy);
+    opacity: 0.4;
+    transition: transform 200ms, opacity 200ms;
+  }
+  .section-card:hover .section-card__arrow {
+    transform: translateX(3px);
+    opacity: 1;
+    color: var(--red);
+  }
+  .section-card__label {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .section-card__desc {
+    margin: 0;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+  .section-card__preview {
+    margin: 0.5rem 0 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.74rem;
+    line-height: 1.45;
+    color: var(--navy);
+    opacity: 0.7;
+    font-style: italic;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+</style>

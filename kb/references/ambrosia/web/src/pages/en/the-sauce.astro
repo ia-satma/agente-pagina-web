@@ -1,0 +1,104 @@
+---
+export const prerender = true;
+/**
+ * /en/the-sauce — The Sauce (Chapter II, World 02).
+ * Mirror of /la-salsa.astro — see that file for the storytelling rationale.
+ */
+import Base from '~/layouts/Base.astro';
+import PageHero from '~/components/PageHero.astro';
+import BottleAnatomy from '~/components/BottleAnatomy.astro';
+import BottleShowcase from '~/components/BottleShowcase.astro';
+import TastingNotes from '~/components/TastingNotes.astro';
+import Pairings from '~/components/Pairings.astro';
+import BuyPoints from '~/components/BuyPoints.astro';
+import Citation from '~/components/Citation.astro';
+import FloatingDecor from '~/components/FloatingDecor.astro';
+import Footer from '~/components/Footer.astro';
+import { t } from '~/i18n';
+import { isVisible } from '~/lib/settings';
+
+const locale = 'en' as const;
+const dict = t(locale);
+const page = (dict as any).pages['la-salsa'];
+---
+
+<Base
+  title={`AMBROSIA — ${page.eyebrow}`}
+  locale={locale}
+  description="200 ml of AMBROSIA sauce: cobalt glass, Pantone 485 lacquer, Otomi label, 90 days of resting, 6 chiles. Tasting notes, pairings, and points of sale in Monterrey."
+>
+  <PageHero
+    eyebrow={page.eyebrow}
+    title={page.title}
+    body={page.body}
+    accent="cyan"
+    sealVariant="silver"
+    showPhonetic
+    locale={locale}
+    videoBg={{ webm: '/video/reel-01.webm', mp4: '/video/reel-01.mp4' }}
+    videoOverlayOpacity={0.66}
+  />
+
+  {isVisible('laSalsa.edicion') && <BottleAnatomy locale={locale} />}
+
+  {isVisible('laSalsa.bottleShowcase') && <BottleShowcase locale={locale} />}
+
+  {isVisible('laSalsa.tastingNotes') && (
+    <div class="decor-wrap decor-wrap--tasting">
+      <FloatingDecor class="decor-edge decor-edge--tr" src="/images/decor/chile.webp"  placement="top-right"   size="sm" opacity={0.22} parallax={0.18} rotate={6} />
+      <FloatingDecor class="decor-edge decor-edge--bl" src="/images/decor/garlic.webp" placement="bottom-left" size="sm" opacity={0.2}  parallax={0.16} rotate={-8} />
+      <TastingNotes locale={locale} />
+    </div>
+  )}
+
+  {isVisible('laSalsa.pairings') && (
+    <div class="decor-wrap decor-wrap--pairings">
+      <FloatingDecor class="decor-edge decor-edge--bl" src="/images/decor/molcajete.webp" placement="bottom-left" size="sm" opacity={0.22} parallax={0.18} rotate={-4} />
+      <FloatingDecor class="decor-edge decor-edge--tr" src="/images/decor/tomato.webp"    placement="top-right"   size="sm" opacity={0.2}  parallax={0.16} rotate={6} />
+      <Pairings locale={locale} />
+    </div>
+  )}
+
+  <Citation locale={locale} />
+
+  {isVisible('laSalsa.buyPoints') && (
+    <>
+      <section id="boutique" class="boutique-anchor" aria-hidden="true"></section>
+      <BuyPoints locale={locale} />
+    </>
+  )}
+
+  <Footer locale={locale} />
+</Base>
+
+<style is:global>
+  .decor-wrap {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .decor-wrap .tasting__inner,
+  .decor-wrap .pairings__inner,
+  .decor-wrap .buy-points__inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .decor-edge.decor-edge--tr { top: -6%; right: -14%; }
+  .decor-edge.decor-edge--bl { bottom: -6%; left: -14%; }
+
+  @media (max-width: 1280px) {
+    .decor-wrap--tasting .decor-edge,
+    .decor-wrap--pairings .decor-edge {
+      display: none;
+    }
+  }
+</style>
+
+<style>
+  .boutique-anchor {
+    display: block;
+    height: 0;
+    scroll-margin-top: 80px;
+  }
+</style>

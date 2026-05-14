@@ -1,0 +1,122 @@
+---
+/**
+ * CommunityCTA — bloque "Pertenencia" de la home.
+ * Sin form real (placeholder hasta integracion Mailchimp/CRM).
+ * Visual: bloque de una sola columna sobre fondo cream con regla
+ * horizontal y CTA primario tipo boton.
+ */
+import { pathFor, t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const c = (dict as any).community as {
+  eyebrow: string;
+  title: string;
+  body: string;
+  cta: string;
+};
+---
+
+<section class="community" data-community>
+  <div class="community__inner">
+    <span class="community__rule" aria-hidden="true" data-anim="up"></span>
+
+    <p class="eyebrow community__eyebrow" data-anim="up">{c.eyebrow}</p>
+    <h2 class="community__title" data-anim="up">{c.title}</h2>
+    <p class="community__body" data-anim="up">{c.body}</p>
+
+    <div class="community__cta" data-anim="up">
+      <a class="btn btn--primary btn--lg" href={pathFor(locale, 'concierge')}>
+        <span>{c.cta}</span>
+        <span aria-hidden="true">
+          <svg width="16" height="11" viewBox="0 0 14 10" fill="none">
+            <path d="M0 5h13M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .community {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+    text-align: center;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 8%, transparent);
+  }
+  .community__inner {
+    max-width: 48rem;
+    margin: 0 auto;
+  }
+
+  .community__rule {
+    display: block;
+    width: 1px;
+    height: clamp(28px, 3.5vw, 48px);
+    margin: 0 auto 1.25rem;
+    background: var(--red);
+    opacity: 0.6;
+  }
+
+  .community__eyebrow { margin: 0 0 0.85rem; }
+
+  .community__title {
+    margin: 0 0 0.85rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    color: var(--navy);
+  }
+
+  .community__body {
+    margin: 0 auto 1.75rem;
+    max-width: 36rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    line-height: 1.55;
+    color: var(--navy);
+    opacity: 0.78;
+  }
+
+  .community__cta { display: inline-block; }
+
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-anim='up'].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  if ('IntersectionObserver' in window) {
+    const sec = document.querySelector<HTMLElement>('[data-community]');
+    if (sec) {
+      const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            items.forEach((el, i) => setTimeout(() => el.classList.add('is-in'), i * 70));
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.25 });
+      io.observe(sec);
+    }
+  } else {
+    document.querySelectorAll('[data-community] [data-anim="up"]').forEach((el) => el.classList.add('is-in'));
+  }
+</script>

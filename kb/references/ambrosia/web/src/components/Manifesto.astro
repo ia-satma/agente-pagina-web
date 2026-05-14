@@ -1,0 +1,160 @@
+---
+import { Image } from 'astro:assets';
+import { t, type Locale } from '~/i18n';
+import Phonetic from '~/components/Phonetic.astro';
+import isotypeImg from '~/assets/brand/isotype.png';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+---
+
+<section class="manifesto" data-manifesto>
+  <div class="manifesto__inner">
+    <div class="manifesto__iso" data-anim="up" aria-hidden="true">
+      <Image
+        class="manifesto__iso-img"
+        src={isotypeImg}
+        alt=""
+        width={320}
+        height={320}
+        format="webp"
+        quality={94}
+      />
+    </div>
+
+    <h2 class="manifesto__title title-skew" data-anim="up">
+      {dict.manifesto.title}
+    </h2>
+
+    <p class="manifesto__caption" data-anim="up" set:html={dict.manifesto.caption}></p>
+    <p class="manifesto__phon" data-anim="up"><Phonetic tone="auto" /></p>
+  </div>
+</section>
+
+<style>
+  .manifesto {
+    position: relative;
+    min-height: 60vh;
+    min-height: 60svh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3rem, 6vw, 5.5rem) 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 10%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 10%, transparent);
+  }
+
+  .manifesto__inner {
+    text-align: center;
+    max-width: 64rem;
+  }
+
+  .manifesto__iso {
+    margin: 0 auto 1.5rem;
+    display: inline-block;
+    line-height: 0;
+  }
+  /* Ceremonia: iso entra con scale 0.92 → 1, opacidad 0 → 1 lento */
+  .manifesto__iso[data-anim="up"] {
+    transform: translateY(0) scale(0.92);
+    transition: opacity var(--dur-ceremony) var(--ease-divine),
+                transform var(--dur-ceremony) var(--ease-divine);
+  }
+  .manifesto__iso[data-anim="up"].is-in {
+    transform: translateY(0) scale(1);
+  }
+  .manifesto__iso-img {
+    width: clamp(180px, 22vw, 320px);
+    height: auto;
+    /* Filter sutil para alinear el isotipo con la paleta navy del sitio */
+    filter: hue-rotate(-30deg) saturate(0.6) brightness(0.85);
+    opacity: 1;
+  }
+
+  .manifesto__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2rem, 6vw, 5rem);
+    line-height: 1.05;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--navy);
+    max-width: 18ch;
+    margin-left: auto;
+    margin-right: auto;
+    text-wrap: balance;
+  }
+
+  .manifesto__caption {
+    margin: 1rem auto 0;
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-display);
+    font-weight: 400;
+    font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+    color: var(--navy);
+    opacity: 0.78;
+    max-width: 38rem;
+    line-height: 1.45;
+  }
+
+  .manifesto__phon {
+    margin: 0.85rem 0 0;
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: lowercase;
+    color: var(--navy);
+    opacity: 0.5;
+  }
+
+  /* Animaciones de entrada */
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity var(--dur-divine) var(--ease-divine), transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-anim='up'].is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  if ('IntersectionObserver' in window) {
+    const sec = document.querySelector<HTMLElement>('.manifesto');
+    if (sec) {
+      const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+      // Stagger ceremonia: iso 0ms → title 260ms → caption 520ms → phon 780ms
+      // Cascada Manifesto recalibrada — was [0, 260, 520, 780] (ultimo a 780ms)
+      const delays = [0, 150, 300, 450];
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Activar la seccion entera para draw-on de los O-marks
+            sec.classList.add('is-in');
+            items.forEach((el, i) => {
+              setTimeout(() => el.classList.add('is-in'), delays[i] ?? (i * 150));
+            });
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.25 });
+      io.observe(sec);
+    }
+  } else {
+    document.querySelectorAll('.manifesto [data-anim="up"]').forEach((el) => el.classList.add('is-in'));
+  }
+</script>

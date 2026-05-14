@@ -1,0 +1,571 @@
+---
+/**
+ * TimelineCultural — 4 hitos en layout vertical estatico editorial.
+ *
+ * Diseno: stack vertical clasico magazine. Cada hito en su propia "card"
+ * apilada con generoso whitespace. Sin pin, sin scroll-driven, sin sticky.
+ * El scroll natural del navegador avanza linealmente entre los 4 hitos.
+ *
+ * Cada hito muestra:
+ *   - Marker lateral: numeral romano + dot + linea conectora hacia el siguiente
+ *   - Columna izquierda: place uppercase tracking + ano monumental Optimus
+ *   - Columna derecha: glifo SVG por era + texto editorial + signature
+ *
+ * Reveal: IntersectionObserver clasico — cada hito recibe .is-in al entrar
+ * al viewport, fade-up suave. Header reveal igual.
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const tl = (dict as any).pages.timeline as {
+  eyebrow: string;
+  title: string;
+  items: { year: string; place: string; text: string }[];
+};
+
+const total = tl.items.length;
+const padTotal = (n: number) => String(n).padStart(2, '0');
+---
+
+<section class="timeline" data-timeline>
+  <div class="timeline__inner">
+    <header class="timeline__header">
+      <p class="eyebrow timeline__eyebrow" data-anim="up">{tl.eyebrow}</p>
+      <h2 class="timeline__title" data-anim="up" set:html={tl.title}></h2>
+    </header>
+
+    <ol class="timeline__list" role="list" data-timeline-list>
+      {/* ─── Rail maestro: línea vertical roja que crece con scroll progress ─── */}
+      <div class="timeline__rail-master" data-timeline-rail aria-hidden="true">
+        <span class="timeline__rail-master-fill"></span>
+      </div>
+
+      {tl.items.map((item, i) => (
+        <li class="timeline__entry" data-anim="up" data-i={i}>
+          {/* Marker lateral: numeral + dot (sin línea local — la rail master cubre todo) */}
+          <aside class="timeline__marker" aria-hidden="true">
+            <span class="timeline__marker-num">{padTotal(i + 1)}</span>
+            <span class="timeline__marker-dot"></span>
+          </aside>
+
+          {/* Columna izquierda: place + año monumental */}
+          <div class="timeline__col-left">
+            <p class="timeline__place">{item.place}</p>
+            <h3 class="timeline__year">{item.year}</h3>
+            <div class="timeline__rule"></div>
+          </div>
+
+          {/* Columna derecha: glifo + texto + signature */}
+          <div class="timeline__col-right">
+            <div class="timeline__glyph" aria-hidden="true">
+              {i === 0 && (
+                /* Columna jonica griega — Olimpo */
+                <svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="6" y="2" width="48" height="6" stroke="currentColor" stroke-width="1.2" />
+                  <rect x="10" y="8" width="40" height="4" stroke="currentColor" stroke-width="1" />
+                  <path d="M14 12v52M22 12v52M30 12v52M38 12v52M46 12v52" stroke="currentColor" stroke-width="1" />
+                  <rect x="6" y="64" width="48" height="6" stroke="currentColor" stroke-width="1.2" />
+                  <rect x="2" y="70" width="56" height="8" stroke="currentColor" stroke-width="1.2" />
+                </svg>
+              )}
+              {i === 1 && (
+                /* Piramide escalonada mexica — Tenochtitlan */
+                <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M40 6 L52 22 L28 22 Z" stroke="currentColor" stroke-width="1.2" />
+                  <rect x="22" y="22" width="36" height="12" stroke="currentColor" stroke-width="1.2" />
+                  <rect x="14" y="34" width="52" height="14" stroke="currentColor" stroke-width="1.2" />
+                  <rect x="6"  y="48" width="68" height="16" stroke="currentColor" stroke-width="1.2" />
+                  <line x1="40" y1="22" x2="40" y2="64" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 3" />
+                </svg>
+              )}
+              {i === 2 && (
+                /* Libreta + cuchara — Receta familiar */
+                <svg viewBox="0 0 70 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="8" y="6" width="44" height="60" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M16 18h28M16 26h28M16 34h22M16 42h26M16 50h20" stroke="currentColor" stroke-width="0.8" />
+                  <ellipse cx="56" cy="22" rx="6" ry="4" stroke="currentColor" stroke-width="1.2" />
+                  <line x1="56" y1="26" x2="56" y2="60" stroke="currentColor" stroke-width="1.2" />
+                  <circle cx="56" cy="62" r="2" fill="currentColor" />
+                </svg>
+              )}
+              {i === 3 && (
+                /* Botella AMBROSIA — embotellado moderno */
+                <svg viewBox="0 0 50 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="20" y="4" width="10" height="14" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M16 22 L34 22 L36 32 L36 70 Q36 76 30 76 L20 76 Q14 76 14 70 L14 32 Z" stroke="currentColor" stroke-width="1.2" />
+                  <rect x="18" y="40" width="14" height="22" stroke="currentColor" stroke-width="0.8" />
+                  <line x1="22" y1="48" x2="28" y2="48" stroke="currentColor" stroke-width="0.6" />
+                  <line x1="22" y1="52" x2="28" y2="52" stroke="currentColor" stroke-width="0.6" />
+                </svg>
+              )}
+            </div>
+            <p class="timeline__text">{item.text}</p>
+            <p class="timeline__signature" aria-hidden="true">
+              <span class="timeline__signature-line"></span>
+              AMBROSIA · {item.year}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════════════
+     Timeline — Stack editorial estatico (sin pin, sin scroll-driven)
+     ═══════════════════════════════════════════════════════════════════ */
+  .timeline {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3rem, 7vw, 6rem) 1.5rem clamp(2.5rem, 5vw, 4rem);
+    border-top: 1px solid color-mix(in srgb, var(--navy) 8%, transparent);
+  }
+  .timeline__inner {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ─── Header ─── */
+  .timeline__header {
+    text-align: center;
+    margin: 0 auto clamp(3rem, 6vw, 5rem);
+    max-width: 38rem;
+  }
+  .timeline__eyebrow { margin: 0 0 0.85rem; }
+  .timeline__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+    color: var(--navy);
+  }
+  .timeline__title :global(em) {
+    font-style: normal;
+    color: var(--red);
+  }
+
+  /* ─── List ─── */
+  .timeline__list {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3rem, 6vw, 5.5rem);
+  }
+
+  /* ─── Rail maestro: solo el fill rojo que GSAP escala con scroll.
+       (Sin track gris — la línea solo aparece conforme avanzas) */
+  .timeline__rail-master {
+    position: absolute;
+    /* Centro del marker column (64px width, dot 12px → 32 - 1 = 31px) */
+    left: 31px;
+    /* Fallback antes de que JS calcule (se sobreescribe en runtime) */
+    top: 36px;
+    bottom: 36px;
+    width: 2px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .timeline__rail-master-fill {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: var(--red);
+    transform-origin: top center;
+    transform: scaleY(0);
+    will-change: transform;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--red) 35%, transparent);
+  }
+  /* Los entries van por encima del rail */
+  .timeline__entry {
+    position: relative;
+    z-index: 1;
+  }
+  /* El dot DEBE ir sobre la línea — fondo blanco para "cortar" la línea */
+  .timeline__marker-dot {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ─── Entry: grid de 3 columnas (marker + left + right) ─── */
+  .timeline__entry {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) minmax(0, 1.4fr);
+    column-gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: start;
+    /* GSAP controla autoAlpha + y en runtime. Fallback CSS si JS falla:
+       el reveal usa .is-in via IO classic (catch del script). */
+    will-change: opacity, transform;
+  }
+  .timeline__entry.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── Marker lateral: numeral + dot + linea ─── */
+  .timeline__marker {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 0.35rem;
+    min-height: 100%;
+  }
+  .timeline__marker-num {
+    position: relative;
+    z-index: 2;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--navy) 55%, transparent);
+    margin-bottom: 0.65rem;
+    /* Punch out de la rail master: fondo bg-page con padding sutil para
+       que el rail (z:0) NO se vea cruzando el numero. */
+    background: var(--bg-page);
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+  }
+  .timeline__marker-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--red);
+    /* Anillo bg-page para cortar el rail master detrás + halo rojo sutil */
+    box-shadow:
+      0 0 0 5px var(--bg-page),
+      0 0 0 8px color-mix(in srgb, var(--red) 18%, transparent);
+    flex-shrink: 0;
+  }
+  /* (La linea conectora local fue reemplazada por el rail maestro
+      .timeline__rail-master que crece con scroll progress.) */
+
+  /* ─── Columna izquierda: place + año ─── */
+  .timeline__col-left {
+    padding-top: 0.2rem;
+  }
+  .timeline__place {
+    margin: 0 0 0.85rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--navy) 70%, transparent);
+  }
+  .timeline__year {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.6rem, 5.5vw, 4.5rem);
+    line-height: 0.95;
+    letter-spacing: 0.005em;
+    color: var(--navy);
+    font-variant-numeric: lining-nums;
+  }
+  .timeline__rule {
+    margin-top: 1.75rem;
+    width: 48px;
+    height: 1px;
+    background: var(--red);
+    clear: both;
+  }
+
+  /* ─── Columna derecha: glifo + texto + signature ─── */
+  .timeline__col-right {
+    padding-top: 0.2rem;
+  }
+  .timeline__glyph {
+    width: clamp(80px, 10vw, 120px);
+    height: clamp(80px, 10vw, 120px);
+    color: var(--red);
+    opacity: 0.92;
+    margin-bottom: 1.5rem;
+  }
+  .timeline__glyph svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .timeline__text {
+    margin: 0 0 1.5rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    line-height: 1.55;
+    color: var(--navy);
+    opacity: 0.88;
+    max-width: 44ch;
+    text-wrap: balance;
+  }
+  .timeline__signature {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.45;
+    font-variant-numeric: lining-nums;
+  }
+  .timeline__signature-line {
+    width: 32px;
+    height: 1px;
+    background: currentColor;
+  }
+
+  /* ─── Header [data-anim="up"] reveal ─── */
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity var(--dur-divine) var(--ease-divine),
+      transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-anim='up'].is-in { opacity: 1; transform: translateY(0); }
+
+  /* ─── Tablet (≤ 900px): marker pasa a horizontal arriba, columnas se apilan ─── */
+  @media (max-width: 900px) {
+    .timeline__entry {
+      grid-template-columns: 1fr;
+      row-gap: 1.5rem;
+    }
+    .timeline__marker {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.85rem;
+      padding-top: 0;
+      min-height: 0;
+    }
+    .timeline__marker-num {
+      margin: 0;
+    }
+    /* Mobile: rail maestro oculto (el layout pasa a horizontal arriba) */
+    .timeline__rail-master {
+      display: none;
+    }
+    .timeline__col-left {
+      padding-top: 0;
+    }
+    .timeline__year {
+      font-size: clamp(2.4rem, 9vw, 3.2rem);
+    }
+    .timeline__glyph {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 1rem;
+    }
+    .timeline__list {
+      gap: clamp(2.5rem, 6vw, 3.5rem);
+    }
+  }
+
+  /* ─── Reduced motion ─── */
+  @media (prefers-reduced-motion: reduce) {
+    .timeline__entry,
+    [data-anim='up'] {
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Timeline scroll-reactive (NO pin, NO sticky — solo reveals animados).
+   *
+   * Capas de animación al hacer scroll:
+   *   1. Header — fade-up cuando entra viewport (IntersectionObserver classic)
+   *   2. Entries — ScrollTrigger.batch con stagger 0.12s al entrar 85% viewport
+   *   3. Marker lines verticales — scrub que dibuja scaleY 0→1 conforme
+   *      progresa el scroll dentro de cada entry (sensación "se va trazando")
+   *   4. Year numerals — parallax sutil (y: 30 → -10) durante el viewport pass
+   *   5. Glyph — fade + scale 0.85 → 1 con scrub corto al entrar
+   *
+   * gsap.matchMedia respeta prefers-reduced-motion y mobile (desactiva
+   * parallax + scrub, deja solo fade-in).
+   */
+  const sec = document.querySelector<HTMLElement>('[data-timeline]');
+  if (sec) {
+    // Header reveal — IO clásico (no necesita GSAP)
+    const headerReveals = sec.querySelectorAll<HTMLElement>('.timeline__header [data-anim="up"]');
+    if ('IntersectionObserver' in window) {
+      const headIO = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              (e.target as HTMLElement).classList.add('is-in');
+              headIO.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      headerReveals.forEach((el) => headIO.observe(el));
+    } else {
+      headerReveals.forEach((el) => el.classList.add('is-in'));
+    }
+
+    // GSAP ScrollTrigger — animaciones DRAMÁTICAS scroll-driven
+    (async () => {
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/ScrollTrigger'),
+      ]);
+      gsap.registerPlugin(ScrollTrigger);
+
+      const list = sec.querySelector<HTMLElement>('[data-timeline-list]');
+      const rail = sec.querySelector<HTMLElement>('[data-timeline-rail] .timeline__rail-master-fill');
+      const entries = Array.from(sec.querySelectorAll<HTMLElement>('.timeline__entry'));
+      const dots = Array.from(sec.querySelectorAll<HTMLElement>('.timeline__marker-dot'));
+      const nums = Array.from(sec.querySelectorAll<HTMLElement>('.timeline__marker-num'));
+      const places = Array.from(sec.querySelectorAll<HTMLElement>('.timeline__place'));
+      const years = Array.from(sec.querySelectorAll<HTMLElement>('.timeline__year'));
+      const rules = Array.from(sec.querySelectorAll<HTMLElement>('.timeline__rule'));
+      const glyphs = Array.from(sec.querySelectorAll<HTMLElement>('.timeline__glyph'));
+      const texts = Array.from(sec.querySelectorAll<HTMLElement>('.timeline__text'));
+      const signatures = Array.from(sec.querySelectorAll<HTMLElement>('.timeline__signature'));
+
+      const mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          isReduced: '(prefers-reduced-motion: reduce)',
+          isMotion: '(prefers-reduced-motion: no-preference)',
+        },
+        (context) => {
+          const c = (context.conditions ?? {}) as { isMotion?: boolean; isReduced?: boolean };
+
+          if (c.isReduced) {
+            entries.forEach((el) => el.classList.add('is-in'));
+            if (rail) gsap.set(rail, { scaleY: 1 });
+            return;
+          }
+
+          // ════════════════════════════════════════════════════════
+          //  ESTADO INICIAL — todo escondido hasta que scroll lo revele.
+          //  Los wrappers .timeline__entry quedan visibles (autoAlpha 1);
+          //  son los HIJOS los que animan uno por uno como una coreografía.
+          // ════════════════════════════════════════════════════════
+          gsap.set(entries, { autoAlpha: 1, y: 0 });
+          gsap.set(dots, { scale: 0, transformOrigin: 'center center' });
+          gsap.set(nums, { autoAlpha: 0, y: -12 });
+          gsap.set(places, { autoAlpha: 0, x: -30 });
+          gsap.set(years, { autoAlpha: 0, y: 80 });
+          gsap.set(rules, { scaleX: 0, transformOrigin: 'left center' });
+          gsap.set(glyphs, { autoAlpha: 0, scale: 0.5, rotation: -10 });
+          gsap.set(texts, { autoAlpha: 0, y: 40 });
+          gsap.set(signatures, { autoAlpha: 0, x: -20 });
+          if (rail) gsap.set(rail, { scaleY: 0, transformOrigin: 'top center' });
+
+          // ════════════════════════════════════════════════════════
+          //  REVEAL coreográfico — cada entry tiene su mini-timeline
+          //  scroll-triggered con toggleActions play/reverse.
+          //  Los 8 elementos del entry entran en secuencia.
+          // ════════════════════════════════════════════════════════
+          entries.forEach((entry, i) => {
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: entry,
+                start: 'top 80%',
+                end: 'top 25%',
+                toggleActions: 'play none none reverse',
+                invalidateOnRefresh: true,
+              },
+              defaults: { ease: 'power3.out' },
+            });
+
+            tl
+              .to(nums[i],       { autoAlpha: 1, y: 0,                        duration: 0.45 }, 0)
+              .to(dots[i],       { scale: 1,                                  duration: 0.6, ease: 'back.out(2.4)' }, 0.05)
+              .to(places[i],     { autoAlpha: 1, x: 0,                        duration: 0.55 }, 0.15)
+              .to(years[i],      { autoAlpha: 1, y: 0,                        duration: 0.85, ease: 'power4.out' }, 0.2)
+              .to(rules[i],      { scaleX: 1,                                 duration: 0.5 }, 0.5)
+              .to(glyphs[i],     { autoAlpha: 0.92, scale: 1, rotation: 0,    duration: 0.9, ease: 'back.out(1.6)' }, 0.3)
+              .to(texts[i],      { autoAlpha: 0.88, y: 0,                     duration: 0.6 }, 0.45)
+              .to(signatures[i], { autoAlpha: 0.45, x: 0,                     duration: 0.55 }, 0.6);
+          });
+
+          // ════════════════════════════════════════════════════════
+          //  RAIL MAESTRO — UNA línea vertical roja que avanza con el
+          //  scroll desde el centro del primer dot hasta el centro del
+          //  último dot. JS calcula top/height EXACTOS para que nunca
+          //  se sobreponga con los numerales o cruce fuera de los dots.
+          // ════════════════════════════════════════════════════════
+          const railTrack = sec.querySelector<HTMLElement>('[data-timeline-rail]');
+          if (rail && railTrack && list && dots.length >= 2) {
+            // Calcula top + bottom relativos al .timeline__list parent
+            const calibrateRail = () => {
+              const listRect = list.getBoundingClientRect();
+              const firstDot = dots[0].getBoundingClientRect();
+              const lastDot = dots[dots.length - 1].getBoundingClientRect();
+              const top = firstDot.top + firstDot.height / 2 - listRect.top;
+              const bottom = listRect.bottom - (lastDot.top + lastDot.height / 2);
+              railTrack.style.top = `${top}px`;
+              railTrack.style.bottom = `${bottom}px`;
+            };
+            calibrateRail();
+            window.addEventListener('resize', calibrateRail);
+            window.addEventListener('load', calibrateRail);
+
+            gsap.to(rail, {
+              scaleY: 1,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: list,
+                // Empieza cuando el primer dot llega al 70% del viewport
+                start: 'top 70%',
+                // Termina cuando el último dot pasa al 50% del viewport
+                endTrigger: entries[entries.length - 1],
+                end: 'top 50%',
+                scrub: 0.4,
+                invalidateOnRefresh: true,
+                onRefresh: calibrateRail,
+              },
+            });
+          }
+
+          // Año parallax removido — causaba overlap visual con el
+          // .timeline__rule horizontal debajo. El reveal coreográfico
+          // ya da suficiente movimiento; el año queda anclado a y:0
+          // después de su drop inicial desde y:80.
+
+          return () => {
+            // matchMedia auto-revierte
+          };
+        }
+      );
+
+      // Refresh tras carga de assets pesados
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+    })().catch((err) => {
+      console.warn('GSAP timeline animations failed, falling back to CSS:', err);
+      // Fallback: muestra todo via IO classic
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) (e.target as HTMLElement).classList.add('is-in');
+          });
+        },
+        { threshold: 0.2 }
+      );
+      sec.querySelectorAll('.timeline__entry').forEach((el) => io.observe(el));
+    });
+  }
+</script>

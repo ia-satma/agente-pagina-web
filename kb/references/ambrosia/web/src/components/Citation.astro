@@ -1,0 +1,149 @@
+---
+/**
+ * Citation — bloque editorial de blockquote para "Confianza".
+ * Una cita central, autor abajo, regla horizontal sutil.
+ * Placeholder hasta tener testimonio real (chef o critico).
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const c = (dict as any).citation as {
+  eyebrow: string;
+  quote: string;
+  author: string;
+  place: string;
+};
+---
+
+<section class="citation" data-citation>
+  <div class="citation__inner">
+    <p class="eyebrow citation__eyebrow" data-anim="up">{c.eyebrow}</p>
+
+    <span class="citation__mark" aria-hidden="true">
+      <svg viewBox="0 0 60 48" width="60" height="48" fill="none">
+        <path
+          d="M14 0C6 0 0 6 0 14v6c0 8 6 14 14 14h2v14L28 34v-6h-7c-3 0-5-2-5-5V14h12V0H14ZM46 0c-8 0-14 6-14 14v6c0 8 6 14 14 14h2v14L60 34v-6h-7c-3 0-5-2-5-5V14h12V0H46Z"
+          fill="currentColor"
+          opacity="0.18"
+        />
+      </svg>
+    </span>
+
+    <blockquote class="citation__quote" data-anim="words" set:html={c.quote}>
+    </blockquote>
+
+    <span class="citation__rule" aria-hidden="true" data-anim="up"></span>
+
+    <footer class="citation__foot" data-anim="up">
+      <span class="citation__author">{c.author}</span>
+      <span class="citation__place">{c.place}</span>
+    </footer>
+  </div>
+</section>
+
+<style>
+  .citation {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3rem, 6vw, 5rem) 1.5rem;
+    text-align: center;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 8%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 8%, transparent);
+  }
+  .citation__inner {
+    max-width: 56rem;
+    margin: 0 auto;
+    position: relative;
+  }
+  .citation__eyebrow { margin: 0 0 1.25rem; }
+
+  .citation__mark {
+    display: inline-block;
+    margin: 0 auto 1.25rem;
+    color: var(--red);
+    line-height: 0;
+  }
+
+  .citation__quote {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2rem, 4.8vw, 3.8rem);
+    line-height: 1.2;
+    letter-spacing: 0.005em;
+    color: var(--navy);
+  }
+  .citation__quote :global(em) {
+    font-style: normal;
+    color: var(--red);
+  }
+
+  .citation__rule {
+    display: block;
+    width: clamp(80px, 12vw, 140px);
+    height: 1px;
+    margin: clamp(1.5rem, 3vw, 2.25rem) auto 1rem;
+    background: var(--navy);
+    opacity: 0.35;
+  }
+
+  .citation__foot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  .citation__author {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.85;
+  }
+  .citation__place {
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.55;
+  }
+
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-anim='up'].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  if ('IntersectionObserver' in window) {
+    const sec = document.querySelector<HTMLElement>('[data-citation]');
+    if (sec) {
+      const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            items.forEach((el, i) => setTimeout(() => el.classList.add('is-in'), i * 70));
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.25 });
+      io.observe(sec);
+    }
+  } else {
+    document.querySelectorAll('[data-citation] [data-anim="up"]').forEach((el) => el.classList.add('is-in'));
+  }
+</script>

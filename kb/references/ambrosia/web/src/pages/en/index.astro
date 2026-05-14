@@ -1,0 +1,75 @@
+---
+export const prerender = true;
+/**
+ * Home (EN) — Minimalist editorial.
+ *
+ * Structure:
+ *   01 Hero       → HeroVideo autoplay loop
+ *   02 Claim      → BrandStatement (AMBROSIA + tagline + CTA)
+ *   03 Manifesto  → "THE DIVINE SAUCE OF GODS" + isotype
+ *   04 Timeline   → TimelineCultural (4 milestones) — historical close
+ *   05 Footer
+ *
+ * Worlds navigation: in top Nav (no duplicated grid in home).
+ */
+import Base from '~/layouts/Base.astro';
+import HeroVideo from '~/components/HeroVideo.astro';
+import BrandStatement from '~/components/BrandStatement.astro';
+import VideoReel from '~/components/VideoReel.astro';
+import WorldsGrid from '~/components/WorldsGrid.astro';
+import Manifesto from '~/components/Manifesto.astro';
+import BottleGallery from '~/components/BottleGallery.astro';
+import MotionDivider from '~/components/MotionDivider.astro';
+import Footer from '~/components/Footer.astro';
+import { isVisible } from '~/lib/settings';
+
+const locale = 'en' as const;
+---
+
+<Base
+  title="AMBROSIA — The Divine Sauce of Gods"
+  locale={locale}
+  description="Mexican ultra-luxury hot sauce hand-bottled in Monterrey. Inspired by the elixir of the gods of Olympus. A single drop is enough to transform a dish."
+>
+  {isVisible('home.hero') && <HeroVideo locale={locale} />}
+
+  {isVisible('home.brandStatement') && <BrandStatement locale={locale} />}
+
+  <VideoReel
+    eyebrow="The ritual"
+    title='AMBROSIA is not only a sauce'
+    body="It is a ritual of connection, a fragment of time, an echo of the ancient songs. Three moments captured in 1080p."
+    videos={[
+      {
+        src: '/video/reel-01.webm',
+        srcMp4: '/video/reel-01.mp4',
+        poster: '/video/reel-01-poster.jpg',
+        caption: 'The ritual — each drop is the spirit of abundance and tradition.',
+      },
+      {
+        src: '/video/reel-02.webm',
+        srcMp4: '/video/reel-02.mp4',
+        poster: '/video/reel-02-poster.jpg',
+        caption: "The alchemist's flask — dark, sturdy, holding a fragment of time.",
+      },
+      {
+        src: '/video/reel-03.webm',
+        srcMp4: '/video/reel-03.mp4',
+        poster: '/video/reel-03-poster.jpg',
+        caption: 'The gathering — a journey to the origins, where the human and the divine met by the fire.',
+      },
+    ]}
+  />
+
+  {isVisible('home.worldsGrid') && <WorldsGrid locale={locale} />}
+
+  <MotionDivider variant="ornament" />
+
+  {isVisible('home.manifesto') && <Manifesto locale={locale} />}
+
+  <MotionDivider variant="drop" />
+
+  {isVisible('home.bottleGallery') && <BottleGallery locale={locale} />}
+
+  <Footer locale={locale} />
+</Base>

@@ -1,0 +1,471 @@
+---
+/**
+ * /admin/contenido/[locale]/[section] — Editor de una sección i18n.
+ *
+ * Form generator: lee la estructura JSON real de la sección y construye
+ * inputs dinámicamente. Soporta strings, textos largos, objetos anidados,
+ * listas de strings y listas de objetos.
+ */
+import AdminLayout from '~/layouts/AdminLayout.astro';
+import { getCurrentUser } from '~/lib/auth';
+import { can, type Role } from '~/lib/users';
+import { readSection, SECTION_LABELS, type Locale } from '~/lib/i18n-cms';
+
+const user = (await getCurrentUser(Astro))!;
+const canWrite = can(user.role as Role, 'content.write');
+
+const localeParam = (Astro.url.searchParams.get('lang') as Locale) || 'es';
+const section = Astro.params.section ?? '';
+
+if (localeParam !== 'es' && localeParam !== 'en') {
+  return Astro.redirect('/admin/contenido', 302);
+}
+const locale: Locale = localeParam;
+
+const value = await readSection(locale, section);
+if (value === undefined) {
+  return Astro.redirect('/admin/contenido?flash=error', 302);
+}
+
+const meta = SECTION_LABELS[section] ?? { es: section, en: section };
+const sectionLabel = meta[locale] ?? meta.es ?? section;
+
+const flash = Astro.url.searchParams.get('flash');
+
+// JSON canónico para hidratar el form builder client-side
+const initialJSON = JSON.stringify(value);
+---
+
+<AdminLayout title={`${sectionLabel} · ${locale.toUpperCase()}`} user={user} active="content">
+  {flash === 'saved' && <p class="flash flash--success">Cambios guardados. El sitio recarga en vivo.</p>}
+  {flash === 'error' && <p class="flash flash--error">No se pudo guardar.</p>}
+
+  <section class="panel">
+    <header class="panel__head">
+      <div>
+        <a href={`/admin/contenido?locale=${locale}`} class="back-link">← Todas las secciones ({locale === 'es' ? 'Español' : 'English'})</a>
+        <h2 class="panel__title" style="margin-top: 0.5rem">{sectionLabel}</h2>
+      </div>
+      <span class="pill pill--editor">{section}.json · {locale}</span>
+    </header>
+
+    <form id="content-form" data-can-write={canWrite ? '1' : '0'}>
+      <div id="fields"></div>
+
+      {canWrite && (
+        <div class="form-actions">
+          <button type="submit" class="btn">Guardar cambios</button>
+          <a href={`/admin/contenido?locale=${locale}`} class="btn btn--ghost">Cancelar</a>
+          <span id="save-status" class="save-status"></span>
+        </div>
+      )}
+    </form>
+  </section>
+
+  <script type="application/json" id="initial-data" set:html={initialJSON}></script>
+  <script define:vars={{ locale, section, canWrite }}>
+    const initial = JSON.parse(document.getElementById('initial-data').textContent);
+    const fieldsEl = document.getElementById('fields');
+    const form = document.getElementById('content-form');
+    const status = document.getElementById('save-status');
+
+    function el(tag, attrs = {}, ...children) {
+      const n = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        if (k === 'class') n.className = v;
+        else if (k === 'style') n.style.cssText = v;
+        else if (k.startsWith('on') && typeof v === 'function') n.addEventListener(k.slice(2), v);
+        else if (typeof v === 'boolean') v && n.setAttribute(k, '');
+        else if (v != null) n.setAttribute(k, String(v));
+      }
+      for (const c of children.flat()) {
+        if (c == null || c === false) continue;
+        n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+      }
+      return n;
+    }
+
+    function inferType(value) {
+      if (Array.isArray(value)) {
+        if (value.length === 0) return 'array-empty';
+        if (value.every((v) => typeof v === 'string')) return 'array-string';
+        if (typeof value[0] === 'object') return 'array-object';
+        return 'array-string';
+      }
+      if (value === null || value === undefined) return 'string';
+      if (typeof value === 'object') return 'object';
+      if (typeof value === 'boolean') return 'boolean';
+      if (typeof value === 'number') return 'number';
+      // strings: long if has newline or > 80 chars
+      const isLong = typeof value === 'string' && (value.length > 80 || value.includes('\n'));
+      return isLong ? 'text' : 'string';
+    }
+
+    function labelize(key) {
+      // camelCase / kebab-case → "Camel Case" / "Kebab Case"
+      return key
+        .replace(/-/g, ' ')
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, (c) => c.toUpperCase())
+        .trim();
+    }
+
+    /**
+     * Renderiza un campo según su tipo. Devuelve un <div class="cf-field">.
+     * dataRef: { obj: parent, key: keyName } — para que cualquier cambio mute en sitio.
+     */
+    function renderField(keyName, value, dataRef, depth = 0) {
+      const t = inferType(value);
+      const wrap = el('div', { class: `cf-field cf-field--${t} cf-depth-${depth}` });
+
+      // ─ object ─
+      if (t === 'object') {
+        const det = el('details', { class: 'cf-object', open: depth === 0 });
+        const sum = el('summary', { class: 'cf-object__summary' },
+          el('span', { class: 'cf-object__chevron' }, '▸'),
+          el('span', { class: 'cf-object__label' }, labelize(keyName)),
+          el('span', { class: 'cf-object__hint' }, `${Object.keys(value || {}).length} campos`)
+        );
+        det.appendChild(sum);
+        const body = el('div', { class: 'cf-object__body' });
+        // Aseguramos que dataRef[keyName] exista
+        if (!dataRef[keyName] || typeof dataRef[keyName] !== 'object') dataRef[keyName] = value || {};
+        for (const [k, v] of Object.entries(value || {})) {
+          body.appendChild(renderField(k, v, dataRef[keyName], depth + 1));
+        }
+        det.appendChild(body);
+        wrap.appendChild(det);
+        return wrap;
+      }
+
+      // ─ array of objects ─
+      if (t === 'array-object') {
+        const det = el('details', { class: 'cf-array', open: depth === 0 });
+        const sum = el('summary', { class: 'cf-array__summary' },
+          el('span', { class: 'cf-object__chevron' }, '▸'),
+          el('span', { class: 'cf-object__label' }, labelize(keyName)),
+          el('span', { class: 'cf-object__hint' }, `${value.length} items`)
+        );
+        det.appendChild(sum);
+        const body = el('div', { class: 'cf-array__items' });
+        if (!Array.isArray(dataRef[keyName])) dataRef[keyName] = value;
+        const arr = dataRef[keyName];
+
+        function renderArray() {
+          body.innerHTML = '';
+          arr.forEach((item, idx) => {
+            const itemEl = el('div', { class: 'cf-array__item' });
+            const head = el('div', { class: 'cf-array__head' },
+              el('span', { class: 'cf-array__num' }, `#${idx + 1}`),
+              canWrite
+                ? el('div', { class: 'cf-array__actions' },
+                    el('button', {
+                      type: 'button',
+                      class: 'btn btn--ghost btn--xs',
+                      title: 'Subir',
+                      onclick: () => { if (idx > 0) { [arr[idx-1], arr[idx]] = [arr[idx], arr[idx-1]]; renderArray(); } },
+                    }, '▲'),
+                    el('button', {
+                      type: 'button',
+                      class: 'btn btn--ghost btn--xs',
+                      title: 'Bajar',
+                      onclick: () => { if (idx < arr.length - 1) { [arr[idx+1], arr[idx]] = [arr[idx], arr[idx+1]]; renderArray(); } },
+                    }, '▼'),
+                    el('button', {
+                      type: 'button',
+                      class: 'btn btn--danger btn--xs',
+                      onclick: () => { if (confirm('¿Borrar este item?')) { arr.splice(idx, 1); renderArray(); } },
+                    }, 'Borrar')
+                  )
+                : null
+            );
+            itemEl.appendChild(head);
+            for (const [k, v] of Object.entries(item || {})) {
+              itemEl.appendChild(renderField(k, v, item, depth + 2));
+            }
+            body.appendChild(itemEl);
+          });
+          if (canWrite) {
+            const addBtn = el('button', {
+              type: 'button',
+              class: 'btn btn--ghost btn--xs cf-array__add',
+              onclick: () => {
+                // Crear un nuevo item basado en el primero (template)
+                const template = arr[0] ?? {};
+                const blank = {};
+                for (const k of Object.keys(template)) {
+                  const v = template[k];
+                  blank[k] = Array.isArray(v) ? [] : typeof v === 'object' && v !== null ? {} : '';
+                }
+                arr.push(blank);
+                renderArray();
+              },
+            }, '+ Agregar item');
+            body.appendChild(addBtn);
+          }
+        }
+        renderArray();
+        det.appendChild(body);
+        wrap.appendChild(det);
+        return wrap;
+      }
+
+      // ─ array of strings ─
+      if (t === 'array-string' || t === 'array-empty') {
+        if (!Array.isArray(dataRef[keyName])) dataRef[keyName] = value || [];
+        const arr = dataRef[keyName];
+        const label = el('label', { class: 'cf-label' }, labelize(keyName), el('span', { class: 'cf-typehint' }, 'lista'));
+        const items = el('div', { class: 'cf-list-string' });
+
+        function renderList() {
+          items.innerHTML = '';
+          arr.forEach((str, idx) => {
+            const row = el('div', { class: 'cf-list-string__row' },
+              el('input', {
+                class: 'input',
+                type: 'text',
+                value: String(str ?? ''),
+                disabled: !canWrite,
+                oninput: (e) => { arr[idx] = e.target.value; },
+              }),
+              canWrite
+                ? el('button', {
+                    type: 'button',
+                    class: 'btn btn--ghost btn--xs',
+                    onclick: () => { arr.splice(idx, 1); renderList(); },
+                  }, '✕')
+                : null
+            );
+            items.appendChild(row);
+          });
+          if (canWrite) {
+            const addBtn = el('button', {
+              type: 'button',
+              class: 'btn btn--ghost btn--xs',
+              style: 'margin-top: 0.4rem',
+              onclick: () => { arr.push(''); renderList(); },
+            }, '+ Agregar');
+            items.appendChild(addBtn);
+          }
+        }
+        renderList();
+        wrap.appendChild(label);
+        wrap.appendChild(items);
+        return wrap;
+      }
+
+      // ─ text largo / string corto ─
+      const label = el('label', { class: 'cf-label' }, labelize(keyName));
+      if (t === 'text') {
+        const ta = el('textarea', {
+          class: 'textarea',
+          rows: '4',
+          disabled: !canWrite,
+          oninput: (e) => { dataRef[keyName] = e.target.value; },
+        });
+        ta.value = String(value ?? '');
+        wrap.appendChild(label);
+        wrap.appendChild(ta);
+        return wrap;
+      }
+
+      const input = el('input', {
+        class: 'input',
+        type: t === 'number' ? 'number' : 'text',
+        value: value == null ? '' : String(value),
+        disabled: !canWrite,
+        oninput: (e) => {
+          let v = e.target.value;
+          if (t === 'number') v = v === '' ? null : Number(v);
+          dataRef[keyName] = v;
+        },
+      });
+      wrap.appendChild(label);
+      wrap.appendChild(input);
+      return wrap;
+    }
+
+    // ─── Build form ────────────────────────────────────────────
+    // Wrap top-level value in a container so dataRef navigation works uniformly
+    const root = { value: structuredClone(initial) };
+    if (typeof root.value === 'object' && root.value !== null && !Array.isArray(root.value)) {
+      // Render keys directly (not under a single fold)
+      for (const [k, v] of Object.entries(root.value)) {
+        fieldsEl.appendChild(renderField(k, v, root.value, 0));
+      }
+    } else {
+      fieldsEl.appendChild(renderField('value', root.value, root, 0));
+    }
+
+    // ─── Submit ────────────────────────────────────────────────
+    if (canWrite) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        status.textContent = 'Guardando…';
+        status.dataset.tone = '';
+        try {
+          const res = await fetch(`/api/content/${section}?lang=${locale}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(root.value),
+          });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          status.textContent = '✓ Guardado';
+          status.dataset.tone = 'ok';
+          setTimeout(() => {
+            window.location.href = `/admin/contenido?locale=${locale}&flash=saved`;
+          }, 600);
+        } catch (err) {
+          status.textContent = '✗ Error: ' + err.message;
+          status.dataset.tone = 'err';
+        }
+      });
+    }
+  </script>
+</AdminLayout>
+
+<style is:global>
+  .back-link {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+  .back-link:hover { color: var(--red); }
+
+  /* ─── Form generator ─── */
+  #content-form { margin-top: 0.5rem; }
+
+  .cf-field { margin-bottom: 1rem; }
+  .cf-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.78;
+    margin-bottom: 0.4rem;
+  }
+  .cf-typehint {
+    margin-left: 0.5rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.55rem;
+    background: var(--bg);
+    border-radius: 3px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* Object (collapsible fieldset) */
+  .cf-object,
+  .cf-array {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0;
+    margin-bottom: 0.85rem;
+  }
+  .cf-object__summary,
+  .cf-array__summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    user-select: none;
+  }
+  .cf-object__summary::-webkit-details-marker,
+  .cf-array__summary::-webkit-details-marker { display: none; }
+  .cf-object__chevron {
+    font-size: 0.7rem;
+    color: var(--red);
+    transition: transform 200ms;
+    display: inline-block;
+  }
+  details[open] > summary .cf-object__chevron { transform: rotate(90deg); }
+  .cf-object__label {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--navy);
+  }
+  .cf-object__hint {
+    margin-left: auto;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+  .cf-object__body,
+  .cf-array__items {
+    padding: 0.85rem 1rem 1rem 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  /* Nested depth indentation */
+  .cf-depth-1 { padding-left: 0; }
+  .cf-depth-2 .cf-object,
+  .cf-depth-2 .cf-array { background: var(--card); }
+
+  /* Array of objects */
+  .cf-array__item {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.6rem;
+  }
+  .cf-array__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed var(--line);
+  }
+  .cf-array__num {
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-weight: 700;
+  }
+  .cf-array__actions { display: inline-flex; gap: 0.3rem; }
+  .cf-array__add {
+    margin-top: 0.4rem;
+    width: auto;
+  }
+
+  /* Array of strings */
+  .cf-list-string { display: flex; flex-direction: column; gap: 0.35rem; }
+  .cf-list-string__row {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  .cf-list-string__row .input { flex: 1; }
+
+  .btn--xs {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    min-width: auto;
+  }
+
+  .form-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+  }
+  .save-status {
+    margin-left: auto;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .save-status[data-tone="ok"]  { color: #1a7f3c; }
+  .save-status[data-tone="err"] { color: var(--red); }
+</style>

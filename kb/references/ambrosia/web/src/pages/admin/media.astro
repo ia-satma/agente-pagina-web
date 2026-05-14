@@ -1,0 +1,174 @@
+---
+/**
+ * /admin/media — Biblioteca de medios (imágenes + videos).
+ * Upload via drag-and-drop, lista, delete.
+ */
+import AdminLayout from '~/layouts/AdminLayout.astro';
+import { getCurrentUser } from '~/lib/auth';
+import { can, type Role } from '~/lib/users';
+import { db } from '~/lib/db';
+
+const user = (await getCurrentUser(Astro))!;
+const canWrite = can(user.role as Role, 'media.write');
+
+interface MediaRow {
+  id: number;
+  filename: string;
+  path: string;
+  mime: string;
+  type: string;
+  size_bytes: number;
+  width: number | null;
+  height: number | null;
+  alt_text: string | null;
+  uploaded_by: number | null;
+  uploaded_at: number;
+}
+
+const items = db.prepare(`
+  SELECT * FROM media ORDER BY uploaded_at DESC LIMIT 200
+`).all() as MediaRow[];
+
+function fmtSize(b: number): string {
+  if (b < 1024) return b + ' B';
+  if (b < 1024 * 1024) return (b / 1024).toFixed(0) + ' KB';
+  return (b / 1024 / 1024).toFixed(2) + ' MB';
+}
+
+const flash = Astro.url.searchParams.get('flash');
+const err = Astro.url.searchParams.get('error');
+---
+
+<AdminLayout title="Medios" user={user} active="media">
+  {flash === 'uploaded' && <p class="flash flash--success">Subida exitosa.</p>}
+  {flash === 'deleted'  && <p class="flash flash--success">Eliminado.</p>}
+  {err && <p class="flash flash--error">{err}</p>}
+
+  {canWrite && (
+    <section class="panel">
+      <header class="panel__head">
+        <h2 class="panel__title">Subir media</h2>
+      </header>
+      <p class="panel__hint">
+        Acepta imágenes (PNG, JPG, WebP) y videos (MP4, WebM). Tamaño máx 25 MB por archivo.
+        Las imágenes se guardan optimizadas en <code>public/images/cms/</code>.
+      </p>
+      <form method="POST" action="/api/media/upload" enctype="multipart/form-data" class="upload-form">
+        <input type="file" name="file" id="file" required accept="image/*,video/*" />
+        <div class="field" style="flex:1">
+          <input class="input" type="text" name="alt" placeholder="Texto alt (descripción accesible)" />
+        </div>
+        <button type="submit" class="btn">Subir</button>
+      </form>
+    </section>
+  )}
+
+  <section class="panel">
+    <header class="panel__head">
+      <h2 class="panel__title">Biblioteca ({items.length})</h2>
+    </header>
+
+    {items.length === 0 ? (
+      <p class="panel__hint">No hay medios todavía. {canWrite ? 'Sube tu primera imagen arriba.' : ''}</p>
+    ) : (
+      <div class="media-grid">
+        {items.map((m) => (
+          <div class="media-card">
+            <a href={m.path} target="_blank" rel="noopener" class="media-card__preview">
+              {m.type === 'image' ? (
+                <img src={m.path} alt={m.alt_text ?? m.filename} loading="lazy" />
+              ) : (
+                <video src={m.path} muted preload="metadata" />
+              )}
+            </a>
+            <div class="media-card__info">
+              <p class="media-card__name" title={m.filename}>{m.filename}</p>
+              <p class="media-card__meta">
+                <span>{m.type}</span> · <span>{fmtSize(m.size_bytes)}</span>
+                {m.width && <> · <span>{m.width}×{m.height}</span></>}
+              </p>
+              <div class="media-card__actions">
+                <button type="button" class="btn btn--ghost btn--xs"
+                        data-copy-path={m.path}
+                        onclick="navigator.clipboard.writeText(this.dataset.copyPath); this.textContent='✓ Copiado'; setTimeout(()=>this.textContent='Copiar URL', 1500);">
+                  Copiar URL
+                </button>
+                {canWrite && (
+                  <form method="POST" action={`/api/media/${m.id}?_method=DELETE`}
+                        onsubmit="return confirm('¿Eliminar este archivo?')"
+                        style="display:inline">
+                    <button type="submit" class="btn btn--danger btn--xs">Eliminar</button>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
+</AdminLayout>
+
+<style>
+  .upload-form {
+    display: flex;
+    gap: 0.85rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .upload-form input[type="file"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.5rem;
+    background: var(--bg);
+    border: 1px dashed var(--line-strong);
+    border-radius: 4px;
+  }
+
+  .media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+  .media-card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .media-card__preview {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #000;
+    display: block;
+  }
+  .media-card__preview img,
+  .media-card__preview video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .media-card__info { padding: 0.7rem 0.85rem; }
+  .media-card__name {
+    margin: 0 0 0.25rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .media-card__meta {
+    margin: 0 0 0.6rem;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+  .media-card__actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+  }
+  .btn--xs { padding: 0.35rem 0.7rem; font-size: 0.6rem; }
+</style>

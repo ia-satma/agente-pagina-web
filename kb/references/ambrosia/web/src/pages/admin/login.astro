@@ -1,0 +1,254 @@
+---
+/**
+ * Login del backend AMBROSIA — branding luxury silencioso.
+ * SSR (no prerender). Acepta query ?returnTo= para volver post-login.
+ * Si ya hay sesión → redirige directo a /admin/.
+ */
+import { getCurrentUser } from '~/lib/auth';
+
+const user = await getCurrentUser(Astro);
+if (user) {
+  return Astro.redirect('/admin/', 302);
+}
+
+const returnTo = Astro.url.searchParams.get('returnTo') || '/admin/';
+const error = Astro.url.searchParams.get('error');
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>AMBROSIA — Backend editorial</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/OptimusPrinceps.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/fonts/FuturaStd-Bold.otf" as="font" type="font/otf" crossorigin />
+  </head>
+  <body>
+    <main class="login">
+      <div class="login__card">
+        <header class="login__brand">
+          <p class="login__eyebrow">Backend editorial</p>
+          <h1 class="login__mark">
+            Ambros<em>í</em>a
+          </h1>
+          <div class="login__rule"></div>
+          <p class="login__phon">( am · brō · zhe )</p>
+        </header>
+
+        <form class="login__form" method="POST" action={`/api/auth/login?returnTo=${encodeURIComponent(returnTo)}`}>
+          {error && (
+            <p class="login__error" role="alert">
+              {error === 'invalid' ? 'Correo o contraseña incorrectos.' : 'Error al iniciar sesión.'}
+            </p>
+          )}
+
+          <label class="login__field">
+            <span class="login__label">Correo</span>
+            <input
+              type="email"
+              name="email"
+              required
+              autocomplete="email"
+              class="login__input"
+            />
+          </label>
+
+          <label class="login__field">
+            <span class="login__label">Contraseña</span>
+            <input
+              type="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              class="login__input"
+            />
+          </label>
+
+          <button type="submit" class="login__submit">
+            <span>Entrar al editor</span>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true">
+              <path d="M0 5h13M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <p class="login__hint">
+            Acceso restringido al equipo AMBROSIA.
+            <a href="/">← Volver al sitio</a>
+          </p>
+        </form>
+      </div>
+    </main>
+
+    <style>
+      @font-face {
+        font-family: 'Optimus Princeps';
+        src: url('/fonts/OptimusPrinceps.ttf') format('truetype');
+        font-weight: 400;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'Futura Std';
+        src: url('/fonts/FuturaStd-Bold.otf') format('opentype');
+        font-weight: 700;
+        font-display: swap;
+      }
+      :root {
+        --navy: #15173d;
+        --red: #E22319;
+        --cream: #F6F1E6;
+        --bg-page: #EEF1F8;
+        --line: rgba(21, 23, 61, 0.14);
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; min-height: 100vh; }
+      body {
+        font-family: 'Futura Std', system-ui, sans-serif;
+        background: var(--bg-page);
+        color: var(--navy);
+      }
+
+      .login {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 2rem 1.5rem;
+      }
+      .login__card {
+        width: 100%;
+        max-width: 26rem;
+        padding: clamp(2rem, 5vw, 3.5rem);
+        background: #FFFFFF;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        box-shadow: 0 30px 60px -40px rgba(21, 23, 61, 0.25);
+      }
+      .login__brand {
+        text-align: center;
+        margin-bottom: 2.5rem;
+      }
+      .login__eyebrow {
+        margin: 0 0 1.25rem;
+        font-family: 'Futura Std', sans-serif;
+        font-weight: 700;
+        font-size: 0.65rem;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: var(--red);
+        opacity: 0.85;
+      }
+      .login__mark {
+        margin: 0 0 0.75rem;
+        font-family: 'Optimus Princeps', 'Times New Roman', serif;
+        font-weight: 400;
+        font-size: clamp(2rem, 6vw, 2.6rem);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--navy);
+      }
+      .login__mark em {
+        font-style: italic;
+        color: var(--red);
+      }
+      .login__rule {
+        width: 56px;
+        height: 1px;
+        background: var(--red);
+        margin: 0 auto 1rem;
+      }
+      .login__phon {
+        margin: 0;
+        font-family: 'Optimus Princeps', serif;
+        font-size: 0.72rem;
+        letter-spacing: 0.24em;
+        color: var(--navy);
+        opacity: 0.55;
+      }
+
+      .login__form { display: flex; flex-direction: column; gap: 1.25rem; }
+      .login__field { display: flex; flex-direction: column; gap: 0.5rem; }
+      .login__label {
+        font-weight: 700;
+        font-size: 0.65rem;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: var(--navy);
+        opacity: 0.78;
+      }
+      .login__input {
+        padding: 0.95rem 1.1rem;
+        font: inherit;
+        font-size: 16px;
+        color: var(--navy);
+        background: #FFFFFF;
+        border: 1px solid rgba(21, 23, 61, 0.18);
+        border-radius: 4px;
+        transition: border-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .login__input:hover { border-color: rgba(21, 23, 61, 0.32); }
+      .login__input:focus {
+        outline: none;
+        border-color: rgba(21, 23, 61, 0.6);
+        box-shadow: 0 0 0 3px rgba(226, 35, 25, 0.18);
+      }
+
+      .login__submit {
+        margin-top: 0.5rem;
+        padding: 1rem 1.2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        font-family: 'Futura Std', sans-serif;
+        font-weight: 700;
+        font-size: 0.72rem;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: var(--cream);
+        background: var(--navy);
+        border: 1px solid var(--navy);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: gap 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                    background-color 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                    transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .login__submit:hover {
+        gap: 1rem;
+        background: var(--red);
+        border-color: var(--red);
+        transform: translateY(-1px);
+      }
+
+      .login__hint {
+        margin: 1.5rem 0 0;
+        text-align: center;
+        font-size: 0.74rem;
+        line-height: 1.6;
+        color: var(--navy);
+        opacity: 0.65;
+      }
+      .login__hint a {
+        margin-left: 0.4rem;
+        color: var(--red);
+        text-decoration: none;
+        font-weight: 700;
+      }
+      .login__hint a:hover { text-decoration: underline; }
+
+      .login__error {
+        margin: 0;
+        padding: 0.85rem 1rem;
+        font-size: 0.78rem;
+        line-height: 1.4;
+        color: var(--red);
+        background: rgba(226, 35, 25, 0.06);
+        border: 1px solid rgba(226, 35, 25, 0.25);
+        border-radius: 4px;
+      }
+    </style>
+  </body>
+</html>

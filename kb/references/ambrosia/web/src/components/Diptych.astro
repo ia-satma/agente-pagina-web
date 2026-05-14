@@ -1,0 +1,235 @@
+---
+/**
+ * Seccion diptico: imagen + texto editorial.
+ *
+ * bg: bloque de color de fondo del brand book.
+ *   - "white"  — texto morado, eyebrow rojo (default)
+ *   - "purple" — texto blanco, eyebrow cyan
+ *   - "red"    — texto blanco, eyebrow blanco
+ *   - "cyan"   — texto morado, eyebrow rojo
+ */
+interface Props {
+  id?: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  image: string;
+  imageAlt: string;
+  align?: 'left' | 'right';
+  bg?: 'white' | 'purple' | 'red' | 'cyan';
+  /** Si el Diptych esta cerca del fold, marcar priority=true para fetchpriority high + loading eager */
+  priority?: boolean;
+}
+
+const { id, eyebrow, title, body, image, imageAlt, align = 'left', bg = 'white', priority = false } = Astro.props;
+---
+
+<section id={id} class:list={['diptych', `diptych--${align}`, `diptych--bg-${bg}`]}>
+  <div class="diptych__inner">
+    <figure class="diptych__figure cursor-target">
+      <img
+        src={image}
+        alt={imageAlt}
+        loading="eager"
+        decoding="async"
+        fetchpriority={priority ? 'high' : 'auto'}
+        class="diptych__img"
+      />
+      <span class="diptych__frame" aria-hidden="true"></span>
+      <span class="bracket bracket--tl" aria-hidden="true"></span>
+      <span class="bracket bracket--tr" aria-hidden="true"></span>
+      <span class="bracket bracket--bl" aria-hidden="true"></span>
+      <span class="bracket bracket--br" aria-hidden="true"></span>
+    </figure>
+
+    <div class="diptych__text">
+      <p class="eyebrow" data-reveal>{eyebrow}</p>
+      <h2 class="title-skew" data-reveal set:html={title}></h2>
+      <p class="diptych__body has-dropcap" data-reveal set:html={body}></p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .diptych {
+    position: relative;
+    padding: clamp(3.5rem, 8vw, 7rem) 1.5rem;
+    background: var(--bg-page);
+    color: var(--text-primary);
+  }
+
+  /* Bloques de color del brand book — usan tokens semanticos para light/dark */
+  .diptych--bg-white  { background: var(--bg-page);         color: var(--text-primary);  }
+  .diptych--bg-purple { background: var(--bg-purple-block); color: var(--text-on-color); }
+  .diptych--bg-red    { background: var(--bg-red-block);    color: var(--text-on-color); }
+  .diptych--bg-cyan   { background: var(--bg-cyan-block);   color: var(--text-on-cyan);  }
+
+  .diptych__inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: clamp(2rem, 4.5vw, 4rem);
+  }
+  .diptych--right .diptych__inner {
+    direction: rtl;
+  }
+  .diptych--right .diptych__text {
+    direction: ltr;
+  }
+
+  .diptych__figure {
+    position: relative;
+    margin: 0;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--line-soft);
+  }
+  @media (max-width: 768px) {
+    .diptych__figure { border-radius: var(--radius-md); }
+  }
+  .diptych__figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transform-origin: 50% 50%;
+    transition: transform var(--dur-divine) var(--ease-divine);
+  }
+  /* Imagen siempre visible — sin fade-in que cree pop-in.
+     Las imagenes del scroll de /origen estan preloaded en Base.astro,
+     asi que se renderizan instantaneamente. El kenburns arranca de inmediato. */
+  .diptych__img {
+    opacity: 1;
+    transform: scale(1);
+    animation: diptych-kenburns 14s ease-in-out infinite;
+    transition: transform var(--dur-divine) var(--ease-divine);
+  }
+  .diptych__figure:hover img {
+    animation-play-state: paused;
+    transform: scale(1.06);
+  }
+  @keyframes diptych-kenburns {
+    0%   { transform: scale(1.0)  translate(0, 0); }
+    50%  { transform: scale(1.06) translate(-1%, 1%); }
+    100% { transform: scale(1.0)  translate(0, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .diptych__figure img { animation: none; }
+  }
+
+  /* Marco fino estilo museo */
+  .diptych__frame {
+    position: absolute;
+    inset: 12px;
+    border: 1px solid color-mix(in srgb, var(--text-on-color) 60%, transparent);
+    pointer-events: none;
+  }
+
+  /* Corner brackets — efecto "marco de museo" en hover */
+  .bracket {
+    position: absolute; width: 18px; height: 18px;
+    border-color: var(--color-white);
+    border-style: solid; border-width: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-medium) var(--ease-medium),
+                top var(--dur-medium) var(--ease-medium),
+                left var(--dur-medium) var(--ease-medium),
+                right var(--dur-medium) var(--ease-medium),
+                bottom var(--dur-medium) var(--ease-medium);
+  }
+  .bracket--tl { top: 14px; left: 14px;   border-top-width: 1px; border-left-width: 1px; }
+  .bracket--tr { top: 14px; right: 14px;  border-top-width: 1px; border-right-width: 1px; }
+  .bracket--bl { bottom: 14px; left: 14px;  border-bottom-width: 1px; border-left-width: 1px; }
+  .bracket--br { bottom: 14px; right: 14px; border-bottom-width: 1px; border-right-width: 1px; }
+  .diptych__figure:hover .bracket { opacity: 0.9; }
+  .diptych__figure:hover .bracket--tl { top: 8px; left: 8px; }
+  .diptych__figure:hover .bracket--tr { top: 8px; right: 8px; }
+  .diptych__figure:hover .bracket--bl { bottom: 8px; left: 8px; }
+  .diptych__figure:hover .bracket--br { bottom: 8px; right: 8px; }
+  /* Sobre fondos blancos las brackets son moradas para que se vean */
+  .diptych--bg-white .bracket,
+  .diptych--bg-cyan  .bracket { border-color: var(--navy); }
+
+  .diptych__text {
+    max-width: 32rem;
+  }
+  .diptych__text .eyebrow {
+    margin: 0 0 0.85rem;
+    color: var(--page-accent, var(--navy));
+    opacity: 0.55;
+  }
+  .diptych__text h2 {
+    margin: 0 0 0.85rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 3.2vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    color: inherit;
+  }
+  .diptych__body {
+    margin: 0;
+    font-size: clamp(1rem, 1.2vw, 1.1rem);
+    line-height: 1.65;
+    color: inherit;
+    opacity: 0.88;
+    max-width: 30rem;
+  }
+
+  /* Eyebrow: respeta --page-accent si existe, fallback monocromo ink */
+  .diptych--bg-white  .diptych__text .eyebrow { color: var(--page-accent, var(--navy)); opacity: 0.55; }
+  .diptych--bg-purple .diptych__text .eyebrow { color: var(--page-accent, var(--color-white)); opacity: 0.65; }
+  .diptych--bg-red    .diptych__text .eyebrow { color: var(--color-white); opacity: 0.85; }
+  .diptych--bg-cyan   .diptych__text .eyebrow { color: var(--navy); opacity: 0.65; }
+
+  /* Marco fino del museo: ajusta color segun contraste */
+  .diptych--bg-purple .diptych__frame,
+  .diptych--bg-red    .diptych__frame { border-color: color-mix(in srgb, var(--color-white) 35%, transparent); }
+  .diptych--bg-white  .diptych__frame,
+  .diptych--bg-cyan   .diptych__frame { border-color: color-mix(in srgb, var(--navy) 25%, transparent); }
+
+  /* Reveal con stagger */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity var(--dur-divine) var(--ease-divine), transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-reveal].is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 860px) {
+    .diptych__inner {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
+    .diptych--right .diptych__inner { direction: ltr; }
+    .diptych__figure { max-width: 32rem; margin-inline: auto; }
+  }
+</style>
+
+<script>
+  const els = document.querySelectorAll<HTMLElement>('.diptych [data-reveal]');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const target = entry.target as HTMLElement;
+          // Stagger segun orden dentro del grupo
+          const siblings = Array.from(target.parentElement?.querySelectorAll<HTMLElement>('[data-reveal]') ?? []);
+          const idx = siblings.indexOf(target);
+          setTimeout(() => target.classList.add('is-in'), idx * 80);
+          io.unobserve(target);
+        }
+      });
+    }, { threshold: 0.18 });
+    els.forEach((el) => io.observe(el));
+  } else {
+    els.forEach((el) => el.classList.add('is-in'));
+  }
+</script>

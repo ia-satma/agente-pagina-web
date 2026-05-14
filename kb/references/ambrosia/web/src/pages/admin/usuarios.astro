@@ -1,0 +1,151 @@
+---
+/**
+ * /admin/usuarios — Gestión de usuarios (admin-only).
+ * Crear, editar rol, desactivar, eliminar, reset password.
+ */
+import AdminLayout from '~/layouts/AdminLayout.astro';
+import { getCurrentUser } from '~/lib/auth';
+import { listUsers, can, type Role } from '~/lib/users';
+
+const user = (await getCurrentUser(Astro))!;
+if (!can(user.role as Role, 'users.read')) {
+  return Astro.redirect('/admin/', 302);
+}
+
+const users = listUsers();
+const isAdmin = can(user.role as Role, 'users.write');
+const flash = Astro.url.searchParams.get('flash');
+---
+
+<AdminLayout title="Usuarios" user={user} active="users">
+  {flash === 'created' && <p class="flash flash--success">Usuario creado correctamente.</p>}
+  {flash === 'updated' && <p class="flash flash--success">Usuario actualizado.</p>}
+  {flash === 'deleted' && <p class="flash flash--success">Usuario eliminado.</p>}
+  {flash === 'error'   && <p class="flash flash--error">Hubo un error. Revisa los datos.</p>}
+
+  {isAdmin && (
+    <section class="panel">
+      <header class="panel__head">
+        <h2 class="panel__title">Invitar nuevo usuario</h2>
+      </header>
+      <p class="panel__hint">
+        Solo tú (admin) puedes crear cuentas. Define el rol y una contraseña inicial — el usuario podrá cambiarla luego.
+      </p>
+      <form method="POST" action="/api/users" class="user-form">
+        <div class="field">
+          <label class="label" for="email">Correo</label>
+          <input class="input" type="email" name="email" id="email" required />
+        </div>
+        <div class="field">
+          <label class="label" for="name">Nombre (opcional)</label>
+          <input class="input" type="text" name="name" id="name" />
+        </div>
+        <div class="field">
+          <label class="label" for="password">Contraseña inicial</label>
+          <input class="input" type="password" name="password" id="password" required minlength="8" />
+        </div>
+        <div class="field">
+          <label class="label" for="role">Rol</label>
+          <select class="select" name="role" id="role" required>
+            <option value="editor">Editor — edita contenido + medios</option>
+            <option value="viewer">Viewer — solo lectura</option>
+            <option value="admin">Admin — todo (incluye usuarios)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn">Crear usuario</button>
+      </form>
+    </section>
+  )}
+
+  <section class="panel">
+    <header class="panel__head">
+      <h2 class="panel__title">Usuarios ({users.length})</h2>
+    </header>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Correo</th>
+          <th>Nombre</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Último acceso</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map((u) => (
+          <tr>
+            <td><strong>{u.email}</strong>{u.id === user.id && <span style="opacity:0.55"> (tú)</span>}</td>
+            <td>{u.name ?? '—'}</td>
+            <td><span class:list={['pill', `pill--${u.role}`]}>{u.role}</span></td>
+            <td>
+              {u.active
+                ? <span class="pill pill--active">activo</span>
+                : <span class="pill pill--inactive">inactivo</span>}
+            </td>
+            <td>{u.last_login_at ? new Date(u.last_login_at * 1000).toLocaleString('es-MX') : '—'}</td>
+            <td style="text-align:right">
+              {isAdmin && u.id !== user.id && (
+                <details class="row-actions">
+                  <summary>Acciones</summary>
+                  <div class="row-actions__menu">
+                    <form method="POST" action={`/api/users/${u.id}?_method=PATCH`} class="inline-form">
+                      <select name="role" class="select select--sm">
+                        <option value="admin"  selected={u.role === 'admin'}>Admin</option>
+                        <option value="editor" selected={u.role === 'editor'}>Editor</option>
+                        <option value="viewer" selected={u.role === 'viewer'}>Viewer</option>
+                      </select>
+                      <button class="btn btn--ghost" type="submit">Cambiar rol</button>
+                    </form>
+                    <form method="POST" action={`/api/users/${u.id}?_method=PATCH`} class="inline-form">
+                      <input type="hidden" name="active" value={u.active ? '0' : '1'} />
+                      <button class="btn btn--ghost" type="submit">
+                        {u.active ? 'Desactivar' : 'Reactivar'}
+                      </button>
+                    </form>
+                    <form method="POST" action={`/api/users/${u.id}?_method=DELETE`} class="inline-form"
+                          onsubmit="return confirm('¿Eliminar definitivamente?')">
+                      <button class="btn btn--danger" type="submit">Eliminar</button>
+                    </form>
+                  </div>
+                </details>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</AdminLayout>
+
+<style>
+  .user-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem 1.25rem;
+    max-width: 720px;
+  }
+  .user-form .field { margin-bottom: 0; }
+  .user-form button { grid-column: 1 / -1; justify-self: start; margin-top: 0.5rem; }
+  .row-actions summary {
+    cursor: pointer;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.7;
+    list-style: none;
+  }
+  .row-actions summary::-webkit-details-marker { display: none; }
+  .row-actions summary::after { content: ' ⌄'; }
+  .row-actions[open] summary::after { content: ' ⌃'; }
+  .row-actions__menu {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: flex-end;
+  }
+  .inline-form { display: inline-flex; gap: 0.35rem; align-items: center; }
+  .select--sm { padding: 0.4rem 0.6rem; font-size: 0.78rem; }
+</style>

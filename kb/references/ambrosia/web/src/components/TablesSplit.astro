@@ -1,0 +1,218 @@
+---
+/**
+ * TablesSplit — 2 caminos en /mesas: Restaurantes selectos / Boutique.
+ * Diseno editorial: 2 tarjetas grandes lado a lado con CTA hacia
+ * /mesas/restaurantes y /la-salsa#boutique respectivamente.
+ */
+import { pathFor, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const items = locale === 'es'
+  ? [
+      {
+        eyebrow: 'Camino I',
+        title: 'Restaurantes selectos',
+        body: 'Ocho mesas de autor que entienden lo que servimos. Pujol, Quintonil, Alcalde, Lardo, Casa Oaxaca, Rosetta, Sud 777, Le Chique.',
+        cta: 'Ver restaurantes',
+        href: pathFor(locale, 'mesas/restaurantes'),
+      },
+      {
+        eyebrow: 'Camino II',
+        title: 'Boutique y compra directa',
+        body: 'Restaurante Jabalina y Carnes Ramos: dos espacios donde puedes adquirir AMBROSIA sin intermediarios.',
+        cta: 'Ver boutique',
+        href: pathFor(locale, 'la-salsa') + '#boutique',
+      },
+    ]
+  : [
+      {
+        eyebrow: 'Path I',
+        title: 'Select restaurants',
+        body: "Eight author's tables that understand what we serve. Pujol, Quintonil, Alcalde, Lardo, Casa Oaxaca, Rosetta, Sud 777, Le Chique.",
+        cta: 'See restaurants',
+        href: pathFor(locale, 'mesas/restaurantes'),
+      },
+      {
+        eyebrow: 'Path II',
+        title: 'Boutique & direct sales',
+        body: 'Restaurante Jabalina and Carnes Ramos: two spaces where you can purchase AMBROSIA directly.',
+        cta: 'See boutique',
+        href: pathFor(locale, 'la-salsa') + '#boutique',
+      },
+    ];
+---
+
+<section class="tables-split" data-tables-split>
+  <div class="tables-split__inner">
+    <ul class="tables-split__list" role="list">
+      {items.map((it, i) => (
+        <li class="tables-split__item" data-anim="up" style={`--i:${i}`}>
+          <a class="tables-split__card" href={it.href}>
+            <p class="eyebrow tables-split__eyebrow">{it.eyebrow}</p>
+            <h2 class="tables-split__title">{it.title}</h2>
+            <p class="tables-split__body">{it.body}</p>
+            <span class="tables-split__cta">
+              {it.cta}
+              <svg width="16" height="11" viewBox="0 0 14 10" fill="none" aria-hidden="true">
+                <path d="M0 5h13M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .tables-split {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3.5rem, 7vw, 6rem) 1.5rem;
+  }
+  .tables-split__inner { max-width: 1280px; margin: 0 auto; }
+  .tables-split__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  @media (max-width: 800px) {
+    .tables-split__list { grid-template-columns: 1fr; }
+  }
+
+  /* ─── Luxury silencioso uniforme — alineado con WorldsGrid.
+     Default: fondo de pagina, texto navy, borde sutil.
+     Hover: la tarjeta toma el color navy, el texto pasa a cream.
+     El unico acento cromatico sigue siendo el rojo brand (barra inferior + CTA). */
+  .tables-split__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: clamp(2rem, 4vw, 3.5rem);
+    text-decoration: none;
+    color: var(--navy);
+    background: var(--bg-page);
+    border: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    border-radius: 4px;
+    min-height: 320px;
+    overflow: hidden;
+    transition:
+      background-color var(--dur-medium) var(--ease-medium),
+      border-color var(--dur-medium) var(--ease-medium),
+      color var(--dur-medium) var(--ease-medium),
+      transform var(--dur-medium) var(--ease-medium),
+      box-shadow var(--dur-medium) var(--ease-medium);
+  }
+  .tables-split__card::before {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-medium) var(--ease-medium);
+    z-index: 1;
+  }
+  .tables-split__card:hover {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: var(--cream);
+    transform: translateY(-3px);
+    box-shadow: 0 18px 38px -20px color-mix(in srgb, var(--navy) 55%, transparent);
+  }
+  .tables-split__card:hover::before { transform: scaleX(1); }
+
+  .tables-split__eyebrow {
+    margin: 0;
+    color: var(--red);
+    opacity: 0.85;
+    transition: color var(--dur-medium) var(--ease-medium), opacity var(--dur-medium) var(--ease-medium);
+  }
+  .tables-split__card:hover .tables-split__eyebrow {
+    color: var(--cream);
+    opacity: 0.7;
+  }
+  .tables-split__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.85rem, 3.6vw, 2.8rem);
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    color: inherit;
+    transition: color var(--dur-medium) var(--ease-medium);
+  }
+  .tables-split__body {
+    margin: 0;
+    flex: 1;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: clamp(0.95rem, 1.25vw, 1.1rem);
+    line-height: 1.55;
+    color: inherit;
+    opacity: 0.78;
+    transition: opacity var(--dur-medium) var(--ease-medium);
+  }
+  .tables-split__card:hover .tables-split__body { opacity: 0.82; }
+
+  .tables-split__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--red);
+    transition:
+      gap var(--dur-medium) var(--ease-medium),
+      color var(--dur-medium) var(--ease-medium);
+  }
+  .tables-split__card:hover .tables-split__cta {
+    gap: 0.95rem;
+    color: var(--cream);
+  }
+
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+    transition-delay: calc(var(--i, 0) * 65ms);
+  }
+  [data-anim='up'].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  if ('IntersectionObserver' in window) {
+    const sec = document.querySelector<HTMLElement>('[data-tables-split]');
+    if (sec) {
+      const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            items.forEach((el) => el.classList.add('is-in'));
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      io.observe(sec);
+    }
+  } else {
+    document.querySelectorAll('[data-tables-split] [data-anim="up"]').forEach((el) => el.classList.add('is-in'));
+  }
+</script>

@@ -1,0 +1,116 @@
+---
+/**
+ * Edicion — specs de la edicion oficial 2024 (200 ml · 90 dias reposo · 6 chiles).
+ * Refactor "Clase Azul": eyebrow neutro "Edicion 2024", sin referencia a "Lote 001".
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const e = dict.edicion;
+---
+
+<section class="edicion">
+  <div class="edicion__inner">
+    <p class="eyebrow edicion__eyebrow" data-reveal set:html={e.eyebrow}></p>
+    <h2 class="edicion__title" data-reveal set:html={e.title}></h2>
+
+    <dl class="edicion__specs">
+      {e.specs.map((s) => (
+        <div class="edicion__spec" data-reveal>
+          <dt class="edicion__label">{s.label}</dt>
+          <dd class="edicion__value">{s.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .edicion {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(4rem, 8vw, 7rem) 1.5rem;
+    text-align: center;
+  }
+  .edicion__inner {
+    max-width: 920px;
+    margin: 0 auto;
+  }
+  .edicion__eyebrow {
+    margin: 0 0 1rem;
+    color: var(--color-red);
+    opacity: 0.85;
+  }
+  .edicion__title {
+    margin: 0 0 3rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: 0.04em;
+    color: var(--navy);
+    text-transform: uppercase;
+  }
+  .edicion__title :global(em) {
+    font-style: normal;
+    color: var(--color-red);
+  }
+
+  .edicion__specs {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+  }
+  .edicion__spec {
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+  .edicion__spec + .edicion__spec {
+    border-left: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+  }
+  .edicion__label {
+    margin: 0 0 0.6rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.62rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-red);
+    opacity: 0.7;
+  }
+  .edicion__value {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    color: var(--navy);
+  }
+
+  @media (max-width: 720px) {
+    .edicion__specs { grid-template-columns: repeat(2, 1fr); }
+    .edicion__spec:nth-child(3) { border-left: none; }
+    .edicion__spec:nth-child(3),
+    .edicion__spec:nth-child(4) {
+      border-top: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    }
+  }
+
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-reveal].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+  }
+</style>

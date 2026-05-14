@@ -1,0 +1,239 @@
+---
+/**
+ * HeroVideo — Hero de la home con video HD en loop autoplay.
+ *
+ * - Video Full HD 1920x1080 con dual source (WebM VP9 2.5MB preferido,
+ *   MP4 H.264 22MB fallback Safari) + poster JPG 246KB para LCP rapido
+ * - autoplay + muted + loop + playsinline (muted es obligatorio para autoplay
+ *   en Chrome/Safari mobile sin user gesture)
+ * - Boton pause/play discreto en bottom-right (mobile: bottom-center),
+ *   44x44 touch target, luxury silencioso (border 1px navy + bg blanco
+ *   semi-transparente + backdrop-filter blur)
+ * - prefers-reduced-motion: video pausado por default, poster visible,
+ *   boton etiqueta "Reproducir video"
+ */
+import { type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const t = locale === 'es'
+  ? { pause: 'Pausar video', play: 'Reanudar video' }
+  : { pause: 'Pause video',  play: 'Resume video' };
+---
+
+<section class="hero-video" data-hero-video aria-label={locale === 'es' ? 'Video AMBROSIA en bucle' : 'AMBROSIA video loop'}>
+  <video
+    class="hero-video__player"
+    data-hero-video-el
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="metadata"
+    poster="/video/hero-bottle-frame-poster.jpg"
+    aria-hidden="true"
+  >
+    <source src="/video/hero-bottle-frame.webm" type="video/webm" />
+    <source src="/video/hero-bottle-frame.mp4"  type="video/mp4" />
+  </video>
+
+  {/* Overlay sutil cream → transparent: prepara legibilidad para futuros textos overlaid */}
+  <div class="hero-video__overlay" aria-hidden="true"></div>
+
+  {/* Boton pause/play — fixed luxury fino, visible solo mientras el Hero
+      esta intersecting el viewport (IntersectionObserver) */}
+  <button
+    class="hero-video__toggle"
+    type="button"
+    data-hero-video-toggle
+    aria-label={t.pause}
+    aria-pressed="false"
+  >
+    {/* Pause icon (default, video reproduciendose) — stroke fino */}
+    <svg class="hero-video__icon hero-video__icon--pause" viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true">
+      <line x1="5.5" y1="3.5" x2="5.5" y2="12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      <line x1="10.5" y1="3.5" x2="10.5" y2="12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+    {/* Play icon (cuando pausado) — triangulo stroke fino */}
+    <svg class="hero-video__icon hero-video__icon--play" viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true">
+      <path d="M5 3.5 L12.5 8 L5 12.5 Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="currentColor" fill-opacity="0.2"/>
+    </svg>
+  </button>
+</section>
+
+<style>
+  /* HeroVideo base — el efecto cover-up lo orquesta motion.ts con
+     ScrollTrigger.pin (pinSpacing: false). El section queda fixed por
+     ~1 viewport de scroll mientras las secciones siguientes suben encima
+     cubriendolo. Despues del pin se libera naturalmente. */
+  .hero-video {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--bg-page);
+    z-index: 1;
+  }
+  .hero-video__player {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+  .hero-video__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 65%,
+      color-mix(in srgb, var(--cream) 8%, transparent) 100%
+    );
+  }
+
+  /* ─── Boton pause/play luxury fino — fixed, encima del overlap del BrandStatement.
+     Visibility controlada por IntersectionObserver: solo visible mientras el
+     HeroVideo esta en viewport (al hacer scroll fuera, desaparece). ─── */
+  .hero-video__toggle {
+    position: fixed;
+    right: clamp(1.25rem, 2vw, 1.75rem);
+    bottom: clamp(1.25rem, 2vw, 1.75rem);
+    z-index: 100;  /* por encima de BrandStatement z-index:5 + Nav z-index:50 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--navy) 18%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, #FFFFFF 86%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--navy);
+    cursor: pointer;
+    touch-action: manipulation;
+    opacity: 0;                /* invisible por default; IO lo activa */
+    pointer-events: none;
+    transition:
+      opacity var(--dur-medium) var(--ease-divine),
+      background-color var(--dur-medium) var(--ease-divine),
+      color var(--dur-medium) var(--ease-divine),
+      border-color var(--dur-medium) var(--ease-divine),
+      transform var(--dur-medium) var(--ease-divine),
+      box-shadow var(--dur-medium) var(--ease-divine);
+  }
+  .hero-video__toggle[data-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .hero-video__toggle:hover {
+    background: var(--navy);
+    color: #FFFFFF;
+    border-color: var(--navy);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--navy) 40%, transparent);
+  }
+  .hero-video__toggle:active {
+    transform: scale(0.92);
+    transition-duration: 120ms;
+  }
+  .hero-video__toggle:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 4px;
+  }
+  .hero-video__icon {
+    display: block;
+    pointer-events: none;
+  }
+  .hero-video__icon--play  { display: none; }
+  .hero-video__toggle[aria-pressed="true"] .hero-video__icon--pause { display: none; }
+  .hero-video__toggle[aria-pressed="true"] .hero-video__icon--play  { display: block; }
+
+  /* Mobile: mismo lado derecho (no centrado) para no colisionar con CTAs.
+     Respeta safe-area-inset-bottom para iPhone con home indicator. */
+  @media (max-width: 640px) {
+    .hero-video__toggle {
+      right: 1rem;
+      bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+  }
+
+  /* Reduced motion: pausa el video on by default */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-video__player {
+      animation-play-state: paused;
+    }
+  }
+</style>
+
+<script define:vars={{ t }}>
+  const root = document.querySelector('[data-hero-video]');
+  if (root) {
+    const video = root.querySelector('[data-hero-video-el]');
+    const toggle = root.querySelector('[data-hero-video-toggle]');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (video && toggle) {
+      // Reduced motion: pausa por default, etiqueta "Reanudar"
+      if (reduce) {
+        video.autoplay = false;
+        video.pause();
+        toggle.setAttribute('aria-pressed', 'true');
+        toggle.setAttribute('aria-label', t.play);
+      }
+
+      toggle.addEventListener('click', () => {
+        if (video.paused) {
+          video.play().catch(() => {});
+          toggle.setAttribute('aria-pressed', 'false');
+          toggle.setAttribute('aria-label', t.pause);
+        } else {
+          video.pause();
+          toggle.setAttribute('aria-pressed', 'true');
+          toggle.setAttribute('aria-label', t.play);
+        }
+      });
+
+      // Sincronizar aria si el video cambia estado por otra razon (autoplay denied, etc.)
+      video.addEventListener('play',  () => {
+        toggle.setAttribute('aria-pressed', 'false');
+        toggle.setAttribute('aria-label', t.pause);
+      });
+      video.addEventListener('pause', () => {
+        toggle.setAttribute('aria-pressed', 'true');
+        toggle.setAttribute('aria-label', t.play);
+      });
+
+      // Visibility del boton: visible solo mientras al menos 20% del HeroVideo
+      // sea visible. Al hacer scroll fuera, el boton desaparece (suave fade).
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.intersectionRatio >= 0.2) {
+                toggle.setAttribute('data-visible', 'true');
+              } else {
+                toggle.removeAttribute('data-visible');
+              }
+            });
+          },
+          { threshold: [0, 0.2, 0.5, 1] }
+        );
+        io.observe(root);
+      } else {
+        // Fallback sin IO: visible siempre dentro de la home
+        toggle.setAttribute('data-visible', 'true');
+      }
+    }
+  }
+</script>

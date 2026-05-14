@@ -1,0 +1,290 @@
+---
+/**
+ * /admin/paginas/[id]/editar — Editor de página + block builder.
+ *
+ * UI: metadata (título, slug, estado) + block builder client-side (JS puro,
+ * sin React). Cada cambio se serializa a JSON y se manda al endpoint PATCH.
+ */
+import AdminLayout from '~/layouts/AdminLayout.astro';
+import { getCurrentUser } from '~/lib/auth';
+import { can, type Role } from '~/lib/users';
+import { findPageById } from '~/lib/pages';
+
+const user = (await getCurrentUser(Astro))!;
+if (!can(user.role as Role, 'pages.read')) {
+  return Astro.redirect('/admin/', 302);
+}
+
+const canWrite = can(user.role as Role, 'pages.write');
+const id = parseInt(Astro.params.id ?? '', 10);
+if (!id) return Astro.redirect('/admin/paginas', 302);
+
+const page = findPageById(id);
+if (!page) return Astro.redirect('/admin/paginas?flash=error&msg=No+existe', 302);
+
+const flash = Astro.url.searchParams.get('flash');
+---
+
+<AdminLayout title={`Editar · ${page.title_es}`} user={user} active="pages">
+  {flash === 'created' && <p class="flash flash--success">Página creada. Agrega bloques abajo.</p>}
+  {flash === 'updated' && <p class="flash flash--success">Cambios guardados.</p>}
+
+  <!-- Metadata form -->
+  <section class="panel">
+    <header class="panel__head">
+      <h2 class="panel__title">Metadata</h2>
+      <a class="btn btn--ghost btn--xs" href={`/p/${page.slug}`} target="_blank" rel="noopener">Ver pública ↗</a>
+    </header>
+
+    <form method="POST" action={`/api/pages/${page.id}?_method=PATCH`} class="meta-form">
+      <div class="field">
+        <label class="label">Título (ES) *</label>
+        <input class="input" type="text" name="title_es" value={page.title_es} required disabled={!canWrite} />
+      </div>
+      <div class="field">
+        <label class="label">Título (EN)</label>
+        <input class="input" type="text" name="title_en" value={page.title_en ?? ''} disabled={!canWrite} />
+      </div>
+      <div class="field">
+        <label class="label">Slug (URL)</label>
+        <input class="input" type="text" name="slug" value={page.slug} pattern="[a-z0-9][a-z0-9-]{0,60}" disabled={!canWrite} />
+      </div>
+      <div class="field">
+        <label class="label">Estado</label>
+        <select class="select" name="status" disabled={!canWrite}>
+          <option value="draft"     selected={page.status === 'draft'}>Borrador</option>
+          <option value="published" selected={page.status === 'published'}>Publicada</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column: 1 / -1">
+        <label class="label">Descripción corta (ES) — SEO</label>
+        <input class="input" type="text" name="description_es" value={page.description_es ?? ''} disabled={!canWrite} />
+      </div>
+      <div class="field" style="grid-column: 1 / -1">
+        <label class="label">Descripción corta (EN) — SEO</label>
+        <input class="input" type="text" name="description_en" value={page.description_en ?? ''} disabled={!canWrite} />
+      </div>
+      <div class="field" style="grid-column: 1 / -1">
+        <label class="label">Imagen de portada (URL pública)</label>
+        <input class="input" type="text" name="cover_image" value={page.cover_image ?? ''} placeholder="/images/cms/..." disabled={!canWrite} />
+      </div>
+      {canWrite && (
+        <div class="field" style="grid-column: 1 / -1">
+          <button type="submit" class="btn">Guardar metadata</button>
+        </div>
+      )}
+    </form>
+  </section>
+
+  <!-- Block builder -->
+  <section class="panel">
+    <header class="panel__head">
+      <h2 class="panel__title">Bloques de contenido</h2>
+      {canWrite && (
+        <div class="add-block">
+          <select id="newBlockType" class="select select--inline">
+            <option value="hero">+ Hero</option>
+            <option value="section">+ Sección texto</option>
+            <option value="image">+ Imagen</option>
+            <option value="quote">+ Cita</option>
+            <option value="cta">+ Botón CTA</option>
+            <option value="divider">+ Divisor</option>
+          </select>
+          <button id="addBlockBtn" class="btn btn--ghost" type="button">Agregar bloque</button>
+          <button id="saveBlocksBtn" class="btn" type="button">Guardar bloques</button>
+        </div>
+      )}
+    </header>
+    <p class="panel__hint">Arrastra ▲ ▼ para reordenar. Cada bloque se renderiza en orden en la página pública.</p>
+    <div id="blocks-container"></div>
+
+    <p id="save-status" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;"></p>
+  </section>
+
+  <!-- Initial blocks data + builder JS -->
+  <script type="application/json" id="initial-blocks-data" set:html={JSON.stringify(page.blocks)}></script>
+  <script define:vars={{ pageId: page.id, canWrite }}>
+    const container = document.getElementById('blocks-container');
+    const status = document.getElementById('save-status');
+    let blocks = JSON.parse(document.getElementById('initial-blocks-data').textContent || '[]');
+
+    function uuid() { return crypto.randomUUID(); }
+
+    const TEMPLATES = {
+      hero: {
+        label: 'Hero',
+        fields: [
+          { name: 'title',    label: 'Título',   widget: 'string' },
+          { name: 'subtitle', label: 'Subtítulo', widget: 'text' },
+          { name: 'image',    label: 'Imagen URL', widget: 'string' },
+        ],
+      },
+      section: {
+        label: 'Sección texto',
+        fields: [
+          { name: 'heading', label: 'Encabezado',         widget: 'string' },
+          { name: 'body',    label: 'Cuerpo (markdown OK)', widget: 'markdown' },
+        ],
+      },
+      image: {
+        label: 'Imagen',
+        fields: [
+          { name: 'src',     label: 'URL imagen',  widget: 'string' },
+          { name: 'alt',     label: 'Texto alt',   widget: 'string' },
+          { name: 'caption', label: 'Pie de foto', widget: 'string' },
+        ],
+      },
+      quote: {
+        label: 'Cita',
+        fields: [
+          { name: 'quote',  label: 'Texto de la cita', widget: 'text' },
+          { name: 'author', label: 'Autor',            widget: 'string' },
+        ],
+      },
+      cta: {
+        label: 'Botón CTA',
+        fields: [
+          { name: 'label', label: 'Texto del botón', widget: 'string' },
+          { name: 'href',  label: 'Destino (URL)',   widget: 'string' },
+        ],
+      },
+      divider: {
+        label: 'Divisor',
+        fields: [],
+      },
+    };
+
+    function renderBlocks() {
+      container.innerHTML = '';
+      if (blocks.length === 0) {
+        container.innerHTML = '<p style="opacity:0.55;padding:1rem;">Sin bloques aún. Agrega uno arriba.</p>';
+        return;
+      }
+      blocks.forEach((b, i) => {
+        const tmpl = TEMPLATES[b.type];
+        if (!tmpl) return;
+        const el = document.createElement('div');
+        el.className = 'block';
+        el.dataset.id = b.id;
+
+        let fieldsHtml = '';
+        for (const f of tmpl.fields) {
+          const val = b.data[f.name] ?? '';
+          const escaped = String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          const inputEl = f.widget === 'markdown' || f.widget === 'text'
+            ? `<textarea class="textarea" data-field="${f.name}" rows="3" ${canWrite?'':'disabled'}>${escaped}</textarea>`
+            : `<input class="input" data-field="${f.name}" type="text" value="${escaped}" ${canWrite?'':'disabled'}/>`;
+          fieldsHtml += `<div class="field"><label class="label">${f.label}</label>${inputEl}</div>`;
+        }
+
+        el.innerHTML = `
+          <div class="block__head">
+            <span class="block__type">${i + 1}. ${tmpl.label}</span>
+            ${canWrite ? `
+              <div class="block__actions">
+                <button class="btn btn--ghost btn--xs" data-action="up"     ${i === 0 ? 'disabled' : ''}>▲</button>
+                <button class="btn btn--ghost btn--xs" data-action="down"   ${i === blocks.length - 1 ? 'disabled' : ''}>▼</button>
+                <button class="btn btn--danger btn--xs" data-action="delete">Borrar</button>
+              </div>
+            ` : ''}
+          </div>
+          <div class="block__fields">${fieldsHtml || '<em style="opacity:0.55">Sin campos</em>'}</div>
+        `;
+        container.appendChild(el);
+
+        if (canWrite) {
+          // Reactividad: cuando cambia un campo, actualiza el objeto local
+          el.querySelectorAll('[data-field]').forEach((input) => {
+            input.addEventListener('input', (e) => {
+              const t = e.target;
+              b.data[t.dataset.field] = t.value;
+            });
+          });
+          el.querySelector('[data-action="up"]')?.addEventListener('click', () => {
+            if (i > 0) {
+              [blocks[i - 1], blocks[i]] = [blocks[i], blocks[i - 1]];
+              renderBlocks();
+            }
+          });
+          el.querySelector('[data-action="down"]')?.addEventListener('click', () => {
+            if (i < blocks.length - 1) {
+              [blocks[i + 1], blocks[i]] = [blocks[i], blocks[i + 1]];
+              renderBlocks();
+            }
+          });
+          el.querySelector('[data-action="delete"]')?.addEventListener('click', () => {
+            if (confirm('¿Borrar este bloque?')) {
+              blocks.splice(i, 1);
+              renderBlocks();
+            }
+          });
+        }
+      });
+    }
+
+    if (canWrite) {
+      document.getElementById('addBlockBtn').addEventListener('click', () => {
+        const type = document.getElementById('newBlockType').value;
+        const tmpl = TEMPLATES[type];
+        const data = {};
+        for (const f of tmpl.fields) data[f.name] = '';
+        blocks.push({ id: uuid(), type, data });
+        renderBlocks();
+      });
+
+      document.getElementById('saveBlocksBtn').addEventListener('click', async () => {
+        status.textContent = 'Guardando…';
+        try {
+          const res = await fetch(`/api/pages/${pageId}?_method=PATCH`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ blocks }),
+          });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const j = await res.json();
+          status.textContent = '✓ Guardado · ' + new Date().toLocaleTimeString('es-MX');
+          blocks = j.page.blocks;
+          renderBlocks();
+        } catch (e) {
+          status.textContent = '✗ Error al guardar: ' + e.message;
+        }
+      });
+    }
+
+    renderBlocks();
+  </script>
+</AdminLayout>
+
+<style>
+  .meta-form { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem 1.25rem; }
+  .meta-form .field { margin-bottom: 0; }
+  .add-block { display: inline-flex; gap: 0.5rem; }
+  .select--inline { width: auto; padding: 0.5rem 0.85rem; font-size: 0.78rem; }
+  .btn--xs { padding: 0.35rem 0.7rem; font-size: 0.6rem; }
+
+  .block {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.85rem;
+  }
+  .block__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .block__type {
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-weight: 700;
+  }
+  .block__actions { display: inline-flex; gap: 0.35rem; }
+  .block__fields { display: flex; flex-direction: column; gap: 0.65rem; }
+  .block__fields .field { margin-bottom: 0; }
+</style>

@@ -1,0 +1,153 @@
+---
+/**
+ * RecipeBody — 2 columnas: ingredientes (izquierda) y procedimiento (derecha).
+ * Si la receta tiene `nota`, se muestra al final como pull-quote.
+ */
+import type { Receta } from '~/data/recetas';
+import type { Locale } from '~/i18n';
+
+interface Props {
+  receta: Receta;
+  locale: Locale;
+}
+
+const { receta, locale } = Astro.props;
+const labelIng  = locale === 'es' ? 'Ingredientes'  : 'Ingredients';
+const labelProc = locale === 'es' ? 'Preparacion'    : 'Method';
+const labelNote = locale === 'es' ? 'Nota'           : 'Note';
+---
+
+<section class="recipe-body">
+  <div class="recipe-body__inner">
+    <div class="recipe-body__cols">
+      <div class="recipe-body__col">
+        <h2 class="recipe-body__heading">{labelIng}</h2>
+        <ul class="recipe-body__list" role="list">
+          {receta.ingredientes.map((i) => (
+            <li class="recipe-body__ing">{i}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="recipe-body__col">
+        <h2 class="recipe-body__heading">{labelProc}</h2>
+        <ol class="recipe-body__steps">
+          {receta.procedimiento.map((step, i) => (
+            <li class="recipe-body__step">
+              <span class="recipe-body__stepNum" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <p>{step}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+
+    {receta.nota && (
+      <aside class="recipe-body__note">
+        <p class="recipe-body__noteLabel">{labelNote}</p>
+        <p class="recipe-body__noteText">{receta.nota}</p>
+      </aside>
+    )}
+  </div>
+</section>
+
+<style>
+  .recipe-body {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(2rem, 4.5vw, 4rem) 1.5rem clamp(3rem, 6vw, 5rem);
+  }
+  .recipe-body__inner { max-width: 1080px; margin: 0 auto; }
+
+  .recipe-body__cols {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+  @media (max-width: 800px) {
+    .recipe-body__cols { grid-template-columns: 1fr; gap: 3rem; }
+  }
+
+  .recipe-body__heading {
+    margin: 0 0 1.5rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--red);
+    opacity: 0.85;
+  }
+
+  .recipe-body__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .recipe-body__ing {
+    padding: 0.75rem 0;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--navy);
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 10%, transparent);
+  }
+
+  .recipe-body__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    counter-reset: steps;
+  }
+  .recipe-body__step {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+  .recipe-body__stepNum {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.25rem;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: var(--red);
+    padding-top: 0.1em;
+  }
+  .recipe-body__step p {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--navy);
+  }
+
+  .recipe-body__note {
+    margin: clamp(3rem, 5vw, 4rem) 0 0;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    background: color-mix(in srgb, var(--red) 6%, var(--cream));
+    border-left: 3px solid var(--red);
+    border-radius: 4px;
+  }
+  .recipe-body__noteLabel {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--red);
+  }
+  .recipe-body__noteText {
+    margin: 0;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1rem, 1.5vw, 1.1rem);
+    line-height: 1.5;
+    color: var(--navy);
+  }
+</style>

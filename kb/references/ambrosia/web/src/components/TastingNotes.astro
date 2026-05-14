@@ -1,0 +1,131 @@
+---
+/**
+ * Tasting Notes — 8 notas de cata oficiales del brandbook.
+ * Grid editorial 2 columnas (desktop) / 1 col (mobile) con numeros, nombre y nota.
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const sabor = dict.sabor;
+---
+
+<section class="tasting" data-tasting>
+  <div class="tasting__inner">
+    <p class="eyebrow tasting__eyebrow" data-reveal set:html={sabor.eyebrow}></p>
+    <h2 class="tasting__title" data-reveal set:html={sabor.title}></h2>
+
+    <ul class="tasting__grid">
+      {sabor.notes.map((n) => (
+        <li class="tasting__note" data-reveal>
+          <span class="tasting__num">{n.n}</span>
+          <div class="tasting__content">
+            <p class="tasting__name">{n.name}</p>
+            <p class="tasting__desc">{n.note}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .tasting {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(4.5rem, 9vw, 8rem) 1.5rem;
+  }
+  .tasting__inner {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .tasting__eyebrow {
+    margin: 0 0 1.5rem;
+    color: var(--color-red);
+    opacity: 0.85;
+  }
+  .tasting__title {
+    margin: 0 0 4rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    color: var(--navy);
+    max-width: 32rem;
+  }
+
+  .tasting__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+  }
+  .tasting__note {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 1.5rem;
+    padding: 1.75rem 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    transition: background-color var(--dur-fast) var(--ease-fast),
+                padding var(--dur-medium) var(--ease-medium);
+  }
+  .tasting__note:nth-child(odd) {
+    border-right: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+  }
+  .tasting__note:hover {
+    background: color-mix(in srgb, var(--color-red) 5%, transparent);
+    padding-left: 1.5rem;
+  }
+  .tasting__num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: var(--color-red);
+    opacity: 0.65;
+    line-height: 1.4;
+    font-variant-numeric: lining-nums;
+  }
+  .tasting__name {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--navy);
+  }
+  .tasting__desc {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--navy);
+    opacity: 0.78;
+    max-width: 28rem;
+  }
+
+  @media (max-width: 720px) {
+    .tasting__grid { grid-template-columns: 1fr; }
+    .tasting__note { padding: 1.25rem 0.5rem; }
+    .tasting__note:nth-child(odd) { border-right: none; }
+  }
+
+  /* Reveal */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-reveal].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+  }
+</style>

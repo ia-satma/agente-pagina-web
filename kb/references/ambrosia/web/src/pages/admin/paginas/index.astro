@@ -1,0 +1,101 @@
+---
+/**
+ * /admin/paginas — Listado de páginas personalizadas + crear nueva.
+ */
+import AdminLayout from '~/layouts/AdminLayout.astro';
+import { getCurrentUser } from '~/lib/auth';
+import { can, type Role } from '~/lib/users';
+import { listPages } from '~/lib/pages';
+
+const user = (await getCurrentUser(Astro))!;
+if (!can(user.role as Role, 'pages.read')) {
+  return Astro.redirect('/admin/', 302);
+}
+
+const canWrite = can(user.role as Role, 'pages.write');
+const pages = listPages();
+const flash = Astro.url.searchParams.get('flash');
+const msg = Astro.url.searchParams.get('msg');
+---
+
+<AdminLayout title="Páginas personalizadas" user={user} active="pages">
+  {flash === 'created' && <p class="flash flash--success">Página creada. Ahora puedes agregar bloques.</p>}
+  {flash === 'updated' && <p class="flash flash--success">Página actualizada.</p>}
+  {flash === 'deleted' && <p class="flash flash--success">Página eliminada.</p>}
+  {flash === 'error'   && <p class="flash flash--error">{msg || 'Error al guardar.'}</p>}
+
+  {canWrite && (
+    <section class="panel">
+      <header class="panel__head">
+        <h2 class="panel__title">Crear nueva página</h2>
+      </header>
+      <p class="panel__hint">
+        Las páginas viven en <code>/p/&lt;slug&gt;</code>. Útil para landings de lanzamiento, press kits,
+        eventos, política de privacidad, etc.
+      </p>
+      <form method="POST" action="/api/pages" class="new-form">
+        <div class="field">
+          <label class="label" for="title_es">Título (ES) *</label>
+          <input class="input" type="text" name="title_es" id="title_es" required />
+        </div>
+        <div class="field">
+          <label class="label" for="slug">Slug (URL) — opcional, se auto-genera</label>
+          <input class="input" type="text" name="slug" id="slug" placeholder="lanzamiento-2026" pattern="[a-z0-9][a-z0-9-]{0,60}" />
+        </div>
+        <div class="field" style="grid-column: 1 / -1">
+          <label class="label" for="description_es">Descripción corta (ES)</label>
+          <input class="input" type="text" name="description_es" id="description_es" />
+        </div>
+        <div class="field" style="grid-column: 1 / -1">
+          <button type="submit" class="btn">Crear página</button>
+        </div>
+      </form>
+    </section>
+  )}
+
+  <section class="panel">
+    <header class="panel__head">
+      <h2 class="panel__title">Páginas existentes ({pages.length})</h2>
+    </header>
+
+    {pages.length === 0 ? (
+      <p class="panel__hint">No hay páginas todavía. {canWrite && 'Crea una arriba.'}</p>
+    ) : (
+      <table class="table">
+        <thead>
+          <tr><th>Título</th><th>Slug</th><th>Estado</th><th>Última edición</th><th></th></tr>
+        </thead>
+        <tbody>
+          {pages.map((p) => (
+            <tr>
+              <td><strong>{p.title_es}</strong>{p.title_en && <small style="opacity:0.55"> · {p.title_en}</small>}</td>
+              <td><code>/p/{p.slug}</code></td>
+              <td>
+                {p.status === 'published'
+                  ? <span class="pill pill--active">publicada</span>
+                  : <span class="pill pill--inactive">borrador</span>}
+              </td>
+              <td>{new Date(p.updated_at * 1000).toLocaleString('es-MX')}</td>
+              <td style="text-align:right">
+                <a class="btn btn--ghost btn--xs" href={`/p/${p.slug}`} target="_blank" rel="noopener">Ver ↗</a>
+                {canWrite && <a class="btn btn--ghost btn--xs" href={`/admin/paginas/${p.id}/editar`}>Editar</a>}
+                {canWrite && (
+                  <form method="POST" action={`/api/pages/${p.id}?_method=DELETE`} style="display:inline"
+                        onsubmit="return confirm('¿Eliminar definitivamente esta página?')">
+                    <button type="submit" class="btn btn--danger btn--xs">Borrar</button>
+                  </form>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </section>
+</AdminLayout>
+
+<style>
+  .new-form { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem 1.25rem; }
+  .new-form .field { margin-bottom: 0; }
+  .btn--xs { padding: 0.4rem 0.75rem; font-size: 0.62rem; }
+</style>

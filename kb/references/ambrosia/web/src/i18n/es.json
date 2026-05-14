@@ -1,0 +1,370 @@
+{
+  "nav": {
+    "origen": "Origen",
+    "la-salsa": "La Salsa",
+    "recetario": "Recetario",
+    "mesas": "Mesas",
+    "concierge": "Concierge",
+    "historia": "Historia",
+    "producto": "Producto",
+    "coleccion": "Coleccion",
+    "horeca": "Restaurantes",
+    "diario": "Diario",
+    "contacto": "Contacto"
+  },
+  "worlds": {
+    "eyebrow": "Cinco mundos",
+    "title": "Una salsa, <em class=\"brand\">cinco capitulos</em>",
+    "body": "Cada mundo es una entrada distinta al mismo ritual.",
+    "items": [
+      {
+        "n": "01",
+        "key": "origen",
+        "title": "El Origen",
+        "body": "El mito, los chiles, la libreta familiar."
+      },
+      {
+        "n": "02",
+        "key": "la-salsa",
+        "title": "La Salsa",
+        "body": "Notas, maridajes, edicion y boutique."
+      },
+      {
+        "n": "03",
+        "key": "recetario",
+        "title": "El Recetario",
+        "body": "Veinte recetas firmadas con la salsa como protagonista."
+      },
+      {
+        "n": "04",
+        "key": "mesas",
+        "title": "Mesas Selectas",
+        "body": "Restaurantes y boutiques que la guardan."
+      },
+      {
+        "n": "05",
+        "key": "concierge",
+        "title": "Concierge",
+        "body": "Prensa, distribucion selecta, regalo."
+      }
+    ]
+  },
+  "citation": {
+    "eyebrow": "Confianza",
+    "quote": "<em>Una salsa que no pide permiso.</em> Llega, se sienta, transforma.",
+    "author": "— Cuaderno editorial",
+    "place": "Ciudad de Mexico · 2024"
+  },
+  "recipeTeaser": {
+    "eyebrow": "Deseo",
+    "title": "Tres recetas para <em>empezar el ritual</em>",
+    "body": "Veinte platos firmados utilizan AMBROSIA como ingrediente protagonista. Estas tres son la entrada.",
+    "cta": "Ver el recetario completo"
+  },
+  "community": {
+    "eyebrow": "Pertenencia",
+    "title": "Mesa AMBROSIA",
+    "body": "Acceso anticipado a cada lote, recetas firmadas por chefs y conversaciones reservadas. Sin algoritmo. Solo cuando hay algo que decir.",
+    "cta": "Sumarme a la mesa"
+  },
+  "hero": {
+    "eyebrow": "Salsa",
+    "title": "AMBROSIA",
+    "tagline": "La Salsa Divina de los Dioses",
+    "phonetic": "( am·brozhe )",
+    "cta": "Descubrir el ritual",
+    "scroll_hint": "desliza para descubrir"
+  },
+  "mito": {
+    "eyebrow": "Manifiesto",
+    "title": "PRUEBA SAVE",
+    "body": "En la mitologia, la AMBROSIA era el alimento que concedia la <em>inmortalidad</em> a los dioses del Olimpo. Hoy es una salsa: pequena, contundente, hecha para honrar la mesa. Una sola gota basta para <em>transformar</em> un plato."
+  },
+  "origen": {
+    "eyebrow": "Origen",
+    "title": "De un mito antiguo a una mesa contemporanea",
+    "body": "La palabra AMBROSIA atraviesa siglos. Para los griegos era el alimento que concedia la inmortalidad; para nosotros, el nombre de una receta familiar que recorrio tres generaciones antes de embotellarse. Cada lote se elabora en pequeno: coccion lenta, especias enteras, descanso prolongado."
+  },
+  "ritual": {
+    "eyebrow": "El ritual",
+    "title": "Una gota basta para <em class=\"brand\">transformar</em> un plato.",
+    "body": "Los dioses comian AMBROSIA; los hombres aprendieron a embotellarla. <em>Ofrecida con las manos. Recibida en la mesa.</em>"
+  },
+  "manifesto": {
+    "title": "THE DIVINE SAUCE OF GODS",
+    "caption": "Una sola formula. <em class=\"brand\">Mil rituales.</em>",
+    "phonetic": "( am·brozhe )"
+  },
+  "interlude": {
+    "quote": "Los dioses comian <em>AMBROSIA</em>; los hombres aprendieron a <em>embotellarla</em>."
+  },
+  "closing": {
+    "text": "<em>Ofrecida con las manos.</em> Recibida en la mesa."
+  },
+  "edicion": {
+    "eyebrow": "Edicion 2024",
+    "title": "Una edicion. <em>Mil rituales.</em>",
+    "specs": [
+      {
+        "label": "Volumen",
+        "value": "200 ml"
+      },
+      {
+        "label": "Botellas",
+        "value": "1,200"
+      },
+      {
+        "label": "Reposo",
+        "value": "90 dias"
+      },
+      {
+        "label": "Origen",
+        "value": "Mexico"
+      }
+    ]
+  },
+  "sabor": {
+    "eyebrow": "Notas de cata",
+    "title": "Ocho notas. Una sola voz.",
+    "notes": [
+      {
+        "n": "01",
+        "name": "Chile ancho",
+        "note": "Cuerpo dulce y profundo. La base de toda la sinfonia."
+      },
+      {
+        "n": "02",
+        "name": "Chile morita",
+        "note": "Humo lento, ahumado seco. La memoria de la lumbre."
+      },
+      {
+        "n": "03",
+        "name": "Tomate asado",
+        "note": "Acidez templada y un dulzor que envuelve."
+      },
+      {
+        "n": "04",
+        "name": "Ajo confitado",
+        "note": "Cocido lentamente hasta volverse mantequilla."
+      },
+      {
+        "n": "05",
+        "name": "Comino",
+        "note": "Tierra calida. La especia que ata todo."
+      },
+      {
+        "n": "06",
+        "name": "Vinagre anejo",
+        "note": "Filo limpio, brillo final."
+      },
+      {
+        "n": "07",
+        "name": "Sal de mar",
+        "note": "Cristal puro. La linea que define la silueta."
+      },
+      {
+        "n": "08",
+        "name": "Reposo",
+        "note": "El ultimo ingrediente: tiempo, oscuridad, paciencia."
+      }
+    ]
+  },
+  "maridajes": {
+    "eyebrow": "Maridajes",
+    "title": "Donde la salsa se vuelve mito.",
+    "items": [
+      {
+        "n": "01",
+        "plato": "Tuetano asado",
+        "nota": "Una gota templa la grasa, intensifica el ahumado."
+      },
+      {
+        "n": "02",
+        "plato": "Huevos al sarten",
+        "nota": "El acto mas sencillo, transformado en ofrenda."
+      },
+      {
+        "n": "03",
+        "plato": "Pescado a la sal",
+        "nota": "Filo limpio sobre carne blanca y costra mineral."
+      },
+      {
+        "n": "04",
+        "plato": "Quesos anejos",
+        "nota": "Contraste de calor y curado: una conversacion."
+      },
+      {
+        "n": "05",
+        "plato": "Cordero al horno",
+        "nota": "Resalta el dulzor profundo de la coccion lenta."
+      }
+    ]
+  },
+  "donde": {
+    "eyebrow": "Distribucion selecta",
+    "title": "Donde encontrarla",
+    "body": "Disponible en mesas escogidas — por consulta privada.",
+    "restaurantes": [
+      "Pujol · CDMX",
+      "Quintonil · CDMX",
+      "Alcalde · Guadalajara",
+      "Lardo · CDMX",
+      "Casa Oaxaca · Oaxaca",
+      "Rosetta · CDMX",
+      "Sud 777 · CDMX",
+      "Le Chique · Cancun"
+    ],
+    "compra": {
+      "eyebrow": "Adquierela",
+      "title": "Donde <em class=\"brand\">comprarla</em>",
+      "body": "Disponible al publico en dos espacios selectos en Monterrey. Para distribucion corporativa o privada, escribenos al concierge.",
+      "puntos": [
+        {
+          "nombre": "Restaurante Jabalina",
+          "lugar": "Monterrey, NL · Barrio Antiguo + Armida",
+          "desc": "Mesa de autor del chef Manuel Orozco, con mas de 20 anos de investigacion en cocina del noreste mexicano.",
+          "distincion": "MICHELIN Guide Mexico 2025",
+          "instagram": "https://www.instagram.com/jabalinamx/",
+          "facebook": "https://www.facebook.com/Jabalinamx/",
+          "web": "https://www.opentable.com/r/jabalina-barrio-antiguo-monterrey",
+          "cta": "Reservar mesa",
+          "ctaHref": "https://www.opentable.com/r/jabalina-barrio-antiguo-monterrey"
+        },
+        {
+          "nombre": "Carnes Ramos",
+          "lugar": "Monterrey, NL · area metropolitana",
+          "desc": "Carniceria boutique con mas de 40 anos de tradicion. Venta directa al publico y servicio a domicilio.",
+          "distincion": "Tradicion desde 1985",
+          "instagram": "https://www.instagram.com/carnesramos/",
+          "facebook": "https://www.facebook.com/CarnesRamos/",
+          "web": "https://x.com/carnesramos",
+          "cta": "Visitar tienda",
+          "ctaHref": "https://www.facebook.com/CarnesRamos/"
+        }
+      ]
+    }
+  },
+  "pages": {
+    "origen": {
+      "eyebrow": "Capitulo I — El Origen",
+      "title": "El elixir que <em class=\"brand\">sobrevivio</em> al tiempo",
+      "body": "Del Olimpo a Tenochtitlan, la palabra AMBROSIA atraveso siglos antes de embotellarse. Cada gota que servimos hoy es la herencia de un mito que aprendio a convertirse en cocina."
+    },
+    "la-salsa": {
+      "eyebrow": "Capitulo II — La Salsa",
+      "title": "Una sola formula. <em class=\"brand\">Mil rituales.</em>",
+      "body": "Ocho notas. Cinco maridajes. Doscientos mililitros que rinden cuando importa. Esta es la salsa: como se hace, como se prueba, donde encontrarla."
+    },
+    "recetario": {
+      "eyebrow": "Capitulo III — El Recetario",
+      "title": "Veinte maneras de <em>transformar</em> el dia",
+      "body": "Veinte recetas firmadas que utilizan AMBROSIA como ingrediente protagonista. De desayunos sencillos a piezas de mesa larga, cada plato es una invitacion al ritual."
+    },
+    "mesas": {
+      "eyebrow": "Capitulo IV — Mesas Selectas",
+      "title": "Donde la salsa <em class=\"brand\">se vuelve mito</em>",
+      "body": "Restaurantes que entienden lo que servimos. Boutiques que la guardan como pieza. Una distribucion selecta — por consulta privada — que respeta la escala de cada lote."
+    },
+    "concierge": {
+      "eyebrow": "Capitulo V — Concierge",
+      "title": "Conversaciones que <em class=\"brand\">merecen botella</em>",
+      "body": "Para prensa, distribucion selecta y regalo corporativo. Tres caminos, una sola atencion. Respondemos en 48 horas y solo cuando la conversacion lo amerita."
+    },
+    "timeline": {
+      "eyebrow": "Linea del tiempo",
+      "title": "Cuatro <em>hitos</em>, una herencia",
+      "items": [
+        {
+          "year": "800 a. C.",
+          "place": "Olimpo",
+          "text": "Los dioses griegos comen AMBROSIA: alimento de la inmortalidad."
+        },
+        {
+          "year": "1500",
+          "place": "Tenochtitlan",
+          "text": "Las salsas mexicas se ofrecen como acto ceremonial sobre la mesa."
+        },
+        {
+          "year": "1962",
+          "place": "Centro de Mexico",
+          "text": "La formula se registra en una libreta familiar; tres generaciones la cuidan."
+        },
+        {
+          "year": "2024",
+          "place": "Mexico",
+          "text": "AMBROSIA se embotella por primera vez bajo su nombre."
+        }
+      ]
+    },
+    "conciergeIntent": {
+      "eyebrow": "Tres caminos",
+      "title": "¿Que te trae a la mesa?",
+      "items": [
+        {
+          "key": "horeca",
+          "label": "Distribucion HORECA",
+          "body": "Para restaurantes, hoteles y barras de autor que quieren incorporar AMBROSIA a su menu."
+        },
+        {
+          "key": "prensa",
+          "label": "Prensa y editorial",
+          "body": "Solicitudes de muestras, fichas tecnicas, entrevistas y sesiones fotograficas."
+        },
+        {
+          "key": "corporativo",
+          "label": "Regalo corporativo",
+          "body": "Cajas firmadas, dedicatorias y empaques especiales para clientes y equipos."
+        }
+      ],
+      "form": {
+        "name": "Nombre",
+        "email": "Correo",
+        "company": "Empresa o medio",
+        "message": "Mensaje",
+        "cta": "Enviar consulta",
+        "note": "Respondemos en 48 horas habiles."
+      }
+    },
+    "historia": {
+      "eyebrow": "Capitulo I",
+      "title": "Historia",
+      "body": "AMBROSIA nace donde la mitologia se encuentra con la cocina. La formula original se registro en una libreta familiar en el centro de Mexico en 1962; en 1998 se ajusto el balance de chiles y se incorporo el reposo prolongado; en 2024 se embotello por primera vez bajo la marca Salsa AMBROSIA."
+    },
+    "producto": {
+      "eyebrow": "Edicion original",
+      "title": "Una sola formula. Mil rituales.",
+      "body": "AMBROSIA nace de una receta cerrada: chiles seleccionados, especias del Mediterraneo y el centro de Mexico, y un tiempo de reposo que asienta cada nota. La botella azul cobalto preserva el color y el sabor; el lacre rojo sella el ritual. 200 ml · Mexico · 2024."
+    },
+    "coleccion": {
+      "eyebrow": "Edicion 2024",
+      "title": "1,200 botellas. 90 dias de reposo.",
+      "body": "Cada lote se elabora en pequeno. No buscamos rendimiento, buscamos un resultado que valga el ritual. La distribucion es por canal selecto y consulta privada — escribenos si te interesa probarla."
+    },
+    "horeca": {
+      "eyebrow": "HORECA",
+      "title": "Para mesas escogidas",
+      "body": "Servimos a restaurantes que entienden que una salsa de autor merece su propio menu: Pujol, Quintonil, Alcalde, Lardo, Casa Oaxaca, Rosetta, Sud 777, Le Chique. Atencion concierge, formacion al servicio y co-branding discreto."
+    },
+    "diario": {
+      "eyebrow": "Cuaderno",
+      "title": "Diario",
+      "body": "Notas de cocina, lanzamientos, recetas firmadas por chefs y conversaciones con quienes han probado lo que servimos. Un cuaderno editorial, sin algoritmo, publicado cuando hay algo que decir."
+    },
+    "contacto": {
+      "eyebrow": "Concierge",
+      "title": "Contacto",
+      "body": "Para prensa, distribucion selecta y regalo corporativo. Respondemos en 48 horas y solo cuando la conversacion promete. Las preguntas vagas merecen respuestas vagas; las precisas, una botella."
+    }
+  },
+  "footer": {
+    "tagline": "Ofrecida con las manos. Recibida en la mesa.",
+    "made_in": "Hecho en Mexico · Embotellado a mano",
+    "rights": "Todos los derechos reservados.",
+    "newsletter": {
+      "title": "Recibe nuestros lotes antes que nadie",
+      "body": "Las ediciones de AMBROSIA son limitadas. Suscribete y recibe acceso anticipado, recetas firmadas por chefs, y noticias del proximo embotellado.",
+      "placeholder": "Tu correo",
+      "cta": "Suscribir"
+    }
+  }
+}

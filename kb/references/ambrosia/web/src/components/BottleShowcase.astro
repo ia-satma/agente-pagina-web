@@ -1,0 +1,791 @@
+---
+/**
+ * BottleShowcase — Museum exhibition de las 3 ediciones AMBROSIA.
+ *
+ * Cada botella se presenta como una pieza de arte con:
+ *   - Numeral romano monumental (I · II · III) sobre el pedestal
+ *   - Halo radial detras + reflection bajo la botella + float idle animation
+ *   - Specs grid editorial (lote, ano, vol, reposo, unidades)
+ *   - Cita corta editorial firmada
+ *   - CTA arrow → /la-salsa#boutique
+ *
+ * Cada edicion usa un tono acento sutil del brandbook que tinta el fondo
+ * y el halo, sin romper la palette navy/red/cream.
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+
+// Tres ediciones con metadata editorial enriquecida
+const bottles = [
+  {
+    src: '/images/bottles/bottle-gray.png',
+    roman: 'I',
+    tone: 'onyx',
+    name: locale === 'es' ? 'Edicion Onyx' : 'Onyx Edition',
+    wax: locale === 'es' ? 'Cera negra' : 'Black wax',
+    subtitle: locale === 'es' ? 'Edicion original' : 'Original edition',
+    quote: locale === 'es'
+      ? 'El sello primero — el negro que nombra el archivo.'
+      : 'The first seal — the black that names the archive.',
+    specs: locale === 'es'
+      ? [
+          { label: 'Lote',     value: '001' },
+          { label: 'Ano',      value: '2024' },
+          { label: 'Volumen',  value: '200 ml' },
+          { label: 'Reposo',   value: '90 dias' },
+          { label: 'Unidades', value: '200' },
+        ]
+      : [
+          { label: 'Batch',    value: '001' },
+          { label: 'Year',     value: '2024' },
+          { label: 'Volume',   value: '200 ml' },
+          { label: 'Rest',     value: '90 days' },
+          { label: 'Units',    value: '200' },
+        ],
+  },
+  {
+    src: '/images/bottles/bottle-green.png',
+    roman: 'II',
+    tone: 'violet',
+    name: locale === 'es' ? 'Edicion Violeta' : 'Violet Edition',
+    wax: locale === 'es' ? 'Cera morada' : 'Violet wax',
+    subtitle: locale === 'es' ? 'Edicion ceremonial' : 'Ceremonial edition',
+    quote: locale === 'es'
+      ? 'Para la mesa que conmemora — color de los grandes encuentros.'
+      : 'For the table that commemorates — the color of great gatherings.',
+    specs: locale === 'es'
+      ? [
+          { label: 'Lote',     value: '002' },
+          { label: 'Ano',      value: '2024' },
+          { label: 'Volumen',  value: '200 ml' },
+          { label: 'Reposo',   value: '90 dias' },
+          { label: 'Unidades', value: '150' },
+        ]
+      : [
+          { label: 'Batch',    value: '002' },
+          { label: 'Year',     value: '2024' },
+          { label: 'Volume',   value: '200 ml' },
+          { label: 'Rest',     value: '90 days' },
+          { label: 'Units',    value: '150' },
+        ],
+  },
+  {
+    src: '/images/bottles/bottle-amber.png',
+    roman: 'III',
+    tone: 'amber',
+    name: locale === 'es' ? 'Edicion Ambar' : 'Amber Edition',
+    wax: locale === 'es' ? 'Cera ambar' : 'Amber wax',
+    subtitle: locale === 'es' ? 'Lote 003' : 'Batch 003',
+    quote: locale === 'es'
+      ? 'Cerrada en otono, abierta en hogar — el ultimo gesto del ano.'
+      : 'Closed in autumn, opened at home — the year\'s final gesture.',
+    specs: locale === 'es'
+      ? [
+          { label: 'Lote',     value: '003' },
+          { label: 'Ano',      value: '2024' },
+          { label: 'Volumen',  value: '200 ml' },
+          { label: 'Reposo',   value: '90 dias' },
+          { label: 'Unidades', value: '180' },
+        ]
+      : [
+          { label: 'Batch',    value: '003' },
+          { label: 'Year',     value: '2024' },
+          { label: 'Volume',   value: '200 ml' },
+          { label: 'Rest',     value: '90 days' },
+          { label: 'Units',    value: '180' },
+        ],
+  },
+];
+
+const eyebrow  = locale === 'es' ? 'Las tres ceras' : 'The three waxes';
+const title    = locale === 'es' ? 'Tres <em>ediciones</em>, una sola formula' : 'Three <em>editions</em>, one formula';
+const caption  = locale === 'es'
+  ? 'Cada botella se sella a mano con cera de archivo. La cera no cambia el contenido — distingue el lote.'
+  : 'Each bottle is hand-sealed with archival wax. The wax does not change the content — it signs the batch.';
+const ctaLabel = locale === 'es' ? 'Adquirir edicion' : 'Acquire edition';
+const limitedTag = locale === 'es' ? 'Edicion limitada' : 'Limited edition';
+---
+
+<section class="bottle-showcase" id="ediciones" data-bottle-showcase>
+  <header class="bottle-showcase__head">
+    <p class="eyebrow" data-anim="up">{eyebrow}</p>
+    <h2 class="bottle-showcase__title" data-anim="up" set:html={title}></h2>
+    <p class="bottle-showcase__caption" data-anim="up">{caption}</p>
+  </header>
+
+  <ul class="bottle-showcase__grid">
+    {bottles.map((b, i) => (
+      <li class="bottle-showcase__item" style={`--i:${i};`} data-tone={b.tone}>
+        <article class="bottle-card">
+          {/* Header de la card: numeral romano + tag edicion limitada */}
+          <div class="bottle-card__header">
+            <span class="bottle-card__roman" aria-hidden="true">{b.roman}</span>
+            <span class="bottle-card__tag">
+              <span class="bottle-card__tag-dot" aria-hidden="true"></span>
+              {limitedTag}
+            </span>
+          </div>
+
+          {/* Pedestal: halo + botella floating + reflection. Click → zoom inline */}
+          <div class="bottle-card__pedestal" data-bottle-pedestal>
+            <span class="bottle-card__halo" aria-hidden="true"></span>
+            <button
+              class="bottle-card__zoom-trigger"
+              type="button"
+              data-bottle-zoom
+              aria-label={locale === 'es' ? `Ver ${b.name} en grande` : `View ${b.name} larger`}
+            >
+              <img
+                class="bottle-card__img"
+                src={b.src}
+                alt={b.name}
+                width="600"
+                height="600"
+                loading="eager"
+                decoding="async"
+              />
+            </button>
+            <span class="bottle-card__reflection" style={`background-image: url(${b.src});`} aria-hidden="true"></span>
+            <span class="bottle-card__floor" aria-hidden="true"></span>
+            <span class="bottle-card__zoom-hint" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4" fill="none" />
+                <path d="M9.5 9.5L13 13M4 6h4M6 4v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+              </svg>
+            </span>
+            {/* Boton reset zoom (solo aparece cuando zoomed) */}
+            <button
+              type="button"
+              class="bottle-card__zoom-reset"
+              data-bottle-zoom-reset
+              aria-label={locale === 'es' ? 'Quitar zoom' : 'Reset zoom'}
+            >
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+              <span>{locale === 'es' ? 'Cerrar' : 'Close'}</span>
+            </button>
+          </div>
+
+          {/* Info editorial */}
+          <div class="bottle-card__info" data-anim="up">
+            <p class="bottle-card__wax">{b.wax} · <span>{b.subtitle}</span></p>
+            <h3 class="bottle-card__name">{b.name}</h3>
+            <span class="bottle-card__rule" aria-hidden="true"></span>
+            <p class="bottle-card__quote">{b.quote}</p>
+
+            {/* Specs grid editorial */}
+            <dl class="bottle-card__specs">
+              {b.specs.map((s) => (
+                <div class="bottle-card__spec">
+                  <dt>{s.label}</dt>
+                  <dd>{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <a class="bottle-card__cta" href={locale === 'es' ? '/la-salsa#boutique' : '/en/the-sauce#boutique'}>
+              {ctaLabel}
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="none" aria-hidden="true">
+                <path d="M0 5h14M10 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+        </article>
+      </li>
+    ))}
+  </ul>
+
+</section>
+
+<style>
+  .bottle-showcase {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(4rem, 8vw, 7rem) 1.5rem;
+    text-align: center;
+  }
+
+  .bottle-showcase__head {
+    max-width: 50rem;
+    margin: 0 auto clamp(3rem, 5.5vw, 4.5rem);
+  }
+  .bottle-showcase__head .eyebrow {
+    font-size: 0.78rem;
+    letter-spacing: 0.36em;
+  }
+  .bottle-showcase__title {
+    margin: 1.15rem 0 1.15rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+    line-height: 1.02;
+    letter-spacing: 0.015em;
+    color: var(--navy);
+    text-wrap: balance;
+  }
+  .bottle-showcase__title :global(em) {
+    font-style: normal;
+    color: var(--red);
+  }
+  .bottle-showcase__caption {
+    margin: 0 auto;
+    max-width: 38rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    line-height: 1.55;
+    opacity: 0.72;
+    text-wrap: balance;
+  }
+
+  .bottle-showcase__grid {
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    max-width: 1340px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.25rem, 2.5vw, 2.25rem);
+  }
+
+  .bottle-showcase__item {
+    text-align: left;
+  }
+
+  /* ─── Card de museo ─── */
+  .bottle-card {
+    --tone-accent: var(--navy);
+    --tone-halo: color-mix(in srgb, var(--navy) 6%, transparent);
+    --tone-bg: color-mix(in srgb, var(--navy) 2%, var(--bg-page));
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: clamp(1.5rem, 2.5vw, 2.25rem) clamp(1.25rem, 2vw, 1.75rem) clamp(1.75rem, 3vw, 2.5rem);
+    background: var(--tone-bg);
+    border: 1px solid color-mix(in srgb, var(--navy) 8%, transparent);
+    border-radius: 6px;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+      transform var(--dur-medium) var(--ease-medium),
+      border-color var(--dur-medium) var(--ease-medium),
+      box-shadow var(--dur-medium) var(--ease-medium);
+  }
+  .bottle-card::before {
+    /* Linea ornamental sutil arriba */
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      var(--tone-accent) 30%,
+      var(--tone-accent) 70%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity var(--dur-medium) var(--ease-medium);
+  }
+  .bottle-card:hover {
+    transform: translateY(-6px);
+    border-color: color-mix(in srgb, var(--tone-accent) 24%, transparent);
+    box-shadow:
+      0 30px 60px -40px color-mix(in srgb, var(--tone-accent) 50%, transparent),
+      0 10px 24px -18px color-mix(in srgb, var(--navy) 22%, transparent);
+  }
+  .bottle-card:hover::before {
+    opacity: 1;
+  }
+
+  /* Tonos por edicion — sutiles, no toman over la palette */
+  [data-tone="onyx"]   .bottle-card {
+    --tone-accent: var(--navy);
+    --tone-halo: color-mix(in srgb, var(--navy) 10%, transparent);
+  }
+  [data-tone="violet"] .bottle-card {
+    --tone-accent: #6B4F8C;
+    --tone-halo: color-mix(in srgb, #6B4F8C 14%, transparent);
+  }
+  [data-tone="amber"]  .bottle-card {
+    --tone-accent: #B47A2F;
+    --tone-halo: color-mix(in srgb, #B47A2F 16%, transparent);
+  }
+
+  /* Header card: numeral + tag */
+  .bottle-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  .bottle-card__roman {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.5rem, 4.5vw, 4rem);
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    color: color-mix(in srgb, var(--tone-accent) 22%, transparent);
+    transition: color var(--dur-medium) var(--ease-medium);
+  }
+  .bottle-card:hover .bottle-card__roman {
+    color: var(--tone-accent);
+  }
+  .bottle-card__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    margin-top: 0.5rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tone-accent);
+    background: color-mix(in srgb, var(--tone-accent) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tone-accent) 18%, transparent);
+    border-radius: 999px;
+  }
+  .bottle-card__tag-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--tone-accent);
+    animation: bottle-pulse 2.4s ease-in-out infinite;
+  }
+
+  /* ─── Pedestal: halo + botella float + reflection + floor — más grande ─── */
+  .bottle-card__pedestal {
+    position: relative;
+    margin: 0 auto;
+    width: 100%;
+    aspect-ratio: 1 / 1.25;
+    max-width: 520px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8%;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  /* Trigger interno: botón que envuelve la imagen para click → zoom */
+  .bottle-card__zoom-trigger {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: 380px;
+    aspect-ratio: 1 / 1;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: zoom-in;
+    appearance: none;
+    -webkit-appearance: none;
+    transform-origin: 50% 50%;
+    transition: transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .bottle-card__zoom-trigger:focus-visible {
+    outline: 2px solid var(--tone-accent);
+    outline-offset: 6px;
+    border-radius: 6px;
+  }
+  .bottle-card__pedestal.is-zoomed .bottle-card__zoom-trigger {
+    transform: scale(1.7);
+    cursor: zoom-out;
+  }
+
+  /* Zoom hint — aparece en hover bottom-right */
+  .bottle-card__zoom-hint {
+    position: absolute;
+    bottom: 12%;
+    right: 14%;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: #FFFFFF;
+    background: var(--tone-accent);
+    border-radius: 999px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity var(--dur-medium) var(--ease-medium),
+      transform var(--dur-medium) var(--ease-medium);
+    pointer-events: none;
+  }
+  .bottle-card__pedestal:hover .bottle-card__zoom-hint,
+  .bottle-card__zoom-trigger:focus-visible ~ .bottle-card__zoom-hint {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .bottle-card__pedestal.is-zoomed .bottle-card__zoom-hint {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* En zoom: ocultar halo, reflection, floor para no estorbar la lectura */
+  .bottle-card__pedestal.is-zoomed .bottle-card__halo,
+  .bottle-card__pedestal.is-zoomed .bottle-card__reflection,
+  .bottle-card__pedestal.is-zoomed .bottle-card__floor {
+    opacity: 0;
+    transition: opacity var(--dur-medium) var(--ease-medium);
+  }
+
+  /* Reset button — aparece solo cuando zoomed */
+  .bottle-card__zoom-reset {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.85rem 0.45rem 0.65rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    background: var(--navy);
+    border: 1px solid color-mix(in srgb, #FFFFFF 18%, transparent);
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--navy) 50%, transparent);
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition:
+      opacity var(--dur-medium) var(--ease-medium),
+      transform var(--dur-medium) var(--ease-medium),
+      background-color var(--dur-fast) var(--ease-fast);
+  }
+  .bottle-card__pedestal.is-zoomed .bottle-card__zoom-reset {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .bottle-card__zoom-reset:hover {
+    background: var(--red);
+  }
+  /* Halo radial detras de la botella */
+  .bottle-card__halo {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95%;
+    height: 95%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      var(--tone-halo) 0%,
+      color-mix(in srgb, var(--tone-halo) 50%, transparent) 35%,
+      transparent 70%
+    );
+    z-index: 0;
+    transition: transform var(--dur-divine) var(--ease-divine),
+                opacity var(--dur-divine) var(--ease-divine);
+  }
+  .bottle-card:hover .bottle-card__halo {
+    transform: translate(-50%, -50%) scale(1.18);
+  }
+  /* Botella centrada con sombra editorial + float infinito.
+     Vive dentro de .bottle-card__zoom-trigger, así que el zoom se aplica al
+     trigger (que también escala los drop-shadows correctamente). */
+  .bottle-card__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter:
+      drop-shadow(0 22px 36px color-mix(in srgb, var(--tone-accent) 32%, transparent))
+      drop-shadow(0 8px 14px color-mix(in srgb, var(--navy) 24%, transparent));
+    animation: bottle-float 6s ease-in-out infinite;
+    transition: filter var(--dur-divine) var(--ease-divine);
+  }
+  /* En zoom: pausamos float */
+  .bottle-card__pedestal.is-zoomed .bottle-card__img {
+    animation-play-state: paused;
+  }
+  /* Hover (solo cuando NO está zoom): lift dramático */
+  .bottle-card:hover .bottle-card__pedestal:not(.is-zoomed) .bottle-card__zoom-trigger {
+    transform: translateY(-6px) rotate(-1.2deg);
+  }
+  .bottle-card:hover .bottle-card__img {
+    animation-play-state: paused;
+    filter:
+      drop-shadow(0 26px 40px color-mix(in srgb, var(--tone-accent) 40%, transparent))
+      drop-shadow(0 8px 16px color-mix(in srgb, var(--navy) 28%, transparent));
+  }
+  /* Reflection: botella invertida con mask gradient */
+  .bottle-card__reflection {
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 38%);
+    transform: translate(-50%, 0) scaleY(-1);
+    width: 320px;
+    max-width: 100%;
+    height: 320px;
+    aspect-ratio: 1 / 1;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.18;
+    z-index: 1;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to top, black 0%, transparent 55%);
+            mask-image: linear-gradient(to top, black 0%, transparent 55%);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                top var(--dur-divine) var(--ease-divine);
+  }
+  .bottle-card:hover .bottle-card__reflection {
+    opacity: 0.26;
+    top: calc(50% + 38%);
+  }
+  /* Floor — linea horizontal sutil bajo la botella */
+  .bottle-card__floor {
+    position: absolute;
+    bottom: 6%;
+    left: 12%;
+    right: 12%;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      color-mix(in srgb, var(--tone-accent) 22%, transparent) 30%,
+      color-mix(in srgb, var(--tone-accent) 22%, transparent) 70%,
+      transparent 100%
+    );
+    z-index: 1;
+  }
+
+  /* ─── Info editorial ─── */
+  .bottle-card__info {
+    margin-top: clamp(1rem, 2vw, 1.75rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .bottle-card__wax {
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.62rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--tone-accent);
+    opacity: 0.85;
+  }
+  .bottle-card__wax span {
+    color: var(--navy);
+    opacity: 0.55;
+  }
+  .bottle-card__name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.25rem, 1.8vw, 1.55rem);
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    color: var(--navy);
+  }
+  .bottle-card__rule {
+    display: block;
+    width: 36px;
+    height: 1px;
+    background: var(--tone-accent);
+    margin: 0.5rem 0 0.75rem;
+  }
+  .bottle-card__quote {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--navy);
+    opacity: 0.72;
+    text-wrap: balance;
+  }
+
+  /* Specs grid editorial */
+  .bottle-card__specs {
+    margin: 0.75rem 0 1.25rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 10%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 10%, transparent);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+  }
+  .bottle-card__spec {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    text-align: left;
+  }
+  .bottle-card__spec dt {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.55rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.5;
+  }
+  .bottle-card__spec dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--navy);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  /* CTA arrow */
+  .bottle-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--tone-accent);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--tone-accent) 30%, transparent);
+    width: fit-content;
+    transition: border-color var(--dur-medium) var(--ease-medium),
+                gap var(--dur-medium) var(--ease-medium);
+  }
+  .bottle-card__cta svg {
+    transition: transform var(--dur-medium) var(--ease-medium);
+  }
+  .bottle-card__cta:hover {
+    border-color: var(--tone-accent);
+    gap: 0.85rem;
+  }
+  .bottle-card__cta:hover svg {
+    transform: translateX(3px);
+  }
+
+  /* Animaciones */
+  @keyframes bottle-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+  @keyframes bottle-pulse {
+    0%, 100% { transform: scale(1);    opacity: 1; }
+    50%      { transform: scale(1.3);  opacity: 0.6; }
+  }
+
+  /* ─── Mobile / Tablet ─── */
+  @media (max-width: 1080px) {
+    .bottle-showcase__grid { grid-template-columns: 1fr; max-width: 560px; }
+    .bottle-card__specs { grid-template-columns: repeat(5, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .bottle-card__specs { grid-template-columns: repeat(3, 1fr); row-gap: 0.85rem; }
+  }
+
+  /* Reveal del info */
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-anim='up'].is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .bottle-card__info[data-anim='up'] {
+    transition-delay: calc(var(--i, 0) * 90ms);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bottle-card__img { animation: none; }
+    .bottle-card__tag-dot { animation: none; }
+    .bottle-card:hover { transform: none; }
+    .bottle-card:hover .bottle-card__img { transform: none; }
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  const sec = document.querySelector<HTMLElement>('[data-bottle-showcase]');
+  if (sec) {
+    // ─── Reveal ───
+    if ('IntersectionObserver' in window) {
+      const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            items.forEach((el, i) => {
+              setTimeout(() => el.classList.add('is-in'), 50 + i * 60);
+            });
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.18 });
+      io.observe(sec);
+    } else {
+      sec.querySelectorAll('[data-anim="up"]').forEach((el) => el.classList.add('is-in'));
+    }
+
+    // ─── Zoom inline: click en una botella la amplía in-place ───
+    const pedestals = sec.querySelectorAll<HTMLElement>('[data-bottle-pedestal]');
+    const triggers  = sec.querySelectorAll<HTMLButtonElement>('[data-bottle-zoom]');
+    const resetBtns = sec.querySelectorAll<HTMLButtonElement>('[data-bottle-zoom-reset]');
+
+    function closeAllZooms() {
+      pedestals.forEach((p) => p.classList.remove('is-zoomed'));
+    }
+
+    triggers.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ped = btn.closest<HTMLElement>('[data-bottle-pedestal]');
+        if (!ped) return;
+        const wasZoomed = ped.classList.contains('is-zoomed');
+        // Cierra cualquier otro zoom abierto (solo una botella zoomed a la vez)
+        closeAllZooms();
+        if (!wasZoomed) ped.classList.add('is-zoomed');
+      });
+    });
+
+    resetBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ped = btn.closest<HTMLElement>('[data-bottle-pedestal]');
+        ped?.classList.remove('is-zoomed');
+      });
+    });
+
+    // ESC global → cerrar zoom activo
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAllZooms();
+    });
+
+    // Click fuera de cualquier pedestal → cerrar
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-bottle-pedestal]')) closeAllZooms();
+    });
+  }
+</script>

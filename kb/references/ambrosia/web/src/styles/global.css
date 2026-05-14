@@ -1,0 +1,1512 @@
+/* ─── Fuentes oficiales del brandbook (locales) ─── */
+@font-face {
+  font-family: 'Optimus Princeps';
+  src: url('/fonts/OptimusPrinceps.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Optimus Princeps';
+  src: url('/fonts/OptimusPrincepsSemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Futura';
+  src: url('/fonts/FuturaStd-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Monkton Incised Solid (Adrian Williams / Club Type, body font oficial) ─── */
+@font-face {
+  font-family: 'Monkton Incised Solid';
+  src: url('/fonts/MonktonIncisedSolid.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@import "tailwindcss";
+
+@theme {
+  /* ─── Paleta oficial Pantone del brandbook ───
+     6 Pantone reservados para acentos y pattern decorativo. */
+  --color-purple: #430098;   /* Pantone Violet C — logo brand */
+  --color-yellow: #FFC03A;   /* Pantone 122 U */
+  --color-pantone-red: #E22319;   /* Pantone 485 — pleca/lacre */
+  --color-blue:   #0055B7;   /* Pantone 2935 C */
+  --color-pink:   #DD2396;   /* Pantone Pink C */
+  --color-cyan:   #2DBBD8;   /* Pantone 311 C */
+
+  /* ─── Tokens del sitio (jerarquía cromática) ───
+     Navy marino dominante + cream alterno + rojo acento. */
+  --navy:        #15173d;   /* Navy dominante (fondo principal) */
+  --navy-deep:   #0c0e2a;   /* Footer y bloques profundos */
+  --navy-soft:   #1d2050;   /* Frames de imagen */
+  --red:         #E22319;   /* Pantone 485 oficial — acento principal */
+  --red-deep:    #b51c14;   /* Hover de rojo (10% darker) */
+  --cream:       #f6f1e6;   /* Fondo claro / texto sobre navy */
+  --bone:        #ece4d2;   /* Cream alterno más cálido */
+  --color-white: #FFFFFF;
+
+  /* Aliases retro-compatibles */
+  --color-cream: var(--cream);
+  --color-red:   var(--red);     /* Pantone 485 #E22319 */
+  --color-ink:   var(--navy-deep);
+
+  /* Border radius escalado — Cloud23 usa radios muy generosos */
+  --radius-sm: 12px;
+  --radius-md: 24px;
+  --radius-lg: 48px;
+  --radius-xl: 80px;
+
+  /* Tipografías oficiales */
+  --font-display: 'Optimus Princeps', 'Garamond', serif;
+  --font-script:  'Optimus Princeps', 'Garamond', serif;  /* alias compat: el brandbook no usa script */
+  /* Body font: Monkton Incised Solid → fallbacks por si la fuente no carga. */
+  --font-body:    'Monkton Incised Solid', 'Optimus Princeps', 'Garamond', serif;
+
+  /* Espaciados editoriales */
+  --tracking-display: 0.08em;
+  --tracking-luxury:  0.18em;
+  --tracking-eyebrow: 0.32em;
+
+  /* Sistema de motion — 4 curvas + 4 duraciones canónicas */
+  --ease-fast:     cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-medium:   cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-divine:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-ceremony: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Sistema de duración recalibrado (mayo 2026):
+     snappy en interacción, elegante en reveal, ceremonioso solo en
+     hitos cinemáticos. Stagger por item se mantiene corto (≤ 70ms)
+     para que listas de 5+ no compounden lag perceptible. */
+  --dur-fast:     160ms;  /* micro: focus, border, ícono pequeño */
+  --dur-medium:   320ms;  /* hover, lift, color-shift en cards */
+  --dur-divine:   620ms;  /* reveals de texto en scroll */
+  --dur-ceremony: 1400ms; /* cinematic: mask reveal, kenburns, pin */
+
+  /* ─── Breakpoints canónicos (token reference para nuevos componentes) ───
+     Sistema base. Componentes legacy usan valores ad-hoc; nuevas features
+     deben usar estas variables vía @media (max-width: var(--bp-md)).
+     NOTA: CSS @media no acepta CSS vars directamente. Estos tokens viven
+     como documentación + para usar en JS (getComputedStyle). */
+  --bp-sm: 480px;   /* phones (iPhone SE → iPhone Pro Max) */
+  --bp-md: 768px;   /* tablets portrait */
+  --bp-lg: 1024px;  /* tablets landscape / small laptops */
+  --bp-xl: 1280px;  /* desktops */
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TOKENS SEMÁNTICOS — jerarquía cromática del brandbook
+   Navy marino dominante con cream alterno. Rojo acento. Pantone como decorativo.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  /* Fondos — paleta editorial luxury con blanco puro silencioso.
+     #FFFFFF maximiza el contraste con el navy y el rojo Pantone 485,
+     y deja respirar el grain como única textura tonal de la página. */
+  --bg-page:          #FFFFFF;                 /* blanco puro luxury (silent paper) */
+  --bg-card:          #FFFFFF;                 /* cards en blanco puro sobre bg azulado (contraste sutil) */
+  --bg-navy:          var(--navy);             /* secciones oscuras (Hero, Producto, Origen) */
+  --bg-navy-deep:     var(--navy-deep);        /* footer */
+  --bg-elevated:      var(--color-white);
+
+  /* Bloques sólidos para secciones específicas */
+  --bg-purple-block:  var(--navy);
+  --bg-red-block:     var(--red);
+  --bg-cyan-block:    var(--color-cyan);
+
+  /* Tinta — navy profundo sobre blanco, cream sobre navy */
+  --text-primary:     var(--navy);             /* texto principal sobre blanco */
+  --text-on-navy:     var(--cream);            /* texto sobre navy */
+  --text-on-color:    var(--color-white);      /* sobre purple/red bloques sólidos */
+  --text-on-cyan:     var(--navy-deep);        /* sobre cyan, navy se lee mejor */
+
+  /* Líneas y blurs */
+  --line-soft:        color-mix(in srgb, var(--navy) 14%, transparent);
+  --line-hairline:    color-mix(in srgb, var(--navy) 8%, transparent);
+  --line-on-navy:     color-mix(in srgb, var(--cream) 18%, transparent);
+  --nav-blur:         color-mix(in srgb, #FFFFFF 88%, transparent);
+
+  /* ─── OpenType feature stacks (FASE 1 refinamiento editorial) ───
+     --feat-display: ligatures + contextual alternates + kerning para titulares
+     --feat-body:    ligatures + kerning + tabular nums para cuerpo y stats
+  */
+  --feat-display: "liga" 1, "dlig" 1, "calt" 1, "kern" 1, "ss01" 1;
+  --feat-body:    "liga" 1, "kern" 1, "lnum" 1;
+}
+
+html {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: var(--feat-body);
+  /* hanging-punctuation: Safari + Chrome 132+; degrada gracefully en Firefox */
+  hanging-punctuation: first allow-end last;
+  /* Evita CLS cuando aparece/desaparece scrollbar */
+  scrollbar-gutter: stable;
+  /* Deshabilita scroll-anchoring del browser: durante layout shifts (fuentes,
+     imagenes lazy, hidratacion del 3D model), el browser intenta "mantener"
+     visible el contenido ancla y empuja scrollY abajo. Sin anchor, la pagina
+     respeta el scrollTo(0,0) inicial del Base.astro inline script. */
+  overflow-anchor: none;
+}
+body { overflow-anchor: none; }
+
+/* ─── Skip link a11y: keyboard users saltan al contenido ─── */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--navy);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: top var(--dur-fast) var(--ease-divine);
+}
+.skip-link:focus {
+  top: 1rem;
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+
+/* Headings y display: ligaduras + dlig + calt activos para refinement luxury */
+h1, h2, h3, h4,
+.display-xl,
+.eyebrow,
+[class*="__title"],
+[class*="__eyebrow"] {
+  font-feature-settings: var(--feat-display);
+  font-optical-sizing: auto;
+}
+
+/* Stats con números — lining + tabular nums para alineación vertical */
+.stat-mix .num,
+[class*="__num"],
+[class*="__year"],
+[class*="__value"] {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+
+/* Selección de texto — rojo brand sobre cream */
+::selection {
+  background: var(--red);
+  color: var(--cream);
+}
+
+/* Utilidades editoriales */
+.font-display { font-family: var(--font-display); }
+.font-script  { font-family: var(--font-script); }
+.font-body    { font-family: var(--font-body); }
+
+.tracking-display  { letter-spacing: var(--tracking-display); }
+.tracking-luxury   { letter-spacing: var(--tracking-luxury); }
+.tracking-eyebrow  { letter-spacing: var(--tracking-eyebrow); }
+
+/* Display XL — momentos editoriales luxury (hero, section openings) */
+.display-xl {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(4rem, 12vw, 11rem);
+  line-height: 0.92;
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  color: var(--navy);
+}
+
+/* text-balance — para títulos cortos centrados (Manifesto, Hero) */
+.text-balance { text-wrap: balance; }
+
+/* ─── Sistema de énfasis editorial (FASE 2 refinamiento luxury) ───
+   Inspiración Clase Azul: italics como técnica primaria de énfasis,
+   no solo color. El rojo se reserva para claims fuertes brand.
+
+   <em>                 → italic neutro hereda color (60% de los énfasis editoriales sutiles)
+   <em class="brand">   → italic + rojo Pantone 485 (40% claims fuertes hero / titles)
+   <em class="lining">  → underline 1px sin italic (reservado, raro)
+   .highlight-red       → utility no-italic rojo (alias legacy, no usar en nueva copy)
+*/
+em {
+  color: inherit;
+  font-style: italic;
+  /* swash + alternates si la fuente lo soporta; degrada a italic regular */
+  font-feature-settings: var(--feat-display);
+}
+em.brand {
+  color: var(--red);
+  font-style: italic;
+}
+em.lining {
+  font-style: normal;
+  color: inherit;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.04em;
+}
+.highlight-red,
+em.highlight-red,
+.highlight {
+  color: var(--red);
+  font-style: normal;
+}
+
+/* ─── FASE 3: Utilities editoriales tipo magazine print ─── */
+
+/* Drop cap — primera letra capitular monumental al inicio de un body block.
+   Aplicar agregando class="has-dropcap" en el contenedor <p> o wrapper. */
+.has-dropcap > p:first-of-type::first-letter,
+p.has-dropcap::first-letter {
+  font-family: var(--font-display);
+  font-size: 4.2em;
+  line-height: 0.85;
+  float: left;
+  padding: 0.05em 0.12em 0 0;
+  color: var(--navy);
+  font-weight: 400;
+  font-feature-settings: var(--feat-display);
+}
+
+/* Numerales fantasma 01–05 eliminados a petición del usuario.
+   Si en el futuro se quieren reactivar, restaurar:
+     section:has(> .section-numeral) { position: relative; }
+     .section-numeral { ... }
+   y agregar <span class="section-numeral">XX</span> dentro de la sección. */
+
+/* Stat mix — pareja serif (número) + sans uppercase (unidad) inline.
+   Uso: <span class="stat-mix"><span class="num">1,200</span><span class="unit">botellas</span></span> */
+.stat-mix {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+}
+.stat-mix .num {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.01em;
+}
+.stat-mix .unit {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.6em;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+/* ─── FASE 5: Aspect-ratio editorial fixed ─── */
+.ar-portrait  { aspect-ratio: 4 / 5; }
+.ar-landscape { aspect-ratio: 16 / 10; }
+.ar-square    { aspect-ratio: 1 / 1; }
+.ar-tall      { aspect-ratio: 3 / 4; }
+
+/* Image mask reveal — clip-path animado en motion.ts.
+   Estado inicial inset(0 100% 0 0) — la animación lo lleva a inset(0 0 0 0). */
+[data-reveal="mask-img"] {
+  clip-path: inset(0 100% 0 0);
+  will-change: clip-path;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal="mask-img"] {
+    clip-path: inset(0 0 0 0) !important;
+  }
+}
+
+/* Eyebrow — Futura Bold uppercase, rojo brand acento */
+.eyebrow {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--red);
+  opacity: 0.85;
+}
+
+/* Eyebrow sobre fondo navy: cream con opacity */
+.bg-navy .eyebrow,
+.is-navy .eyebrow {
+  color: var(--cream);
+  opacity: 0.7;
+}
+
+.paper {
+  background-color: var(--bg-page);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain, .diptych__figure img { animation: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Grain overlay — textura de papel manuscrito sobre TODA la página
+   Visible y consistente, mezcla multiply para no romper colores.
+   ───────────────────────────────────────────────────────────── */
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 99;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .85 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 320px 320px;
+  mix-blend-mode: multiply;
+  opacity: 0.06;                    /* bajado de 0.13 — sobre blanco se ve más obvio */
+  animation: grain-drift 5s steps(5) infinite;
+  will-change: transform;
+}
+/* Vignette sutil — oscurece esquinas para foco editorial */
+.grain::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(
+    ellipse 100% 80% at 50% 50%,
+    transparent 50%,
+    color-mix(in srgb, var(--navy) 18%, transparent) 100%
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.4;
+  pointer-events: none;
+}
+@keyframes grain-drift {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-3px, 1px); }
+  40%  { transform: translate(2px, -2px); }
+  60%  { transform: translate(-1px, -3px); }
+  80%  { transform: translate(1px, 2px); }
+  100% { transform: translate(0, 0); }
+}
+@media (max-width: 768px) {
+  .grain { opacity: 0.04; }
+  .grain::after { opacity: 0.22; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .grain { animation: none; }
+}
+
+/* Cursor: usa el del sistema (sin custom orb). */
+
+/* ─────────────────────────────────────────────────────────────
+   Link underline left→right (clase opt-in)
+   ───────────────────────────────────────────────────────────── */
+.link-rule {
+  position: relative;
+  display: inline-block;
+}
+.link-rule::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform var(--dur-medium) var(--ease-medium);
+}
+.link-rule:hover::after { transform: scaleX(1); }
+
+/* En Nav y Footer el underline es bermellón aunque el link sea otro color */
+.nav__links a.link-rule::after,
+.footer__nav a.link-rule::after { background: currentColor; }
+
+/* ─────────────────────────────────────────────────────────────
+   Sistema de botones unified — UX/UI pro
+   Variants: primary (filled) | ghost (outline) | quiet (text-only)
+   Sizes:    sm | md (default) | lg
+   Microinteracciones: arrow slide on hover, ripple-lite focus, lift opcional
+   ───────────────────────────────────────────────────────────── */
+.btn {
+  --btn-fg: var(--navy);
+  --btn-bg: transparent;
+  --btn-bd: var(--navy);
+  --btn-fg-hover: var(--navy);
+  --btn-bg-hover: var(--navy);
+  --btn-shadow: 0 1px 0 0 color-mix(in srgb, var(--navy) 6%, transparent);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.95rem 1.6rem;
+  border: 1px solid var(--btn-bd);
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--btn-shadow);
+  transition:
+    background-color var(--dur-medium) var(--ease-medium),
+    color var(--dur-medium) var(--ease-medium),
+    border-color var(--dur-medium) var(--ease-medium),
+    transform var(--dur-medium) var(--ease-medium),
+    gap var(--dur-medium) var(--ease-medium),
+    box-shadow var(--dur-medium) var(--ease-medium);
+}
+.btn:hover {
+  background: var(--btn-bg-hover);
+  color: var(--btn-fg-hover);
+  gap: 0.85rem;
+  box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--navy) 35%, transparent);
+}
+.btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--navy) 50%, transparent);
+  outline-offset: 3px;
+}
+.btn:active { transform: translateY(1px); }
+.btn[disabled], .btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Variants */
+.btn--primary {
+  --btn-fg: var(--color-cream);
+  --btn-bg: var(--navy);
+  --btn-bd: var(--navy);
+  --btn-fg-hover: var(--navy);
+  --btn-bg-hover: var(--color-cream);
+}
+.btn--primary:hover {
+  border-color: var(--navy);
+  box-shadow: 0 12px 28px -10px color-mix(in srgb, var(--navy) 45%, transparent);
+}
+.btn--ghost {
+  --btn-fg: var(--navy);
+  --btn-bg: transparent;
+  --btn-bd: var(--navy);
+  --btn-fg-hover: var(--color-cream);
+  --btn-bg-hover: var(--navy);
+}
+.btn--quiet {
+  --btn-bd: transparent;
+  --btn-shadow: none;
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
+}
+.btn--quiet:hover {
+  background: color-mix(in srgb, var(--navy) 8%, transparent);
+  color: var(--navy);
+  box-shadow: none;
+}
+
+/* Sizes */
+.btn--sm { padding: 0.7rem 1.2rem; font-size: 0.62rem; }
+.btn--lg { padding: 1.1rem 2rem; font-size: 0.78rem; gap: 0.7rem; }
+
+/* Arrow slide — usa <span data-arrow> dentro */
+.btn [data-arrow] {
+  display: inline-block;
+  transition: transform var(--dur-medium) var(--ease-medium);
+}
+.btn:hover [data-arrow] { transform: translateX(4px); }
+
+/* Variantes de color via accent — los botones sobre páginas internas heredan --page-accent */
+.btn--accent {
+  --btn-fg: var(--page-accent, var(--navy));
+  --btn-bd: var(--page-accent, var(--navy));
+  --btn-fg-hover: var(--color-cream);
+  --btn-bg-hover: var(--page-accent, var(--navy));
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Vignette global — papel editorial con esquinas oscuras sutiles
+   Solo aplica a la home (.paper) — internas tienen su propio accent.
+   ───────────────────────────────────────────────────────────── */
+body.paper::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: radial-gradient(
+    ellipse 110% 90% at 50% 50%,
+    transparent 55%,
+    color-mix(in srgb, var(--navy) 22%, transparent) 100%
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 98;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Title skew on viewport-enter (clase opt-in)
+   ───────────────────────────────────────────────────────────── */
+.title-skew {
+  transform: skewX(-5deg);
+  opacity: 0;
+  transition: transform var(--dur-divine) var(--ease-divine),
+              opacity var(--dur-divine) var(--ease-divine);
+}
+.title-skew.is-in {
+  transform: skewX(0deg);
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-skew { transform: none !important; opacity: 1 !important; }
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   LUXURY REFINEMENT LAYER (ui-ux-pro-max)
+   Capa aditiva sobre el sistema existente. Sin cambiar paleta ni
+   tipografía. Mejora: tracking, touch targets, focus rings, hover
+   cinemático, underlines refinados, cursor states.
+   ═════════════════════════════════════════════════════════════════ */
+
+/* ─── Botones: touch target a11y + tracking luxury + lift sutil ─── */
+.btn {
+  min-height: 44px;
+  letter-spacing: 0.34em;
+  /* Elimina el 300ms tap-delay en mobile (touch-action manipulation) */
+  touch-action: manipulation;
+  transition:
+    background-color var(--dur-medium) var(--ease-divine),
+    color var(--dur-medium) var(--ease-divine),
+    border-color var(--dur-medium) var(--ease-divine),
+    transform var(--dur-medium) var(--ease-divine),
+    gap var(--dur-medium) var(--ease-divine),
+    box-shadow var(--dur-medium) var(--ease-divine);
+}
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--navy) 40%, transparent);
+}
+.btn:active {
+  transform: scale(0.97);
+  transition-duration: 120ms;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
+}
+.btn--lg {
+  padding: 1.15rem 2.2rem;
+  min-height: 52px;
+  letter-spacing: 0.36em;
+}
+.btn--primary:hover {
+  box-shadow: 0 16px 36px -14px color-mix(in srgb, var(--navy) 50%, transparent);
+}
+.btn--quiet:hover {
+  /* Luxury quiet: no fondo, solo crece tracking + underline sutil */
+  background: transparent;
+  letter-spacing: 0.4em;
+  box-shadow: 0 1px 0 0 currentColor;
+}
+.btn [data-arrow] {
+  transition: transform var(--dur-medium) var(--ease-divine);
+}
+.btn:hover [data-arrow] { transform: translateX(6px); }
+
+/* ─── Link rule: underline editorial con thickness hover ─── */
+.link-rule::after {
+  bottom: -4px;
+  transition:
+    transform var(--dur-medium) var(--ease-divine),
+    height var(--dur-medium) var(--ease-divine);
+}
+.link-rule:hover::after { height: 2px; }
+
+/* ─── Focus visible global: outline brand red 2px offset 4px ─── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* ─── Inputs editorial: focus con underline rojo animado ─── */
+.concierge-form__input {
+  transition:
+    border-color var(--dur-medium) var(--ease-divine),
+    background-color var(--dur-medium) var(--ease-divine),
+    box-shadow var(--dur-medium) var(--ease-divine);
+}
+.concierge-form__input:focus {
+  outline: none;
+  border-color: var(--red);
+  background: var(--bg-page);
+  box-shadow: 0 1px 0 0 var(--red), 0 0 0 3px color-mix(in srgb, var(--red) 12%, transparent);
+}
+
+/* ─── Cursor pointer en cards/elementos clickables ─── */
+.recipe-card,
+.worlds__card,
+.tables-split__card,
+.concierge-intent__card,
+button[type="submit"],
+[role="button"],
+.recipe-index__chip {
+  cursor: pointer;
+}
+
+/* ─── Nav language switcher: tracking luxury en hover ─── */
+.nav__lang {
+  transition:
+    opacity var(--dur-medium) var(--ease-divine),
+    border-color var(--dur-medium) var(--ease-divine),
+    background-color var(--dur-medium) var(--ease-divine),
+    letter-spacing var(--dur-medium) var(--ease-divine);
+}
+.nav__lang:hover { letter-spacing: 0.3em; }
+
+/* ─── Nav links: lift sutil en hover (currently solo opacity) ─── */
+.nav__link {
+  transition:
+    opacity var(--dur-fast) var(--ease-divine),
+    background-color var(--dur-fast) var(--ease-divine),
+    transform var(--dur-fast) var(--ease-divine),
+    letter-spacing var(--dur-medium) var(--ease-divine);
+}
+.nav__link:hover { letter-spacing: 0.24em; }
+
+/* ─── Reduced motion: desactivar lifts y growings ─── */
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover,
+  .btn:active { transform: none !important; }
+  .btn--quiet:hover,
+  .nav__lang:hover,
+  .nav__link:hover { letter-spacing: inherit !important; }
+}
+
+/* ─── HeroVideo en home: flujo natural sin overlap ─────────────────────────
+   El HeroVideo ocupa 100vh con position: relative (declarado en su scoped CSS).
+   La siguiente sección (BrandStatement) cancela el margin-top:-30vh que estaba
+   diseñado para overlap con el Hero scroll-driven original.
+
+   Usar `~` (general sibling, no adjacent `+`) porque Astro inserta un
+   <script> tag entre el HeroVideo section y el BrandStatement section,
+   rompiendo el adjacent selector. */
+.hero-video ~ .brand-statement {
+  margin-top: 0 !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  box-shadow: none !important;
+  padding-top: clamp(5rem, 10vw, 9rem) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   📱 MOBILE PRODUCTION HARDENING (appendix mayo 2026)
+   Hardening quirúrgico para producción mobile sin tocar desktop.
+   Solo aplica en ≤ 768px (con sub-breakpoints donde corresponde).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Safety net global — evita horizontal scroll por elementos
+   absolute/decor que se desbordan al edge en viewports estrechos. */
+html, body {
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+}
+
+/* Reduce CLS y mejora paint en dispositivos low-end */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ─── Mobile ≤ 768px ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Body min 16px (1rem) — previene iOS auto-zoom en inputs focus.
+     Reglas legacy con clamp 0.95rem se elevan al mínimo correcto. */
+  html { font-size: 100%; } /* 16px base */
+
+  /* Inputs / selects / textareas: forzar font-size ≥ 16px previene
+     que iOS Safari haga zoom-in al hacer focus. CRÍTICO para UX. */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Touch targets mínimos 44×44 (Apple HIG, W3C WCAG 2.5.5).
+     Aplica a links sueltos que no tengan padding heredado de .btn. */
+  a[href]:not(.btn):not(.eyebrow):not(.skip-link),
+  button:not(.btn) {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Reduce decor en mobile para evitar congestión visual y mejorar perf */
+  .floating-decor {
+    opacity: calc(var(--decor-opacity, 0.7) * 0.55) !important;
+  }
+
+  /* Inner padding consistente en mobile para todos los blocks */
+  [class*="__inner"] {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* ─── Phones estrechos ≤ 480px ───────────────────────────────── */
+@media (max-width: 480px) {
+  /* Padding lateral más generoso para que el contenido respire */
+  section {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  /* Forms en mobile: stack vertical garantizado, no row */
+  .concierge-form__row {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Botones full-width en mobile estrecho — mejor tap-target */
+  .concierge-form__submit {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ─── Tap target spacing: cards interactivas deben tener
+   suficiente separación para evitar mis-taps en grids. */
+@media (max-width: 720px) {
+  .worlds__list,
+  .tables-split__list,
+  .concierge-intent__list,
+  .buy-points__grid,
+  .recipe-index__grid {
+    gap: 1rem !important;
+  }
+}
+
+/* ─── Mejora visual de focus en mobile (a11y + UX) ───────────── */
+@media (hover: none) and (pointer: coarse) {
+  /* En touch devices, los focus rings deben ser MÁS visibles
+     porque no hay hover state. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ✍ TIPOGRAFÍA REFINADA PARA MONKTON INCISED SOLID (mayo 2026)
+   Monkton es display inscriptional (Trajan-derived). Para que respire
+   bien en body necesita: más letter-spacing, más line-height, sizes
+   ligeramente más compactos (Monkton "lee grande" per em).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Baseline html → tamaño + leading globales sanos */
+html {
+  font-size: 100%;          /* 16px base */
+  line-height: 1.65;        /* generoso por defecto */
+  letter-spacing: 0.012em;  /* tracking sutil universal para incised */
+}
+
+/* Body por defecto: legibilidad larga */
+body {
+  font-size: 1rem;          /* 16px — mínimo legible mobile */
+  font-weight: 400;
+  text-wrap: pretty;        /* balance natural de last-line cuando es soportado */
+}
+
+/* Párrafos en cualquier contexto — separación + tracking calibrados */
+p {
+  line-height: 1.68;
+  letter-spacing: 0.014em;
+  text-wrap: pretty;
+}
+
+/* Headings: Monkton no se usa aquí (es Optimus Princeps),
+   pero igual aseguramos un balance contra el body */
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;       /* balance líneas en titulares */
+  letter-spacing: 0.01em;
+}
+
+/* Listas más editoriales */
+ul, ol {
+  line-height: 1.7;
+  letter-spacing: 0.014em;
+}
+
+/* Captions / metas / footnotes */
+small,
+.caption,
+[class*="__meta"],
+[class*="__caption"],
+[class*="__phon"] {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+}
+
+/* Eyebrows uppercase — Monkton ya es caps por naturaleza,
+   reducimos tracking ligeramente para no sobre-espaciar */
+.eyebrow,
+[class*="__eyebrow"],
+[class*="__label"]:not(input),
+[class*="__num"] {
+  letter-spacing: 0.28em;   /* antes 0.32em → un poco más compacto */
+}
+
+/* Botones — Monkton mid-weight balanceada */
+.btn {
+  letter-spacing: 0.30em;   /* antes 0.34em */
+  font-weight: 500;
+}
+
+/* Form inputs — texto del usuario al teclear (no Monkton, mejor system) */
+input,
+textarea,
+select {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+/* Labels SÍ usan Monkton para consistencia editorial */
+label,
+[class*="__label"] {
+  font-family: var(--font-body);
+}
+
+/* Long-form body text (Diptych, Section bodies) — más leading */
+[class*="__body"]:not([class*="__bodyXl"]),
+.body-text {
+  line-height: 1.72;
+  letter-spacing: 0.018em;
+}
+
+/* Nav links — Monkton uppercase tracking sutil */
+.nav__link,
+[class*="nav__"] {
+  letter-spacing: 0.22em;
+}
+
+/* Optimus se queda con su tracking propio en displays grandes */
+.display-xl,
+.title-skew,
+[class*="__title"] {
+  letter-spacing: 0.02em;
+}
+
+/* Mobile: reduce un toque tracking + size para no romper layout */
+@media (max-width: 720px) {
+  html { letter-spacing: 0.008em; }
+  p { letter-spacing: 0.01em; line-height: 1.6; }
+  .btn { letter-spacing: 0.24em; }
+  .eyebrow,
+  [class*="__eyebrow"] { letter-spacing: 0.22em; }
+}
+
+/* Selección de texto — paleta brand */
+::selection {
+  background: var(--red);
+  color: #FFFFFF;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOBILE OPTIMIZATIONS — touch targets, safe-area, iOS anti-zoom
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Safe-area insets para iPhone notch (header/footer/nav) */
+@supports (padding: env(safe-area-inset-top)) {
+  .paper {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Inputs: prevenir zoom automatico en iOS (font-size minimo 16px) */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Touch-action en TODOS los interactivos para eliminar 300ms tap delay */
+a, button, [role="button"], input, select, textarea, label {
+  touch-action: manipulation;
+}
+
+/* Touch targets minimos (WCAG AAA: 44x44px) */
+@media (hover: none) and (pointer: coarse) {
+  button:not([aria-hidden="true"]),
+  a:not(.eyebrow):not(.link-rule):not(.footer__credit):not(.footer__admin) {
+    min-height: 44px;
+  }
+  /* Aumenta hit area sin alterar visual: padding o tamaño extra hidden.
+     WCAG 2.1 Success Criterion 2.5.5: minimum 44×44 css px target size. */
+  .footer__social-link {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .footer__admin {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .nav__brand,
+  .nav__link {
+    min-height: 44px;
+    padding-block: 0.75rem;
+  }
+}
+
+/* Smooth scroll del documento */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* Evita overflow horizontal por elementos absolute mal posicionados */
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Tap highlight color: usar acento brand en lugar del azul nativo */
+* {
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--red) 12%, transparent);
+}
+
+/* Focus visible global mejor mobile/keyboard */
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Inputs/textareas: zoom-friendly + sin border interno raro iOS */
+input, textarea, select, button {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+/* iOS Safari: forzar height del viewport real (svh) */
+@supports (height: 100svh) {
+  .full-vh { height: 100svh; }
+}
+
+/* Mobile-only: ocultar cursor custom si existe */
+@media (hover: none) and (pointer: coarse) {
+  [data-cursor] { cursor: pointer; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AMBROSIA ChatBubble — Concierge con burbujas + voz ElevenLabs
+   100% AMBROSIA: navy #15173d + red #E22319 + Optimus / Futura. Sin orbe.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.amb-chat {
+  position: fixed;
+  bottom: clamp(1rem, 2.5vw, 1.75rem);
+  right: clamp(1rem, 2.5vw, 1.75rem);
+  z-index: 50;
+  font-family: 'Futura', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #15173d;
+  --amb-navy: #15173d;
+  --amb-red: #E22319;
+  --amb-cream: #f6f1e6;
+  --amb-paper: #ffffff;
+  --amb-ink: #1a1a1a;
+  --amb-mute: #6b6f8a;
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .amb-chat { margin-bottom: env(safe-area-inset-bottom); }
+}
+
+/* ─── FAB — burbuja circular compacta con bounce cinemático periódico ─── */
+.amb-chat__fab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: var(--amb-navy);
+  color: #fff;
+  cursor: pointer;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 10px 28px rgba(21,23,61,0.36),
+    0 2px 6px rgba(21,23,61,0.18);
+  transition:
+    transform 420ms cubic-bezier(0.22,1,0.36,1),
+    box-shadow 420ms cubic-bezier(0.22,1,0.36,1),
+    background 320ms cubic-bezier(0.22,1,0.36,1);
+  /* Bounce periódico: ciclo 7s, animación efectiva ~12% (≈0.85s).
+     El resto del tiempo el FAB descansa quieto. */
+  animation: amb-fab-bounce 7s cubic-bezier(0.22,1,0.36,1) infinite;
+  will-change: transform;
+}
+/* Bounce de 4 tiempos al final del ciclo: lift → settle → micro-rebote */
+@keyframes amb-fab-bounce {
+  0%, 86%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+  89%           { transform: translateY(-7px) scale(1.06) rotate(-2deg); }
+  92%           { transform: translateY(2px)  scale(0.97) rotate(2deg); }
+  95%           { transform: translateY(-3px) scale(1.02) rotate(-1deg); }
+  98%           { transform: translateY(0)    scale(1.0)  rotate(0deg); }
+}
+.amb-chat__fab:hover {
+  animation-play-state: paused;
+  transform: translateY(-3px) scale(1.06);
+  background: var(--amb-red);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.1) inset,
+    0 18px 42px rgba(226,35,25,0.38),
+    0 4px 10px rgba(21,23,61,0.22);
+}
+.amb-chat__fab:focus-visible {
+  outline: 2px solid var(--amb-red);
+  outline-offset: 4px;
+}
+.amb-chat__fab:active {
+  transform: translateY(-1px) scale(0.97);
+  transition-duration: 120ms;
+}
+.amb-chat__fab-icon {
+  flex-shrink: 0;
+  /* Sutil aleteo del icono fuera de fase con el bounce — capa secundaria */
+  animation: amb-fab-icon-sway 7s cubic-bezier(0.22,1,0.36,1) infinite;
+}
+@keyframes amb-fab-icon-sway {
+  0%, 86%, 100% { transform: rotate(0deg); }
+  90%           { transform: rotate(-6deg); }
+  94%           { transform: rotate(4deg); }
+  97%           { transform: rotate(-1deg); }
+}
+.amb-chat__fab-dot {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--amb-red);
+  box-shadow:
+    0 0 0 2px var(--amb-navy),
+    0 0 0 0 rgba(226,35,25,0.55);
+  animation: amb-pulse 2.2s cubic-bezier(0.4,0,0.6,1) infinite;
+}
+.amb-chat__fab:hover .amb-chat__fab-dot {
+  box-shadow:
+    0 0 0 2px var(--amb-red),
+    0 0 0 0 rgba(226,35,25,0);
+}
+@keyframes amb-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--amb-navy), 0 0 0 0 rgba(226,35,25,0.55); }
+  50%      { box-shadow: 0 0 0 2px var(--amb-navy), 0 0 0 7px rgba(226,35,25,0); }
+}
+
+/* ─── Panel ─── */
+.amb-chat__panel {
+  width: min(380px, calc(100vw - 2rem));
+  height: min(560px, calc(100vh - 6rem));
+  background: var(--amb-paper);
+  border-radius: 18px;
+  box-shadow:
+    0 24px 64px rgba(21,23,61,0.28),
+    0 8px 20px rgba(21,23,61,0.14),
+    0 0 0 1px rgba(21,23,61,0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: amb-rise 320ms cubic-bezier(0.2,0.7,0.2,1);
+  transform-origin: bottom right;
+}
+@keyframes amb-rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ─── Header navy gradient ─── */
+.amb-chat__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.05rem 1.15rem 0.95rem;
+  background:
+    linear-gradient(135deg, #1a1d4a 0%, #15173d 60%, #0e1030 100%);
+  color: #fff;
+  position: relative;
+}
+.amb-chat__head::after {
+  content: '';
+  position: absolute;
+  left: 1.15rem;
+  right: 1.15rem;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(226,35,25,0.6), transparent);
+}
+.amb-chat__head-text { min-width: 0; }
+.amb-chat__title {
+  margin: 0;
+  font-family: 'Optimus Princeps', Georgia, serif;
+  font-weight: 400;
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.amb-chat__subtitle {
+  margin: 0.18rem 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.62);
+  font-family: 'Futura', sans-serif;
+}
+.amb-chat__status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+}
+.amb-chat__status-dot--on {
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74,222,128,0.6);
+}
+.amb-chat__status-dot--pending {
+  background: #fbbf24;
+  animation: amb-pulse-soft 1.2s ease-in-out infinite;
+}
+@keyframes amb-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+.amb-chat__welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.amb-chat__head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+.amb-chat__icon-btn,
+.amb-chat__close {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.04);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 200ms ease, border-color 200ms ease;
+}
+.amb-chat__icon-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.35);
+}
+.amb-chat__close:hover {
+  background: rgba(226,35,25,0.18);
+  border-color: rgba(226,35,25,0.55);
+}
+
+/* ─── Messages ─── */
+.amb-chat__messages {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  background: linear-gradient(180deg, #fdfcfa 0%, #f9f6ee 100%);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(21,23,61,0.18) transparent;
+}
+.amb-chat__messages::-webkit-scrollbar { width: 6px; }
+.amb-chat__messages::-webkit-scrollbar-thumb {
+  background: rgba(21,23,61,0.16);
+  border-radius: 3px;
+}
+
+.amb-chat__msg {
+  max-width: 82%;
+  padding: 0.6rem 0.85rem;
+  border-radius: 14px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  word-wrap: break-word;
+  animation: amb-msg-in 240ms cubic-bezier(0.2,0.7,0.2,1);
+}
+@keyframes amb-msg-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.amb-chat__msg--user {
+  align-self: flex-end;
+  background: var(--amb-navy);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 8px rgba(21,23,61,0.18);
+}
+.amb-chat__msg--agent {
+  align-self: flex-start;
+  background: #fff;
+  color: var(--amb-ink);
+  border: 1px solid rgba(21,23,61,0.08);
+  border-bottom-left-radius: 4px;
+}
+
+/* Typing indicator */
+.amb-chat__msg--typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.7rem 0.95rem;
+}
+.amb-chat__msg--typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(21,23,61,0.45);
+  animation: amb-dot 1.1s ease-in-out infinite;
+}
+.amb-chat__msg--typing span:nth-child(2) { animation-delay: 0.15s; }
+.amb-chat__msg--typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes amb-dot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30%           { opacity: 1;   transform: translateY(-3px); }
+}
+
+.amb-chat__error {
+  align-self: stretch;
+  padding: 0.55rem 0.75rem;
+  background: rgba(226,35,25,0.08);
+  border: 1px solid rgba(226,35,25,0.25);
+  border-radius: 10px;
+  color: var(--amb-red);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Quick replies ─── */
+.amb-chat__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem 0.8rem;
+  background: linear-gradient(0deg, #f9f6ee 0%, transparent 100%);
+}
+.amb-chat__chip {
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(21,23,61,0.18);
+  background: #fff;
+  color: var(--amb-navy);
+  font-family: 'Futura', sans-serif;
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 220ms cubic-bezier(0.2,0.7,0.2,1);
+}
+.amb-chat__chip:hover {
+  background: var(--amb-navy);
+  color: #fff;
+  border-color: var(--amb-navy);
+  transform: translateY(-1px);
+}
+
+/* Variante compacta — chips persistentes mid-conversation (sticky bar) */
+.amb-chat__quick--compact {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.45rem 1rem 0.55rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+  background: linear-gradient(0deg, #f9f6ee 0%, transparent 100%);
+  border-top: 1px solid rgba(21,23,61,0.06);
+}
+.amb-chat__quick--compact::-webkit-scrollbar { display: none; }
+.amb-chat__quick--compact .amb-chat__chip {
+  flex-shrink: 0;
+  padding: 0.38rem 0.72rem;
+  font-size: 0.7rem;
+  scroll-snap-align: start;
+}
+
+/* Chip "Volver al menú" — outline rojo Pantone 485, jerarquía visual */
+.amb-chat__chip--menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  border-color: rgba(226,35,25,0.45);
+  color: var(--amb-red);
+  background: rgba(255,255,255,0.6);
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.amb-chat__chip--menu:hover {
+  background: var(--amb-red);
+  color: #fff;
+  border-color: var(--amb-red);
+}
+.amb-chat__chip--menu svg {
+  flex-shrink: 0;
+}
+
+/* ─── Footer: mic + input + send ─── */
+.amb-chat__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem 0.85rem;
+  background: #fff;
+  border-top: 1px solid rgba(21,23,61,0.08);
+}
+
+.amb-chat__mic {
+  flex-shrink: 0;
+  /* WCAG 2.5.5: minimum 44×44 css px touch target */
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(21,23,61,0.18);
+  background: #fff;
+  color: var(--amb-navy);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 240ms cubic-bezier(0.2,0.7,0.2,1);
+}
+.amb-chat__mic:hover:not(:disabled) {
+  background: var(--amb-navy);
+  color: #fff;
+  border-color: var(--amb-navy);
+}
+.amb-chat__mic:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.amb-chat__mic[data-active="true"] {
+  background: var(--amb-red);
+  color: #fff;
+  border-color: var(--amb-red);
+  box-shadow: 0 0 0 0 rgba(226,35,25,0.5);
+  animation: amb-mic-pulse 1.4s cubic-bezier(0.4,0,0.6,1) infinite;
+}
+@keyframes amb-mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0   rgba(226,35,25,0.55); }
+  50%      { box-shadow: 0 0 0 10px rgba(226,35,25,0); }
+}
+
+.amb-chat__form {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f4f1ea;
+  border-radius: 999px;
+  padding: 0 0.3rem 0 0.95rem;
+  min-width: 0;
+}
+.amb-chat__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 36px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--amb-ink);
+  font-family: 'Futura', sans-serif;
+  font-size: 0.86rem;
+}
+.amb-chat__input::placeholder {
+  color: var(--amb-mute);
+}
+.amb-chat__input:disabled {
+  opacity: 0.5;
+}
+
+.amb-chat__send {
+  flex-shrink: 0;
+  /* WCAG 2.5.5: minimum 44×44 css px touch target.
+     Icono sigue siendo 14×14, el resto es padding invisible. */
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--amb-navy);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 220ms cubic-bezier(0.2,0.7,0.2,1);
+}
+.amb-chat__send:hover:not(:disabled) {
+  background: var(--amb-red);
+  transform: translateX(1px);
+}
+.amb-chat__send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Print + reduced-motion */
+@media print { .amb-chat { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .amb-chat__panel,
+  .amb-chat__msg,
+  .amb-chat__fab,
+  .amb-chat__fab-icon,
+  .amb-chat__fab-dot,
+  .amb-chat__mic { animation: none !important; transition: none !important; }
+}

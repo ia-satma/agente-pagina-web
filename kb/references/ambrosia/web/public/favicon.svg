@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#3D1E6D"/>
+  <text x="16" y="22" text-anchor="middle"
+        font-family="Didot, Garamond, serif"
+        font-weight="500"
+        font-size="18"
+        fill="#F4EDE0"
+        letter-spacing="0.5">Λ</text>
+</svg>

@@ -1,0 +1,128 @@
+---
+/**
+ * Logo oficial de AMBROSIA — PNG con alpha procesado del brandbook.
+ * El fondo blanco se elimino programaticamente con sharp (process-logo.mjs).
+ *
+ * variant: "wordmark" (default) | "isotype" | "lockup"
+ * size: sm | md | lg | xl
+ * tone: "ink" (morado) | "white" | "red"
+ */
+import { Image } from 'astro:assets';
+import logoOfficial from '~/assets/brand/logo-salsa-ambrosia-clean.png';
+import isotypeImg from '~/assets/brand/isotype.png';
+
+interface Props {
+  variant?: 'wordmark' | 'isotype' | 'lockup';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  tone?: 'ink' | 'white' | 'red';
+  withPhonetic?: boolean;
+  ariaLabel?: string;
+  class?: string;
+}
+
+const {
+  variant = 'wordmark',
+  size = 'md',
+  tone = 'ink',
+  withPhonetic = false,
+  ariaLabel = 'Salsa AMBROSIA',
+  class: className = '',
+} = Astro.props;
+
+// Heights del logo oficial. Como el PNG tiene whitespace ~25% arriba/abajo,
+// usamos heights mas generosos y compensamos con object-fit en CSS.
+const sizeMap = {
+  sm: { h: 64, isoSize: 22 },
+  md: { h: 88, isoSize: 32 },
+  lg: { h: 144, isoSize: 56 },
+  xl: { h: 220, isoSize: 120 },
+};
+const dims = sizeMap[size];
+---
+
+<span
+  class:list={['logo', `logo--${variant}`, `logo--${size}`, `logo--${tone}`, className]}
+  role="img"
+  aria-label={ariaLabel}
+  data-logo
+>
+  {(variant === 'wordmark' || variant === 'lockup') && (
+    <Image
+      class="logo__png"
+      src={logoOfficial}
+      alt=""
+      height={dims.h}
+      widths={[160, 240, 320, 480, 640]}
+      sizes={`${dims.h * 4}px`}
+      format="webp"
+      quality={94}
+      loading="eager"
+    />
+  )}
+
+  {variant === 'isotype' && (
+    <Image
+      class="logo__isotype-img"
+      src={isotypeImg}
+      alt=""
+      width={dims.isoSize}
+      height={dims.isoSize}
+      format="webp"
+      quality={92}
+    />
+  )}
+
+  {withPhonetic && (
+    <span class="logo__phon">( am'brozhe )</span>
+  )}
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    line-height: 1;
+    color: var(--navy);
+  }
+
+  .logo--white { color: var(--color-white); }
+  .logo--red   { color: var(--color-red); }
+
+  /* PNG ya tiene alpha — hue-rotate violet (#430098) → navy oscuro (#15173d) */
+  .logo__png {
+    display: block;
+    height: auto;
+    max-width: 100%;
+    margin: -22% 0;
+    filter: hue-rotate(-30deg) saturate(0.55) brightness(0.75);
+  }
+  /* Tonos via filter: variantes blanco/rojo */
+  .logo--white .logo__png { filter: brightness(0) invert(1); }
+  .logo--red .logo__png {
+    filter: brightness(0) saturate(100%) invert(20%) sepia(95%) saturate(7472%) hue-rotate(355deg) brightness(95%) contrast(95%);
+  }
+
+  .logo__isotype-img {
+    display: block;
+    flex-shrink: 0;
+    height: auto;
+    width: auto;
+    max-width: 100%;
+    filter: hue-rotate(-30deg) saturate(0.55) brightness(0.75);
+  }
+  .logo--white .logo__isotype-img { filter: brightness(0) invert(1); }
+  .logo--red   .logo__isotype-img {
+    filter: brightness(0) saturate(100%) invert(20%) sepia(95%) saturate(7472%) hue-rotate(355deg) brightness(95%) contrast(95%);
+  }
+
+  .logo__phon {
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+  }
+</style>

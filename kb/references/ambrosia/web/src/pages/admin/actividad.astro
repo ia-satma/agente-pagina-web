@@ -1,0 +1,44 @@
+---
+/**
+ * /admin/actividad — Bitácora de auditoría (admin-only).
+ */
+import AdminLayout from '~/layouts/AdminLayout.astro';
+import { getCurrentUser } from '~/lib/auth';
+import { can, recentAuditLog, type Role } from '~/lib/users';
+
+const user = (await getCurrentUser(Astro))!;
+if (!can(user.role as Role, 'audit.read')) {
+  return Astro.redirect('/admin/', 302);
+}
+
+const log = recentAuditLog(200);
+---
+
+<AdminLayout title="Actividad" user={user} active="audit">
+  <section class="panel">
+    <header class="panel__head">
+      <h2 class="panel__title">Bitácora de actividad</h2>
+    </header>
+    <p class="panel__hint">
+      Registro completo de logins, fallos de autenticación, cambios de configuración y operaciones
+      sobre usuarios o medios. Solo lectura.
+    </p>
+    <table class="table">
+      <thead>
+        <tr><th>Cuando</th><th>Usuario</th><th>Acción</th><th>Entidad</th><th>IP</th><th>Detalles</th></tr>
+      </thead>
+      <tbody>
+        {log.map((r: any) => (
+          <tr>
+            <td>{new Date(r.created_at * 1000).toLocaleString('es-MX')}</td>
+            <td>{r.user_email ?? <em style="opacity:0.55">—</em>}</td>
+            <td><code>{r.action}</code></td>
+            <td>{r.entity ?? '—'}</td>
+            <td><code style="font-size:0.7rem; opacity:0.65">{r.ip ?? '—'}</code></td>
+            <td style="font-size:0.78rem; opacity:0.7">{r.details ?? '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</AdminLayout>

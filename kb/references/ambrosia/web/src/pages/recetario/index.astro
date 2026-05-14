@@ -1,0 +1,50 @@
+---
+export const prerender = true;
+/**
+ * /recetario — El Recetario (Capitulo III, Mundo 03).
+ * Indice de las 20 recetas firmadas con filtros por categoria.
+ */
+import Base from '~/layouts/Base.astro';
+import PageHero from '~/components/PageHero.astro';
+import RecipeIndex from '~/components/RecipeIndex.astro';
+import Footer from '~/components/Footer.astro';
+import SEOSchema from '~/components/SEOSchema.astro';
+import { t } from '~/i18n';
+import { recetas } from '~/data/recetas';
+
+const locale = 'es' as const;
+const dict = t(locale);
+const page = (dict as any).pages.recetario;
+
+// Lista resumida para el ItemList schema
+const recetasList = recetas.map((r) => ({
+  slug: r.slug,
+  titulo: r.titulo,
+  imagen: r.imagen,
+}));
+---
+
+<Base
+  title={`AMBROSIA — ${page.eyebrow}`}
+  locale={locale}
+  description="20 recetas firmadas que utilizan Salsa AMBROSIA como ingrediente protagonista. Desayunos, entradas, pescados, carnes, vegetales y bases para tu cocina."
+>
+  <SEOSchema type="recipe-list" locale={locale} recetas={recetasList} breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Recetario', url: '/recetario' },
+  ]} />
+  <PageHero
+    eyebrow={page.eyebrow}
+    title={page.title}
+    body={page.body}
+    accent="pink"
+    sealVariant="magenta"
+    locale={locale}
+    videoBg={{ webm: '/video/reel-02.webm', mp4: '/video/reel-02.mp4' }}
+    videoOverlayOpacity={0.66}
+  />
+
+  <RecipeIndex locale={locale} />
+
+  <Footer locale={locale} />
+</Base>

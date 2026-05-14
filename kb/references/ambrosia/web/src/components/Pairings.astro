@@ -1,0 +1,126 @@
+---
+/**
+ * Pairings — 5 maridajes oficiales del brandbook.
+ * Lista editorial con numero, plato y nota.
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const m = dict.maridajes;
+---
+
+<section class="pairings" data-pairings>
+  <div class="pairings__inner">
+    <p class="eyebrow pairings__eyebrow" data-reveal set:html={m.eyebrow}></p>
+    <h2 class="pairings__title" data-reveal set:html={m.title}></h2>
+
+    <ul class="pairings__list">
+      {m.items.map((it) => (
+        <li class="pairings__item" data-reveal>
+          <span class="pairings__num">{it.n}</span>
+          <span class="pairings__plato">{it.plato}</span>
+          <span class="pairings__nota">{it.nota}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .pairings {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(4.5rem, 9vw, 8rem) 1.5rem;
+  }
+  .pairings__inner {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .pairings__eyebrow {
+    margin: 0 0 1.5rem;
+    color: var(--color-red);
+    opacity: 0.85;
+  }
+  .pairings__title {
+    margin: 0 0 4rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    color: var(--navy);
+    max-width: 30rem;
+  }
+
+  .pairings__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+  }
+  .pairings__item {
+    display: grid;
+    grid-template-columns: 56px 1fr 2fr;
+    gap: 1.5rem;
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    align-items: baseline;
+    transition: background-color var(--dur-fast) var(--ease-fast),
+                padding var(--dur-medium) var(--ease-medium);
+  }
+  .pairings__item:hover {
+    background: color-mix(in srgb, var(--color-red) 5%, transparent);
+    padding-left: 1.5rem;
+  }
+  .pairings__num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--color-red);
+    opacity: 0.65;
+    font-variant-numeric: lining-nums;
+  }
+  .pairings__plato {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--navy);
+  }
+  .pairings__nota {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--navy);
+    opacity: 0.78;
+  }
+
+  @media (max-width: 720px) {
+    .pairings__item {
+      grid-template-columns: 40px 1fr;
+      gap: 0.75rem;
+      row-gap: 0.35rem;
+    }
+    .pairings__nota {
+      grid-column: 2;
+      font-size: 0.85rem;
+    }
+  }
+
+  /* Reveal */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-reveal].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+  }
+</style>

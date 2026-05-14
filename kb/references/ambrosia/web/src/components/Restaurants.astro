@@ -1,0 +1,107 @@
+---
+/**
+ * Restaurants — los 8 restaurantes selectos donde se sirve AMBROSIA.
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const d = dict.donde;
+---
+
+<section class="restaurants">
+  <div class="restaurants__inner">
+    <p class="eyebrow restaurants__eyebrow" data-reveal set:html={d.eyebrow}></p>
+    <h2 class="restaurants__title" data-reveal set:html={d.title}></h2>
+    <p class="restaurants__body" data-reveal set:html={d.body}></p>
+
+    <ul class="restaurants__list">
+      {d.restaurantes.map((r) => (
+        <li class="restaurants__item" data-reveal>{r}</li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .restaurants {
+    background: var(--color-red);
+    color: var(--color-white);
+    padding: clamp(4.5rem, 9vw, 8rem) 1.5rem;
+  }
+  .restaurants__inner {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .restaurants__eyebrow {
+    margin: 0 0 1.5rem;
+    color: var(--color-white);
+    opacity: 0.85;
+  }
+  .restaurants__title {
+    margin: 0 0 1.5rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    color: var(--color-white);
+    max-width: 28rem;
+  }
+  .restaurants__body {
+    margin: 0 0 4rem;
+    font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+    line-height: 1.6;
+    color: var(--color-white);
+    opacity: 0.85;
+    max-width: 32rem;
+  }
+
+  .restaurants__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border-top: 1px solid color-mix(in srgb, var(--color-white) 22%, transparent);
+  }
+  .restaurants__item {
+    padding: 1.5rem 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-white) 22%, transparent);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.15rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    transition: background-color var(--dur-fast) var(--ease-fast),
+                padding var(--dur-medium) var(--ease-medium);
+  }
+  .restaurants__item:nth-child(odd) {
+    border-right: 1px solid color-mix(in srgb, var(--color-white) 22%, transparent);
+  }
+  .restaurants__item:hover {
+    background: color-mix(in srgb, var(--color-white) 8%, transparent);
+    padding-left: 1.5rem;
+  }
+
+  @media (max-width: 720px) {
+    .restaurants__list { grid-template-columns: 1fr; }
+    .restaurants__item:nth-child(odd) { border-right: none; }
+  }
+
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-reveal].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+  }
+</style>

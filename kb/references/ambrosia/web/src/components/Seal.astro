@@ -1,0 +1,179 @@
+---
+/**
+ * Sello de lacre con isotipo AMBROSIA.
+ * 4 variantes que coinciden con los tapones de la linea (brand book junio 2025):
+ *   - magenta · purple · silver · brown
+ *
+ * size: sm (40px) | md (64px) | lg (96px)
+ * tilt: bool — leve rotacion natural (default true)
+ * label: opcional — pequena etiqueta de "Lote N°" debajo
+ */
+
+interface Props {
+  variant?: 'magenta' | 'purple' | 'silver' | 'brown';
+  size?: 'sm' | 'md' | 'lg';
+  tilt?: boolean;
+  label?: string;
+  class?: string;
+}
+
+const {
+  variant = 'purple',
+  size = 'md',
+  tilt = true,
+  label,
+  class: className = '',
+} = Astro.props;
+
+const sizeMap = { sm: 40, md: 64, lg: 96 };
+const px = sizeMap[size];
+const id = `seal-${Math.random().toString(36).slice(2, 9)}`;
+---
+
+<span
+  class:list={['seal', `seal--${variant}`, `seal--${size}`, tilt && 'seal--tilt', className]}
+  data-seal={variant}
+  aria-hidden={label ? undefined : 'true'}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+>
+  <svg
+    width={px}
+    height={px}
+    viewBox="0 0 100 100"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <defs>
+      {/* Gradiente radial para dar volumen al lacre */}
+      <radialGradient id={`${id}-grad`} cx="35%" cy="32%" r="70%">
+        <stop offset="0%"  stop-color="var(--seal-light)"  stop-opacity="1" />
+        <stop offset="55%" stop-color="var(--seal-base)"   stop-opacity="1" />
+        <stop offset="100%" stop-color="var(--seal-dark)"  stop-opacity="1" />
+      </radialGradient>
+      {/* Filtro grain sutil */}
+      <filter id={`${id}-noise`} x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" />
+        <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .18 0" />
+        <feComposite in2="SourceGraphic" operator="in" />
+      </filter>
+    </defs>
+
+    {/* Cuerpo del lacre con borde irregular organico */}
+    <path
+      d="M50 6
+         C 64 6, 78 12, 86 24
+         C 95 33, 96 50, 90 64
+         C 86 76, 74 90, 60 92
+         C 46 95, 28 92, 18 80
+         C 8 70, 4 54, 8 40
+         C 12 24, 24 12, 38 8
+         Z"
+      fill={`url(#${id}-grad)`}
+    />
+    {/* Capa noise sobre el lacre */}
+    <path
+      d="M50 6
+         C 64 6, 78 12, 86 24
+         C 95 33, 96 50, 90 64
+         C 86 76, 74 90, 60 92
+         C 46 95, 28 92, 18 80
+         C 8 70, 4 54, 8 40
+         C 12 24, 24 12, 38 8
+         Z"
+      fill="black"
+      filter={`url(#${id}-noise)`}
+      opacity="0.45"
+    />
+
+    {/* Brillo superior */}
+    <ellipse cx="38" cy="28" rx="14" ry="6" fill="white" opacity="0.18" />
+
+    {/* Isotipo grabado sobre el lacre */}
+    <g transform="translate(28 26)" fill="none" stroke="var(--seal-engrave)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.92">
+      <path d="M16 4 h8 v3 a2 2 0 0 0 1 1.7 l1 .8 a3 3 0 0 1 1.5 2.5 v15 a3 3 0 0 1 -3 3 h-9 a3 3 0 0 1 -3 -3 v-15 a3 3 0 0 1 1.5 -2.5 l1 -.8 a2 2 0 0 0 1 -1.7 z" />
+      <rect x="17" y="1" width="6" height="3.6" rx="0.6" fill="var(--seal-engrave)" />
+      <line x1="14" y1="16" x2="26" y2="16" />
+      <line x1="14" y1="22" x2="26" y2="22" />
+      <path d="M2 34 c2 -3 6 -4 10 -3 l16 0 c4 -1 8 0 10 3 l4 6 c1 1.5 0 3.5 -2 3.5 h-40 c-2 0 -3 -2 -2 -3.5 z" />
+      <path d="M10 34 v-3 M16 34 v-3.5 M24 34 v-3.5 M30 34 v-3" />
+      <path d="M6 43.5 q14 6 28 0" />
+    </g>
+  </svg>
+
+  {label && <span class="seal__label">{label}</span>}
+</span>
+
+<style>
+  .seal {
+    --seal-light: #fff;
+    --seal-base: #999;
+    --seal-dark: #333;
+    --seal-engrave: rgba(0, 0, 0, 0.55);
+
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    line-height: 0;
+    transform-origin: center;
+    filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--seal-dark) 35%, transparent));
+  }
+
+  /* Variante magenta — tapon rosa intenso */
+  .seal--magenta {
+    --seal-light: #f084ad;
+    --seal-base:  #b8204f;
+    --seal-dark:  #5e0d28;
+    --seal-engrave: rgba(94, 13, 40, 0.85);
+  }
+  /* Variante purple — tapon morado profundo (default firma de la marca) */
+  .seal--purple {
+    --seal-light: #6b3eb6;
+    --seal-base:  #3d1e6d;
+    --seal-dark:  #1f0f3a;
+    --seal-engrave: rgba(31, 15, 58, 0.9);
+  }
+  /* Variante silver — tapon metalizado */
+  .seal--silver {
+    --seal-light: #f6f6f6;
+    --seal-base:  #b9bcc2;
+    --seal-dark:  #65696e;
+    --seal-engrave: rgba(40, 40, 40, 0.7);
+  }
+  /* Variante brown — tapon ambar/cobre */
+  .seal--brown {
+    --seal-light: #c98a55;
+    --seal-base:  #7a3d1c;
+    --seal-dark:  #3a1a09;
+    --seal-engrave: rgba(58, 26, 9, 0.9);
+  }
+
+  /* Tilt natural segun variante (cada lacre cae distinto) */
+  .seal--tilt.seal--magenta { transform: rotate(-4deg); }
+  .seal--tilt.seal--purple  { transform: rotate(-2deg); }
+  .seal--tilt.seal--silver  { transform: rotate(3deg); }
+  .seal--tilt.seal--brown   { transform: rotate(-3deg); }
+
+  .seal--tilt {
+    transition: transform var(--dur-medium) var(--ease-medium),
+                filter var(--dur-medium) var(--ease-medium);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.18));
+  }
+  .seal--tilt:hover {
+    transform: rotate(0deg) scale(1.06);
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.32));
+  }
+
+  .seal__label {
+    font-family: var(--font-body);
+    font-size: 0.6rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-purple-deep) 70%, transparent);
+    line-height: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .seal--tilt:hover { transform: rotate(0deg); }
+  }
+</style>

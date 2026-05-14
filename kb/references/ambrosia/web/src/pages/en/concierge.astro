@@ -1,0 +1,44 @@
+---
+export const prerender = true;
+/**
+ * /en/concierge — Concierge (Chapter V, World 05).
+ * Replaces /contact with intent-segmented forms (HORECA / press / gifting).
+ */
+import Base from '~/layouts/Base.astro';
+import PageHero from '~/components/PageHero.astro';
+import ConciergeIntent from '~/components/ConciergeIntent.astro';
+import ConciergeForm from '~/components/ConciergeForm.astro';
+import CommunityCTA from '~/components/CommunityCTA.astro';
+import Footer from '~/components/Footer.astro';
+import { t } from '~/i18n';
+import { isVisible } from '~/lib/settings';
+
+const locale = 'en' as const;
+const dict = t(locale);
+const page = (dict as any).pages.concierge;
+---
+
+<Base
+  title={`AMBROSIA — ${page.eyebrow}`}
+  locale={locale}
+  description="AMBROSIA Concierge — HORECA, press, corporate gifting. Direct contact for private distribution and curated experiences."
+>
+  <PageHero
+    eyebrow={page.eyebrow}
+    title={page.title}
+    body={page.body}
+    accent="yellow"
+    sealVariant="silver"
+    locale={locale}
+    videoBg={{ webm: '/video/hero-bottle-frame.webm', mp4: '/video/hero-bottle-frame.mp4' }}
+    videoOverlayOpacity={0.66}
+  />
+
+  {isVisible('concierge.intent') && <ConciergeIntent locale={locale} />}
+
+  {isVisible('concierge.form') && <ConciergeForm locale={locale} />}
+
+  <CommunityCTA locale={locale} />
+
+  <Footer locale={locale} />
+</Base>

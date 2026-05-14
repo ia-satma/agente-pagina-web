@@ -1,0 +1,68 @@
+# Ambrosía — The Divine Sauce of Gods
+
+> Salsa picante mexicana ultra-lujo embotellada a mano en Monterrey, NL. Inspirada en la mitología del elixir de los dioses del Olimpo y en la tradición artesanal mexica. Una sola gota basta para transformar un plato.
+
+## Identidad
+
+- **Nombre**: Ambrosía — La Salsa Divina de los Dioses (The Divine Sauce of Gods)
+- **Origen**: Monterrey, Nuevo León, México
+- **Producción**: Lotes pequeños, embotellado a mano, sellada con lacre rojo Pantone 485
+- **Presentación**: Botella de vidrio cobalto 200 ml con etiqueta Otomí
+- **Especificaciones**: 90 días de reposo · 6 chiles secos (ancho, morita, chipotle, pasilla, guajillo, árbol) · receta familiar de tres generaciones (desde 1962)
+- **Filosofía**: Lujo silencioso editorial, mestizaje mítico Olimpo griego × Tenochtitlán mexica
+- **Web**: https://ambrosiasauceofgods.com
+
+## Mundos editoriales (capítulos)
+
+1. **Origen** (`/origen`): El elixir que sobrevivió al tiempo. Del mito griego de la ambrosía a la receta familiar mexicana.
+2. **La Salsa** (`/la-salsa`): Catálogo de la edición 2024 — 8 notas de cata, 5 maridajes, botella detallada.
+3. **Recetario** (`/recetario`): 20 recetas autorales que usan Ambrosía como ingrediente transformador.
+4. **Mesas Selectas** (`/mesas`): Restaurantes que la sirven (Pujol, Quintonil, Alcalde, Lardo, Casa Oaxaca, Rosetta, Sud 777, Le Chique).
+5. **Concierge** (`/concierge`): Contacto segmentado para HORECA, prensa y regalo corporativo.
+
+## Dónde comprar
+
+- **Restaurante Jabalina** (Monterrey, NL — Barrio Antiguo + Distrito Armida). Mesa de autor del chef Manuel Orozco. Reconocido por MICHELIN Guide México 2025.
+  - Instagram: https://www.instagram.com/jabalinamx/
+  - Facebook: https://www.facebook.com/Jabalinamx/
+  - Reservas: https://www.opentable.com/r/jabalina-barrio-antiguo-monterrey
+
+- **Carnes Ramos** (Monterrey, NL — área metropolitana). Carnicería boutique con más de 40 años de tradición. Venta directa y servicio a domicilio.
+  - Instagram: https://www.instagram.com/carnesramos/
+  - Facebook: https://www.facebook.com/CarnesRamos/
+
+## Preguntas frecuentes (FAQ)
+
+**¿Qué es Ambrosía?**
+Una salsa picante mexicana embotellada a mano de 200 ml, inspirada en el elixir de los dioses del Olimpo y elaborada con seis chiles secos mexicanos en reposo prolongado de 90 días.
+
+**¿Dónde se elabora?**
+En Monterrey, Nuevo León, México. Lotes pequeños, producción artesanal.
+
+**¿Cuántos chiles tiene?**
+Seis: ancho, morita, chipotle, pasilla, guajillo y árbol.
+
+**¿Dónde se puede comprar al público?**
+En Monterrey: Restaurante Jabalina (Barrio Antiguo y Distrito Armida) y Carnes Ramos (área metropolitana). Para distribución corporativa o regalo, contactar al concierge en concierge@ambrosiasauceofgods.com.
+
+**¿En qué restaurantes se sirve?**
+Pujol (CDMX), Quintonil (CDMX), Alcalde (Guadalajara), Lardo (CDMX), Casa Oaxaca (Oaxaca), Rosetta (CDMX), Sud 777 (CDMX), Le Chique (Cancún).
+
+**¿Cuál es la inspiración del nombre?**
+La ambrosía era el alimento mítico que concedía la inmortalidad a los dioses del Olimpo en la mitología griega. La marca traduce ese mito a la mesa contemporánea mexicana.
+
+## Páginas principales
+
+- /                 — Home con los 5 mundos
+- /origen           — Capítulo I: el mito y el origen
+- /la-salsa         — Capítulo II: la edición 2024
+- /recetario        — Capítulo III: las 20 recetas
+- /mesas            — Capítulo IV: mesas selectas
+- /concierge        — Capítulo V: contacto segmentado
+
+## Contacto
+
+- concierge@ambrosiasauceofgods.com
+- Web: https://ambrosiasauceofgods.com
+- Locale principal: español de México (es-MX)
+- Locale alterno: inglés (en-US) en https://ambrosiasauceofgods.com/en

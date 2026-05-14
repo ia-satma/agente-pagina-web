@@ -1,0 +1,121 @@
+---
+/**
+ * /admin/ — Dashboard editorial AMBROSIA.
+ * Stats rápidos + accesos directos a las secciones más usadas.
+ */
+import AdminLayout from '~/layouts/AdminLayout.astro';
+import { getCurrentUser } from '~/lib/auth';
+import { countUsers, recentAuditLog, type Role } from '~/lib/users';
+import { db } from '~/lib/db';
+
+const user = (await getCurrentUser(Astro))!;
+const role = user.role as Role;
+
+const totalUsers = countUsers();
+const totalMedia = (db.prepare(`SELECT COUNT(*) AS n FROM media`).get() as any).n;
+const recent = recentAuditLog(8);
+
+const sinceLogin = user.last_login_at ? Math.floor((Date.now() / 1000 - user.last_login_at) / 60) : null;
+---
+
+<AdminLayout title="Inicio" user={user} active="dashboard">
+  <section class="panel">
+    <p class="panel__hint">
+      Bienvenido, <strong>{user.name ?? user.email}</strong>. Tu rol es{' '}
+      <span class:list={['pill', `pill--${role}`]}>{role}</span>.
+      {sinceLogin !== null && ` Último acceso: hace ${sinceLogin} min.`}
+    </p>
+
+    <div class="dash-grid">
+      <a class="dash-card" href="/admin/contenido">
+        <span class="dash-card__label">Contenido</span>
+        <span class="dash-card__cta">Editar textos del sitio →</span>
+      </a>
+      <a class="dash-card" href="/admin/media">
+        <span class="dash-card__label">Medios</span>
+        <span class="dash-card__num">{totalMedia}</span>
+        <span class="dash-card__cta">Galería completa →</span>
+      </a>
+      <a class="dash-card" href="/admin/configuracion">
+        <span class="dash-card__label">Configuración</span>
+        <span class="dash-card__cta">Mostrar / ocultar secciones →</span>
+      </a>
+      {role === 'admin' && (
+        <a class="dash-card" href="/admin/usuarios">
+          <span class="dash-card__label">Usuarios</span>
+          <span class="dash-card__num">{totalUsers}</span>
+          <span class="dash-card__cta">Gestionar accesos →</span>
+        </a>
+      )}
+    </div>
+  </section>
+
+  {role === 'admin' && recent.length > 0 && (
+    <section class="panel">
+      <header class="panel__head">
+        <h2 class="panel__title">Actividad reciente</h2>
+        <a href="/admin/actividad" class="btn btn--ghost">Ver todo</a>
+      </header>
+      <table class="table">
+        <thead>
+          <tr><th>Cuando</th><th>Usuario</th><th>Acción</th><th>Entidad</th></tr>
+        </thead>
+        <tbody>
+          {recent.map((r: any) => (
+            <tr>
+              <td>{new Date(r.created_at * 1000).toLocaleString('es-MX')}</td>
+              <td>{r.user_email ?? <em style="opacity:0.55">anónimo</em>}</td>
+              <td>{r.action}</td>
+              <td>{r.entity ?? '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )}
+</AdminLayout>
+
+<style>
+  .dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  .dash-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.5rem 1.25rem;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--navy);
+    transition: border-color 200ms, transform 200ms, box-shadow 200ms;
+  }
+  .dash-card:hover {
+    border-color: var(--navy);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -16px rgba(21, 23, 61, 0.25);
+  }
+  .dash-card__label {
+    font-size: 0.62rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-weight: 700;
+  }
+  .dash-card__num {
+    font-family: 'Optimus Princeps', serif;
+    font-size: 2.5rem;
+    line-height: 1;
+    color: var(--navy);
+    margin: 0.4rem 0;
+  }
+  .dash-card__cta {
+    font-size: 0.78rem;
+    color: var(--navy);
+    opacity: 0.78;
+    margin-top: auto;
+  }
+</style>

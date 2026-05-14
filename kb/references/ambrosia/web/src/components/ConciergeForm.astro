@@ -1,0 +1,183 @@
+---
+/**
+ * ConciergeForm — formulario segmentado por intent (HORECA / prensa / regalo).
+ * Sin backend real: action dummy `mailto:` + JS que arma el correo con el
+ * intent seleccionado. Para produccion, reemplazar action por endpoint CRM.
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+const intent = (dict as any).pages.conciergeIntent as {
+  items: { key: string; label: string }[];
+  form: {
+    name: string;
+    email: string;
+    company: string;
+    message: string;
+    cta: string;
+    note: string;
+  };
+};
+---
+
+<section class="concierge-form-section" id="concierge-form-section">
+  <form
+    class="concierge-form"
+    id="concierge-form"
+    action="mailto:concierge@ambrosiasauceofgods.com"
+    method="post"
+    enctype="text/plain"
+  >
+    <fieldset class="concierge-form__field">
+      <label class="concierge-form__label" for="cf-intent">
+        {locale === 'es' ? 'Contacto' : 'Contact'}
+      </label>
+      <select id="cf-intent" name="intent" class="concierge-form__input concierge-form__input--select" required>
+        {intent.items.map((it) => (
+          <option value={it.key}>{it.label}</option>
+        ))}
+      </select>
+    </fieldset>
+
+    <div class="concierge-form__row">
+      <fieldset class="concierge-form__field">
+        <label class="concierge-form__label" for="cf-name">{intent.form.name}</label>
+        <input id="cf-name" name="name" type="text" class="concierge-form__input" required autocomplete="name" />
+      </fieldset>
+
+      <fieldset class="concierge-form__field">
+        <label class="concierge-form__label" for="cf-email">{intent.form.email}</label>
+        <input id="cf-email" name="email" type="email" class="concierge-form__input" required autocomplete="email" />
+      </fieldset>
+    </div>
+
+    <fieldset class="concierge-form__field">
+      <label class="concierge-form__label" for="cf-company">{intent.form.company}</label>
+      <input id="cf-company" name="company" type="text" class="concierge-form__input" autocomplete="organization" />
+    </fieldset>
+
+    <fieldset class="concierge-form__field">
+      <label class="concierge-form__label" for="cf-message">{intent.form.message}</label>
+      <textarea id="cf-message" name="message" rows="5" class="concierge-form__input concierge-form__input--textarea" required></textarea>
+    </fieldset>
+
+    <button class="btn btn--primary btn--lg concierge-form__submit" type="submit">
+      <span>{intent.form.cta}</span>
+      <span aria-hidden="true">
+        <svg width="16" height="11" viewBox="0 0 14 10" fill="none">
+          <path d="M0 5h13M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </button>
+
+    <p class="concierge-form__note">{intent.form.note}</p>
+  </form>
+</section>
+
+<style>
+  .concierge-form-section {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3rem, 6vw, 5rem) 1.5rem clamp(4rem, 7vw, 6.5rem);
+    border-top: 1px solid color-mix(in srgb, var(--navy) 8%, transparent);
+  }
+  .concierge-form {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    scroll-margin-top: 80px;
+  }
+
+  .concierge-form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 600px) {
+    .concierge-form__row { grid-template-columns: 1fr; }
+  }
+
+  .concierge-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .concierge-form__label {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.85;
+  }
+  /* ─── Inputs editoriales — alineados con el sistema luxury silencioso.
+     Default: fondo blanco crisp sobre el lavanda de seccion, borde navy sutil.
+     Hover: borde navy mas definido.
+     Focus: borde navy intenso + ring de rojo brand al 18% (1 acento por interaccion). */
+  .concierge-form__input {
+    width: 100%;
+    padding: 0.95rem 1.1rem;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--navy);
+    background: #FFFFFF;
+    border: 1px solid color-mix(in srgb, var(--navy) 16%, transparent);
+    border-radius: 4px;
+    transition:
+      border-color var(--dur-medium) var(--ease-medium),
+      background-color var(--dur-medium) var(--ease-medium),
+      box-shadow var(--dur-medium) var(--ease-medium);
+  }
+  .concierge-form__input::placeholder {
+    color: color-mix(in srgb, var(--navy) 45%, transparent);
+  }
+  .concierge-form__input:hover {
+    border-color: color-mix(in srgb, var(--navy) 32%, transparent);
+  }
+  .concierge-form__input:focus {
+    outline: none;
+    border-color: color-mix(in srgb, var(--navy) 60%, transparent);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 18%, transparent);
+  }
+  .concierge-form__input--select {
+    appearance: none;
+    -webkit-appearance: none;
+    /* Flecha custom — navy solido, alineada con el lenguaje del resto del site */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='none' stroke='%2315173d' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5l5 5 5-5'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 1.1rem center;
+    padding-right: 2.75rem;
+    cursor: pointer;
+  }
+  .concierge-form__input--textarea {
+    resize: vertical;
+    min-height: 140px;
+    font-family: var(--font-body);
+    line-height: 1.55;
+  }
+
+  .concierge-form__submit {
+    align-self: flex-start;
+    margin-top: 0.75rem;
+  }
+
+  .concierge-form__note {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: var(--navy);
+    opacity: 0.55;
+  }
+</style>

@@ -1,0 +1,31 @@
+# Ambrosía — Salsa picante ultra-lujo
+# https://ambrosiasauceofgods.com
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin/*
+
+# AI crawlers explícitamente permitidos (GEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+Sitemap: https://ambrosiasauceofgods.com/sitemap-index.xml

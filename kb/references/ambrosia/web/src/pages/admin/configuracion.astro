@@ -1,0 +1,351 @@
+---
+/**
+ * /admin/configuracion — Toggles de visibilidad por sección + settings globales.
+ */
+import AdminLayout from '~/layouts/AdminLayout.astro';
+import { getCurrentUser } from '~/lib/auth';
+import { can, type Role } from '~/lib/users';
+import { listSettings, getSetting } from '~/lib/settings';
+
+const user = (await getCurrentUser(Astro))!;
+const canWrite = can(user.role as Role, 'settings.write');
+const settings = listSettings();
+const visibilitySettings = settings.filter((s) => s.key.startsWith('visibility.'));
+
+/* Redes sociales editables */
+const socialPlatforms: Array<{ key: string; label: string; placeholder: string }> = [
+  { key: 'social.instagram', label: 'Instagram', placeholder: 'https://www.instagram.com/ambrosia.mx' },
+  { key: 'social.facebook',  label: 'Facebook',  placeholder: 'https://www.facebook.com/AmbrosiaMx' },
+  { key: 'social.twitter',   label: 'X (Twitter)', placeholder: 'https://x.com/ambrosia_mx' },
+  { key: 'social.tiktok',    label: 'TikTok',    placeholder: 'https://www.tiktok.com/@ambrosia.mx' },
+  { key: 'social.youtube',   label: 'YouTube',   placeholder: 'https://www.youtube.com/@ambrosia' },
+  { key: 'social.email',     label: 'Email contacto', placeholder: 'mailto:concierge@ambrosiasauceofgods.com' },
+];
+const socialValues: Record<string, string> = {};
+for (const p of socialPlatforms) {
+  socialValues[p.key] = getSetting<string>(p.key, '') || '';
+}
+
+/* Galeria home — JSON editable */
+const galleryRaw = JSON.stringify(getSetting('gallery.home', []), null, 2);
+
+/* ElevenLabs Conversational AI — agent_id editable */
+const elevenLabsAgentId = getSetting<string>('elevenlabs.agentId', '') || '';
+
+// Agrupa por página
+const grouped: Record<string, Array<{ key: string; label: string; value: boolean }>> = {};
+const labels: Record<string, string> = {
+  'visibility.home.hero':           'Hero video',
+  'visibility.home.brandStatement': 'Brand statement',
+  'visibility.home.worldsGrid':     'Grid de 5 mundos',
+  'visibility.home.manifesto':      'Manifesto / Elixir',
+  'visibility.home.bottleGallery':  'Galería de botellas',
+  'visibility.origen.hero':         'Hero scroll-driven',
+  'visibility.origen.diptychMito':  'Diptych Mito (Tezcatlipoca)',
+  'visibility.origen.interlude':    'Cita Interlude',
+  'visibility.origen.diptychOrigen':'Diptych Origen (Molcajete)',
+  'visibility.origen.ritual':       'Ritual (Guardianes)',
+  'visibility.origen.timeline':     'Línea de tiempo cultural',
+  'visibility.laSalsa.bottleShowcase': 'Bottle Showcase',
+  'visibility.laSalsa.tastingNotes':   'Notas de cata',
+  'visibility.laSalsa.pairings':       'Maridajes',
+  'visibility.laSalsa.edicion':        'Edición 2024',
+  'visibility.laSalsa.buyPoints':      'Boutique (Jabalina / Carnes Ramos)',
+  'visibility.mesas.tablesSplit':      'Tables split (Camino I/II)',
+  'visibility.mesas.restaurants':      'Restaurantes selectos',
+  'visibility.concierge.intent':       'Tarjetas de intent',
+  'visibility.concierge.form':         'Formulario',
+  'visibility.footer.newsletter':      'Newsletter en footer',
+};
+
+for (const s of visibilitySettings) {
+  const parts = s.key.split('.');
+  const page = parts[1] ?? 'misc';
+  if (!grouped[page]) grouped[page] = [];
+  grouped[page].push({ key: s.key, label: labels[s.key] ?? s.key, value: !!s.value });
+}
+
+const pageLabels: Record<string, string> = {
+  home:      'Inicio',
+  origen:    'Capítulo I — El Origen',
+  laSalsa:   'Capítulo II — La Salsa',
+  mesas:     'Capítulo IV — Mesas Selectas',
+  concierge: 'Capítulo V — Concierge',
+  footer:    'Footer',
+};
+
+const flash = Astro.url.searchParams.get('flash');
+---
+
+<AdminLayout title="Configuración" user={user} active="settings">
+  {flash === 'saved' && <p class="flash flash--success">Cambios guardados.</p>}
+  {flash === 'error' && <p class="flash flash--error">No se pudo guardar.</p>}
+
+  <section class="panel">
+    <header class="panel__head">
+      <h2 class="panel__title">Visibilidad de secciones</h2>
+    </header>
+    <p class="panel__hint">
+      Activa o desactiva cada bloque del sitio sin tocar código.
+      Los cambios se aplican en cuanto guardas.
+      {!canWrite && <span style="color:var(--red); font-weight:600"> · Tu rol no permite editar (solo lectura).</span>}
+    </p>
+
+    <form method="POST" action="/api/settings" class="visibility-form">
+      {Object.entries(grouped).map(([page, items]) => (
+        <div class="settings-group">
+          <h3>{pageLabels[page] ?? page}</h3>
+          <ul class="toggles">
+            {items.map((item) => (
+              <li class="toggle">
+                <label class="toggle__label">
+                  <input
+                    type="checkbox"
+                    name={item.key}
+                    value="true"
+                    checked={item.value}
+                    disabled={!canWrite}
+                  />
+                  <span class="toggle__switch"></span>
+                  <span class="toggle__text">{item.label}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+
+      {/* ─── Redes sociales ─── */}
+      <div class="settings-group">
+        <h3>Redes sociales</h3>
+        <p class="settings-hint">
+          Pega la URL completa. Si dejas un campo vacío, ese icono no aparecerá en el footer.
+        </p>
+        <ul class="social-list">
+          {socialPlatforms.map((p) => (
+            <li class="social-row">
+              <label class="social-row__label">{p.label}</label>
+              <input
+                type="url"
+                name={p.key}
+                value={socialValues[p.key]}
+                placeholder={p.placeholder}
+                disabled={!canWrite}
+                class="social-row__input"
+                autocomplete="off"
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* ─── ElevenLabs Conversational AI (chatbot por voz) ─── */}
+      <div class="settings-group">
+        <h3>ElevenLabs · Agente conversacional</h3>
+        <p class="settings-hint">
+          Pega el <strong>Agent ID</strong> de tu agente ElevenLabs Conversational AI.
+          Aparece en <a href="https://elevenlabs.io/app/conversational-ai" target="_blank" rel="noopener noreferrer" style="color:var(--red);text-decoration:underline">elevenlabs.io/app/conversational-ai</a> &gt; tu agente.
+          Si dejas vacío, el botón "Hablar con AMBROSIA" no aparecerá en el chatbot.
+        </p>
+        <div class="social-row">
+          <label class="social-row__label" for="elevenlabs-agent">Agent ID</label>
+          <input
+            id="elevenlabs-agent"
+            type="text"
+            name="elevenlabs.agentId"
+            value={elevenLabsAgentId}
+            placeholder="agt_xxxxxxxxxxxxxxxxxxxxxxxx"
+            disabled={!canWrite}
+            class="social-row__input"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        {elevenLabsAgentId && (
+          <p class="settings-hint" style="margin-top:0.85rem;color:#2DBBA5">
+            ✓ Agente conectado · El botón aparecerá en el ChatBubble de todas las páginas.
+          </p>
+        )}
+      </div>
+
+      {/* ─── Galería de la home (BottleGallery) ─── */}
+      <div class="settings-group">
+        <h3>Galería de imágenes (Home · BottleGallery)</h3>
+        <p class="settings-hint">
+          Las imágenes del carrusel del home. Si dejas vacío, usa las 4 por defecto.
+          Sube las imágenes en <a href="/admin/media" style="color:var(--red); text-decoration:underline;">Medios</a> y copia su URL.
+          El formato es JSON array — cada objeto define una imagen.
+        </p>
+        <details class="gallery-help">
+          <summary>Ver formato JSON de ejemplo</summary>
+          <pre>{`[
+  {
+    "src": "/images/bottle/bottle-01.webp",
+    "alt_es": "Botella cobalto AMBROSIA",
+    "alt_en": "Cobalt AMBROSIA bottle",
+    "caption_es": "Cobalto soplado",
+    "caption_en": "Blown cobalt",
+    "href": "/la-salsa",
+    "linkLabel_es": "La Salsa",
+    "linkLabel_en": "The Sauce"
+  }
+]`}</pre>
+        </details>
+        <textarea
+          name="gallery.home"
+          class="gallery-textarea"
+          rows="14"
+          disabled={!canWrite}
+          placeholder="[]"
+        >{galleryRaw === '[]' ? '' : galleryRaw}</textarea>
+      </div>
+
+      {canWrite && (
+        <div class="settings-actions">
+          <button type="submit" class="btn">Guardar configuración</button>
+        </div>
+      )}
+    </form>
+  </section>
+</AdminLayout>
+
+<style>
+  .visibility-form { display: flex; flex-direction: column; gap: 1.5rem; }
+  .settings-group h3 {
+    margin: 0 0 0.85rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--red);
+    font-weight: 700;
+  }
+  .toggles { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+  .toggle {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+  }
+  .toggle__label {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle__label input[type="checkbox"] { display: none; }
+  .toggle__switch {
+    width: 34px;
+    height: 20px;
+    border-radius: 999px;
+    background: rgba(21, 23, 61, 0.18);
+    position: relative;
+    flex-shrink: 0;
+    transition: background 200ms;
+  }
+  .toggle__switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #FFFFFF;
+    transition: transform 200ms;
+  }
+  .toggle__label input:checked + .toggle__switch { background: var(--red); }
+  .toggle__label input:checked + .toggle__switch::after { transform: translateX(14px); }
+  .toggle__label input:disabled ~ * { opacity: 0.5; }
+  .toggle__text { font-size: 0.88rem; }
+  .settings-actions { margin-top: 0.5rem; }
+
+  /* ─── Hints y blocks editoriales ─── */
+  .settings-hint {
+    margin: -0.5rem 0 1rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary, #666);
+    line-height: 1.5;
+  }
+
+  /* ─── Redes sociales ─── */
+  .social-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+  .social-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.65rem 0.85rem;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    transition: border-color 200ms;
+  }
+  .social-row:focus-within {
+    border-color: var(--red);
+  }
+  .social-row__label {
+    font-family: var(--font-body, system-ui);
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: var(--text-primary, #15173d);
+  }
+  .social-row__input {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    padding: 0.35rem 0;
+    font-family: ui-monospace, monospace;
+    font-size: 0.82rem;
+    color: var(--text-primary, #15173d);
+    outline: none;
+    transition: border-color 200ms;
+  }
+  .social-row__input:focus {
+    border-bottom-color: var(--red);
+  }
+  .social-row__input:disabled { opacity: 0.5; }
+  .social-row__input::placeholder { color: rgba(0,0,0,0.3); }
+
+  /* ─── Galeria textarea ─── */
+  .gallery-help {
+    margin: 0 0 0.85rem;
+    padding: 0.5rem 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary, #666);
+  }
+  .gallery-help summary { cursor: pointer; font-weight: 600; }
+  .gallery-help pre {
+    margin: 0.6rem 0 0;
+    padding: 0.85rem 1rem;
+    background: var(--bg, #fafafa);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-family: ui-monospace, monospace;
+    font-size: 0.74rem;
+    line-height: 1.5;
+    overflow: auto;
+  }
+  .gallery-textarea {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-family: ui-monospace, monospace;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--text-primary, #15173d);
+    resize: vertical;
+    min-height: 200px;
+    outline: none;
+    transition: border-color 200ms;
+  }
+  .gallery-textarea:focus { border-color: var(--red); }
+  .gallery-textarea:disabled { opacity: 0.5; }
+
+  @media (max-width: 600px) {
+    .social-row { grid-template-columns: 1fr; gap: 0.45rem; }
+  }
+</style>

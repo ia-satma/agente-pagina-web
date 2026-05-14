@@ -1,0 +1,51 @@
+---
+export const prerender = true;
+/**
+ * /recetario/[slug] — Detalle dinamico de cada una de las 20 recetas.
+ * `getStaticPaths` genera las paginas estaticas a partir del array `recetas`.
+ */
+import Base from '~/layouts/Base.astro';
+import RecipeIntro from '~/components/RecipeIntro.astro';
+import RecipeMeta from '~/components/RecipeMeta.astro';
+import RecipeBody from '~/components/RecipeBody.astro';
+import RecipeNav from '~/components/RecipeNav.astro';
+import Footer from '~/components/Footer.astro';
+import SEOSchema from '~/components/SEOSchema.astro';
+import { recetas, type Receta } from '~/data/recetas';
+
+export async function getStaticPaths() {
+  return recetas.map((receta) => ({
+    params: { slug: receta.slug },
+    props: { receta },
+  }));
+}
+
+interface Props {
+  receta: Receta;
+}
+
+const { receta } = Astro.props;
+const locale = 'es' as const;
+---
+
+<Base
+  title={`AMBROSIA — ${receta.titulo}`}
+  locale={locale}
+  description={`Receta de ${receta.titulo} (${receta.tiempo}, rinde ${receta.rinde}) del recetario de Salsa AMBROSIA. ${receta.categoria}.`}
+  ogImage={receta.imagen}
+>
+  <SEOSchema type="recipe" locale={locale} receta={receta} breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Recetario', url: '/recetario' },
+    { name: receta.titulo, url: `/recetario/${receta.slug}` },
+  ]} />
+  <RecipeIntro receta={receta} locale={locale} />
+
+  <RecipeMeta receta={receta} locale={locale} />
+
+  <RecipeBody receta={receta} locale={locale} />
+
+  <RecipeNav slug={receta.slug} locale={locale} />
+
+  <Footer locale={locale} />
+</Base>

@@ -1,0 +1,83 @@
+---
+/**
+ * Interlude — cita poetica entre secciones, estilo editorial con reglas verticales.
+ * "Los dioses comian AMBROSIA; los hombres aprendieron a embotellarla."
+ */
+import { t, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+---
+
+<section class="interlude">
+  <div class="interlude__rule" aria-hidden="true"></div>
+
+  {/* Guillemet SVG abierta — reemplaza ::before content '\201C' por ornament editorial */}
+  <svg class="interlude__guillemet interlude__guillemet--open" viewBox="0 0 60 48" width="60" height="48" fill="none" aria-hidden="true">
+    <path d="M14 0C6 0 0 6 0 14v6c0 8 6 14 14 14h2v14L28 34v-6h-7c-3 0-5-2-5-5V14h12V0H14ZM46 0c-8 0-14 6-14 14v6c0 8 6 14 14 14h2v14L60 34v-6h-7c-3 0-5-2-5-5V14h12V0H46Z" fill="currentColor"/>
+  </svg>
+
+  <blockquote class="interlude__quote" data-reveal>
+    <span class="interlude__quote-text" data-anim="words" set:html={dict.interlude.quote}></span>
+  </blockquote>
+
+  {/* Guillemet SVG cerrada — rotacion 180° para inversion */}
+  <svg class="interlude__guillemet interlude__guillemet--close" viewBox="0 0 60 48" width="60" height="48" fill="none" aria-hidden="true">
+    <path d="M14 0C6 0 0 6 0 14v6c0 8 6 14 14 14h2v14L28 34v-6h-7c-3 0-5-2-5-5V14h12V0H14ZM46 0c-8 0-14 6-14 14v6c0 8 6 14 14 14h2v14L60 34v-6h-7c-3 0-5-2-5-5V14h12V0H46Z" fill="currentColor"/>
+  </svg>
+
+  <div class="interlude__rule" aria-hidden="true"></div>
+</section>
+
+<style>
+  .interlude {
+    background: var(--bg-page);
+    padding: clamp(2.75rem, 5.5vw, 4.5rem) 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .interlude__rule {
+    width: 1px;
+    height: clamp(2rem, 4vw, 3.5rem);
+    background: var(--navy);
+    opacity: 0.35;
+  }
+  .interlude__quote {
+    margin: 0;
+    max-width: 44rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(1.4rem, 3vw, 2.4rem);
+    line-height: 1.35;
+    color: var(--navy);
+    opacity: 0.92;
+  }
+  /* Guillemets SVG ornamentales — reemplazan los caracteres "\201C"/"\201D" planos */
+  .interlude__guillemet {
+    color: var(--red);
+    opacity: 0.32;
+    transform-origin: center;
+  }
+  .interlude__guillemet--close {
+    transform: rotate(180deg);
+  }
+
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine),
+                transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-reveal].is-in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+  }
+</style>

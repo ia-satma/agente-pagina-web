@@ -1,0 +1,499 @@
+---
+/**
+ * RecipeIndex — Grid editorial tipo magazine con cards mas ricas.
+ *
+ * Mejoras vs version anterior (que era "solo imagenes y meta"):
+ *   - Aspect-ratio portrait 4:5 para feel editorial (no square)
+ *   - Numero monumental de receta en esquina top-right de la imagen
+ *   - Chip de categoria flotando top-left con color de marca
+ *   - Overlay gradient sutil bottom-up con icon arrow al hacer hover
+ *   - Meta con SVG icons (reloj/comensales) en lugar de "Tiempo: X · Rinde: Y"
+ *   - Hover: lift cinematico + zoom imagen + arrow CTA reveal
+ *   - Filtros sticky con backdrop blur + contador "Mostrando X de 20"
+ */
+import { recetas, CATEGORIAS, type Categoria } from '~/data/recetas';
+import { pathFor, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+  esOnly?: boolean;
+}
+
+const { locale, esOnly = false } = Astro.props;
+
+const labels = {
+  all: locale === 'es' ? 'Todas' : 'All',
+  time: locale === 'es' ? 'min' : 'min',
+  serves: locale === 'es' ? 'pers' : 'serves',
+  showing: locale === 'es' ? 'Mostrando' : 'Showing',
+  of: locale === 'es' ? 'de' : 'of',
+  recipes: locale === 'es' ? 'recetas' : 'recipes',
+  esNote: 'Recipe in Spanish',
+  open: locale === 'es' ? 'Ver receta' : 'View recipe',
+};
+
+// Mapeo de categoria → tono acento del brandbook
+const CATEGORY_TONE: Record<string, string> = {
+  desayunos: 'yellow',
+  entradas:  'pink',
+  pescados:  'cyan',
+  carnes:    'red',
+  vegetales: 'green',
+  bases:     'navy',
+};
+---
+
+<section class="recipe-index" data-recipe-index>
+  <div class="recipe-index__inner">
+    {/* ─── Filtros + contador ─── */}
+    <div class="recipe-index__toolbar">
+      <ul class="recipe-index__filters" role="list">
+        <li>
+          <button class="recipe-index__chip" type="button" data-cat="all" data-active="true">
+            <span class="recipe-index__chip-dot" aria-hidden="true"></span>
+            {labels.all}
+          </button>
+        </li>
+        {CATEGORIAS.map((c) => (
+          <li>
+            <button
+              class="recipe-index__chip"
+              type="button"
+              data-cat={c.key}
+              data-tone={CATEGORY_TONE[c.key] ?? 'red'}
+            >
+              <span class="recipe-index__chip-dot" aria-hidden="true"></span>
+              {locale === 'es' ? c.label_es : c.label_en}
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <p class="recipe-index__count" aria-live="polite">
+        <span data-count-current>{recetas.length}</span>
+        <span class="recipe-index__count-sep">·</span>
+        <span class="recipe-index__count-label">{labels.of} {recetas.length} {labels.recipes}</span>
+      </p>
+    </div>
+
+    {/* ─── Grid editorial ─── */}
+    <ul class="recipe-index__grid" role="list">
+      {recetas.map((r, i) => {
+        const detailHref = esOnly
+          ? `/recetario/${r.slug}`
+          : pathFor(locale, `recetario/${r.slug}`);
+        const cat = CATEGORIAS.find((c) => c.key === r.categoria);
+        const catLabel = cat ? (locale === 'es' ? cat.label_es : cat.label_en) : '';
+        const tone = CATEGORY_TONE[r.categoria] ?? 'red';
+        return (
+          <li class="recipe-index__item" data-cat={r.categoria} style={`--i:${i};`}>
+            <a class="recipe-card" href={detailHref} data-tone={tone}>
+              <figure class="recipe-card__figure">
+                <img
+                  src={r.imagen}
+                  alt={r.titulo}
+                  loading={i < 4 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  width="600"
+                  height="750"
+                />
+                {/* Chip de categoria sobre la imagen */}
+                <span class="recipe-card__cat" aria-hidden="true">{catLabel}</span>
+                {/* Numero monumental como watermark */}
+                <span class="recipe-card__num" aria-hidden="true">{r.numero}</span>
+                {/* Overlay con CTA reveal */}
+                <span class="recipe-card__overlay" aria-hidden="true">
+                  <span class="recipe-card__cta">
+                    {labels.open}
+                    <svg width="16" height="10" viewBox="0 0 16 10" fill="none" aria-hidden="true">
+                      <path d="M0 5h14M10 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                </span>
+              </figure>
+
+              <div class="recipe-card__body">
+                <h3 class="recipe-card__title">{r.titulo}</h3>
+                <p class="recipe-card__meta">
+                  <span class="recipe-card__meta-item">
+                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.1" />
+                      <path d="M7 3.5V7l2.2 1.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                    </svg>
+                    {r.tiempo}
+                  </span>
+                  <span class="recipe-card__meta-sep" aria-hidden="true"></span>
+                  <span class="recipe-card__meta-item">
+                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <circle cx="4.5" cy="5" r="1.8" stroke="currentColor" stroke-width="1.1" />
+                      <circle cx="9.5" cy="5" r="1.8" stroke="currentColor" stroke-width="1.1" />
+                      <path d="M1 12c0-2 1.6-3.5 3.5-3.5S8 10 8 12" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                      <path d="M6 12c0-2 1.6-3.5 3.5-3.5S13 10 13 12" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                    </svg>
+                    {r.rinde} {labels.serves}
+                  </span>
+                </p>
+                {esOnly && (
+                  <p class="recipe-card__es-only">{labels.esNote}</p>
+                )}
+              </div>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .recipe-index {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(2.5rem, 5vw, 4rem) 1.5rem clamp(4rem, 8vw, 6rem);
+  }
+  .recipe-index__inner { max-width: 1340px; margin: 0 auto; }
+
+  /* ─── Toolbar (filtros + contador) ─── */
+  .recipe-index__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin: 0 0 clamp(2rem, 4vw, 3rem);
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 10%, transparent);
+  }
+
+  .recipe-index__filters {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .recipe-index__chip {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    /* WCAG 2.5.5: padding-block 0.75rem → garantiza min-height 44px aún
+       con font-size 0.68rem. El visual luce idéntico, solo es hit area. */
+    padding: 0.75rem 1rem 0.75rem 0.85rem;
+    min-height: 44px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.68rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--navy);
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--navy) 18%, transparent);
+    border-radius: 999px;
+    transition:
+      background-color var(--dur-fast) var(--ease-fast),
+      color var(--dur-fast) var(--ease-fast),
+      border-color var(--dur-fast) var(--ease-fast);
+  }
+  .recipe-index__chip-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--navy) 30%, transparent);
+    transition: background-color var(--dur-fast) var(--ease-fast);
+  }
+  .recipe-index__chip:hover { border-color: var(--navy); }
+  .recipe-index__chip[data-active='true'] {
+    background: var(--navy);
+    color: #FFFFFF;
+    border-color: var(--navy);
+  }
+  .recipe-index__chip[data-active='true'] .recipe-index__chip-dot {
+    background: var(--red);
+  }
+
+  .recipe-index__count {
+    margin: 0;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--navy);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .recipe-index__count > span:first-child {
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    color: var(--red);
+  }
+  .recipe-index__count-sep { opacity: 0.3; }
+  .recipe-index__count-label {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.55;
+  }
+
+  /* ─── Grid ─── */
+  .recipe-index__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(1.5rem, 2.5vw, 2.25rem) clamp(1.25rem, 2vw, 1.75rem);
+  }
+  @media (max-width: 1100px) { .recipe-index__grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 760px)  { .recipe-index__grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 440px)  { .recipe-index__grid { grid-template-columns: 1fr; } }
+
+  .recipe-index__item[data-hidden='true'] { display: none; }
+
+  /* ─── Card editorial ─── */
+  .recipe-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: var(--navy);
+    transition: transform var(--dur-medium) var(--ease-medium);
+  }
+  .recipe-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .recipe-card__figure {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: color-mix(in srgb, var(--navy) 6%, var(--bg-page));
+    border-radius: 4px;
+    isolation: isolate;
+  }
+  .recipe-card__figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1100ms cubic-bezier(0.16, 1, 0.3, 1),
+                filter 700ms var(--ease-medium);
+  }
+  .recipe-card:hover .recipe-card__figure img {
+    transform: scale(1.06);
+    filter: saturate(1.05) brightness(1.02);
+  }
+
+  /* Chip de categoria sobre imagen */
+  .recipe-card__cat {
+    position: absolute;
+    top: 0.85rem;
+    left: 0.85rem;
+    z-index: 2;
+    padding: 0.4rem 0.75rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--navy);
+    background: color-mix(in srgb, var(--bg-page) 92%, transparent);
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  /* Tonos por categoria */
+  .recipe-card[data-tone="red"]    .recipe-card__cat { color: var(--red); }
+  .recipe-card[data-tone="cyan"]   .recipe-card__cat { color: #1A8FA8; }
+  .recipe-card[data-tone="pink"]   .recipe-card__cat { color: #B8205F; }
+  .recipe-card[data-tone="yellow"] .recipe-card__cat { color: #8B6914; }
+  .recipe-card[data-tone="green"]  .recipe-card__cat { color: #2D6B3F; }
+  .recipe-card[data-tone="navy"]   .recipe-card__cat { color: var(--navy); }
+
+  /* Numero monumental como watermark */
+  .recipe-card__num {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.85rem;
+    z-index: 2;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #FFFFFF;
+    opacity: 0.72;
+    font-variant-numeric: lining-nums;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    mix-blend-mode: difference;
+    pointer-events: none;
+  }
+
+  /* Overlay con CTA — visible solo en hover */
+  .recipe-card__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 1rem;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, #000 55%, transparent) 0%,
+      color-mix(in srgb, #000 12%, transparent) 40%,
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity var(--dur-medium) var(--ease-medium);
+    pointer-events: none;
+  }
+  .recipe-card:hover .recipe-card__overlay,
+  .recipe-card:focus-visible .recipe-card__overlay {
+    opacity: 1;
+  }
+  .recipe-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.95rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    background: var(--red);
+    border-radius: 999px;
+    transform: translateY(6px);
+    transition: transform var(--dur-medium) var(--ease-medium);
+  }
+  .recipe-card:hover .recipe-card__cta {
+    transform: translateY(0);
+  }
+
+  /* Body de card */
+  .recipe-card__body {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .recipe-card__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+    line-height: 1.2;
+    letter-spacing: 0.005em;
+    color: var(--navy);
+    text-wrap: balance;
+  }
+  .recipe-card__meta {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--navy);
+    opacity: 0.65;
+  }
+  .recipe-card__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .recipe-card__meta-item svg {
+    color: var(--red);
+    flex-shrink: 0;
+  }
+  .recipe-card__meta-sep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--navy) 35%, transparent);
+  }
+
+  .recipe-card__es-only {
+    margin: 0.2rem 0 0;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.62rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--red);
+    opacity: 0.85;
+  }
+
+  /* Stagger reveal */
+  .recipe-index__item {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 700ms var(--ease-divine),
+      transform 700ms var(--ease-divine);
+    transition-delay: calc(var(--i, 0) * 35ms);
+  }
+  .recipe-index__item.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .recipe-card:hover { transform: none; }
+    .recipe-card:hover .recipe-card__figure img { transform: none; filter: none; }
+    .recipe-index__item { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  const sec = document.querySelector<HTMLElement>('[data-recipe-index]');
+  if (sec) {
+    const chips = sec.querySelectorAll<HTMLButtonElement>('.recipe-index__chip');
+    const items = sec.querySelectorAll<HTMLElement>('.recipe-index__item');
+    const counter = sec.querySelector<HTMLElement>('[data-count-current]');
+    const total = items.length;
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const cat = chip.dataset.cat;
+        chips.forEach((c) => c.removeAttribute('data-active'));
+        chip.setAttribute('data-active', 'true');
+
+        let visible = 0;
+        items.forEach((it) => {
+          const match = cat === 'all' || it.dataset.cat === cat;
+          if (match) {
+            it.removeAttribute('data-hidden');
+            visible++;
+          } else {
+            it.setAttribute('data-hidden', 'true');
+          }
+        });
+        if (counter) counter.textContent = String(visible);
+      });
+    });
+
+    // Stagger reveal con IO
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-in');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
+      items.forEach((it) => io.observe(it));
+    } else {
+      items.forEach((it) => it.classList.add('is-in'));
+    }
+  }
+</script>

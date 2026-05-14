@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ambrosia",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["preview", "--host", "127.0.0.1"],
+      "port": 4321
+    }
+  ]
+}

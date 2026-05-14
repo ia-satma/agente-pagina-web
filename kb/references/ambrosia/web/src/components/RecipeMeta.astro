@@ -1,0 +1,91 @@
+---
+/**
+ * RecipeMeta — tira de chips con tiempo, porciones y categoria.
+ */
+import { CATEGORIAS, type Receta } from '~/data/recetas';
+import type { Locale } from '~/i18n';
+
+interface Props {
+  receta: Receta;
+  locale: Locale;
+}
+
+const { receta, locale } = Astro.props;
+const cat = CATEGORIAS.find((c) => c.key === receta.categoria);
+const catLabel = cat ? (locale === 'es' ? cat.label_es : cat.label_en) : '';
+
+const items = locale === 'es'
+  ? [
+      { label: 'Tiempo',    value: receta.tiempo },
+      { label: 'Rinde',     value: receta.rinde },
+      { label: 'Categoria', value: catLabel },
+    ]
+  : [
+      { label: 'Time',     value: receta.tiempo },
+      { label: 'Serves',   value: receta.rinde },
+      { label: 'Category', value: catLabel },
+    ];
+---
+
+<section class="recipe-meta">
+  <div class="recipe-meta__inner">
+    <dl class="recipe-meta__grid">
+      {items.map((it) => (
+        <div class="recipe-meta__item">
+          <dt class="recipe-meta__label">{it.label}</dt>
+          <dd class="recipe-meta__value">{it.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .recipe-meta {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(1.5rem, 3vw, 2.5rem) 1.5rem;
+  }
+  .recipe-meta__inner { max-width: 1080px; margin: 0 auto; }
+  .recipe-meta__grid {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+  }
+  @media (max-width: 600px) {
+    .recipe-meta__grid {
+      grid-template-columns: 1fr;
+    }
+    .recipe-meta__item + .recipe-meta__item {
+      border-top: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    }
+  }
+  .recipe-meta__item {
+    padding: 1.5rem 1rem;
+    text-align: center;
+  }
+  @media (min-width: 601px) {
+    .recipe-meta__item + .recipe-meta__item {
+      border-left: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    }
+  }
+  .recipe-meta__label {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--red);
+    opacity: 0.85;
+  }
+  .recipe-meta__value {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    color: var(--navy);
+  }
+</style>

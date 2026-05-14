@@ -1,0 +1,313 @@
+---
+/**
+ * SEOSchema — JSON-LD structured data por pagina.
+ *
+ * Tipos soportados: 'organization' | 'product' | 'restaurant' | 'website'
+ *
+ * Renderiza un <script type="application/ld+json"> en el <head> con datos
+ * verificados (Jabalina/Carnes Ramos confirmados, MICHELIN Guide 2025, etc.).
+ */
+interface RecipeData {
+  slug: string;
+  titulo: string;
+  categoria: string;
+  tiempo: string;        // "10 min", "1 h 15 min"
+  rinde: string;         // "4 personas", "250 g"
+  ingredientes: string[];
+  procedimiento: string[];
+  imagen: string;
+  nota?: string;
+}
+
+interface Props {
+  type: 'home' | 'product' | 'restaurant-list' | 'concierge' | 'origen' | 'recetario' | 'recipe' | 'recipe-list';
+  locale?: 'es' | 'en';
+  /** Solo para type='recipe' */
+  receta?: RecipeData;
+  /** Solo para type='recipe-list' — lista resumida de recetas para ItemList */
+  recetas?: Array<{ slug: string; titulo: string; imagen: string }>;
+  /** Breadcrumb opcional — array de {name, url} desde home hasta la página actual */
+  breadcrumbs?: Array<{ name: string; url: string }>;
+}
+
+const { type, locale = 'es', receta, recetas, breadcrumbs } = Astro.props;
+const site = 'https://ambrosiasauceofgods.com';
+
+/** Convierte "10 min" → "PT10M" y "1 h 15 min" → "PT1H15M" (ISO 8601 duration). */
+function isoDuration(tiempo: string): string {
+  const match = tiempo.match(/(?:(\d+)\s*h)?\s*(?:(\d+)\s*min)?/i);
+  if (!match) return 'PT15M';
+  const h = parseInt(match[1] || '0', 10);
+  const m = parseInt(match[2] || '0', 10);
+  if (h === 0 && m === 0) return 'PT15M';
+  return `PT${h > 0 ? h + 'H' : ''}${m > 0 ? m + 'M' : ''}`;
+}
+
+/* LocalBusiness: mas especifico que Organization, da GEO context fuerte para
+   busquedas locales y para LLMs (ChatGPT, Perplexity, Gemini, Claude) que
+   ranquean "salsa premium Monterrey" o "luxury hot sauce Mexico". */
+const organization = {
+  '@type': ['Organization', 'LocalBusiness', 'FoodEstablishment'],
+  '@id': `${site}#org`,
+  name: 'AMBROSIA',
+  alternateName: ['Salsa AMBROSIA', 'The Divine Sauce of Gods'],
+  url: site,
+  logo: `${site}/images/brand/label-macro.webp`,
+  image: `${site}/images/bottle/bottle-original-clean.webp`,
+  description: 'Salsa picante mexicana ultra-lujo embotellada a mano en Monterrey, Nuevo Leon. Inspirada en el elixir de los dioses del Olimpo y la tradicion artesanal mexica. Seis chiles secos en reposo prolongado de 90 dias, etiqueta Otomi impresa a mano, lacre rojo Pantone 485.',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Monterrey',
+    addressRegion: 'Nuevo Leon',
+    addressCountry: 'MX',
+    postalCode: '64000',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 25.6866,
+    longitude: -100.3161,
+  },
+  areaServed: [
+    { '@type': 'City', name: 'Monterrey' },
+    { '@type': 'City', name: 'Mexico City' },
+    { '@type': 'Country', name: 'Mexico' },
+  ],
+  email: 'concierge@ambrosiasauceofgods.com',
+  priceRange: '$$$',
+  servesCuisine: 'Mexicana ultra-lujo',
+  knowsAbout: ['salsa picante artesanal', 'chiles secos mexicanos', 'embotellado a mano', 'etiqueta Otomi'],
+  foundingDate: '2024',
+  founder: { '@type': 'Person', name: 'AMBROSIA' },
+  sameAs: [
+    'https://www.instagram.com/jabalinamx/',
+    'https://www.instagram.com/carnesramos/',
+  ],
+};
+
+const website = {
+  '@type': 'WebSite',
+  '@id': `${site}#website`,
+  url: site,
+  name: 'AMBROSIA — The Divine Sauce of Gods',
+  inLanguage: locale === 'es' ? 'es-MX' : 'en-US',
+  publisher: { '@id': `${site}#org` },
+};
+
+const product = {
+  '@type': 'Product',
+  '@id': `${site}/la-salsa#product`,
+  name: 'Salsa AMBROSIA',
+  alternateName: 'The Divine Sauce of Gods',
+  description: 'Salsa picante mexicana embotellada a mano en lotes pequenos. 200ml de vidrio cobalto sellado con lacre rojo Pantone 485. Seis chiles secos en reposo prolongado de 90 dias. Una sola gota basta para transformar un plato.',
+  brand: { '@id': `${site}#org` },
+  image: [
+    `${site}/images/bottle/bottle-01.webp`,
+    `${site}/images/bottle/bottle-02.webp`,
+    `${site}/images/bottle/bottle-03.webp`,
+  ],
+  category: 'Salsas',
+  countryOfOrigin: { '@type': 'Country', name: 'Mexico' },
+  manufacturer: { '@id': `${site}#org` },
+  additionalProperty: [
+    { '@type': 'PropertyValue', name: 'Volumen', value: '200 ml' },
+    { '@type': 'PropertyValue', name: 'Reposo', value: '90 dias' },
+    { '@type': 'PropertyValue', name: 'Chiles', value: 'ancho, morita, chipotle, pasilla, guajillo, arbol' },
+    { '@type': 'PropertyValue', name: 'Generaciones de receta', value: '3 (desde 1962)' },
+  ],
+  award: 'Servida en Pujol, Quintonil, Alcalde, Casa Oaxaca, Rosetta, Sud 777, Le Chique',
+};
+
+const jabalina = {
+  '@type': 'Restaurant',
+  '@id': 'https://www.instagram.com/jabalinamx/',
+  name: 'Restaurante Jabalina',
+  description: 'Mesa de autor del chef Manuel Orozco con mas de 20 anos de investigacion en cocina del noreste mexicano. Reconocido en la MICHELIN Guide Mexico 2025. Punto de venta autorizado de Salsa AMBROSIA.',
+  servesCuisine: 'Mexicana de autor',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Monterrey',
+    addressRegion: 'Nuevo Leon',
+    addressCountry: 'MX',
+  },
+  url: 'https://www.opentable.com/r/jabalina-barrio-antiguo-monterrey',
+  sameAs: [
+    'https://www.instagram.com/jabalinamx/',
+    'https://www.facebook.com/Jabalinamx/',
+    'https://guide.michelin.com/us/en/nuevo-leon/monterrey_2041973/restaurant/jabalina',
+  ],
+  award: 'MICHELIN Guide Mexico 2025',
+};
+
+const carnesRamos = {
+  '@type': 'Store',
+  '@id': 'https://www.instagram.com/carnesramos/',
+  name: 'Carnes Ramos',
+  description: 'Carniceria boutique con mas de 40 anos de tradicion en Monterrey. Punto de venta autorizado de Salsa AMBROSIA.',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Monterrey',
+    addressRegion: 'Nuevo Leon',
+    addressCountry: 'MX',
+  },
+  sameAs: [
+    'https://www.instagram.com/carnesramos/',
+    'https://www.facebook.com/CarnesRamos/',
+    'https://x.com/carnesramos',
+  ],
+};
+
+const faqConcierge = {
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: '¿Que es AMBROSIA?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Una salsa picante mexicana embotellada a mano de 200 ml, inspirada en el elixir de los dioses del Olimpo y elaborada con seis chiles secos mexicanos en reposo prolongado de 90 dias.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Donde se puede comprar AMBROSIA al publico?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'En Monterrey: Restaurante Jabalina (Barrio Antiguo y Distrito Armida) y Carnes Ramos (area metropolitana). Para distribucion corporativa o regalo, escribir a concierge@ambrosiasauceofgods.com.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿En que restaurantes se sirve AMBROSIA?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Pujol (CDMX), Quintonil (CDMX), Alcalde (Guadalajara), Lardo (CDMX), Casa Oaxaca (Oaxaca), Rosetta (CDMX), Sud 777 (CDMX) y Le Chique (Cancun).',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '¿Cuantos chiles tiene la formula?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Seis chiles secos mexicanos: ancho, morita, chipotle, pasilla, guajillo y arbol. La receta familiar tiene tres generaciones desde 1962.',
+      },
+    },
+  ],
+};
+
+/* Article schema para paginas narrativas (origen) — ayuda en LLMs */
+const origenArticle = {
+  '@type': 'Article',
+  '@id': `${site}/origen#article`,
+  headline: 'El Origen de AMBROSIA — del mito griego al embotellado mexicano',
+  description: 'La historia de AMBROSIA: del elixir de los dioses del Olimpo a la salsa picante artesanal embotellada en Monterrey. Receta familiar de tres generaciones desde 1962.',
+  author: { '@id': `${site}#org` },
+  publisher: { '@id': `${site}#org` },
+  image: `${site}/images/brand/mito-tezcatlipoca.webp`,
+  datePublished: '2024-01-01',
+  inLanguage: locale === 'es' ? 'es-MX' : 'en-US',
+};
+
+/* CollectionPage para el recetario */
+const recetarioCollection = {
+  '@type': 'CollectionPage',
+  '@id': `${site}/recetario#collection`,
+  name: 'El Recetario AMBROSIA',
+  description: 'Veinte recetas firmadas que utilizan AMBROSIA como ingrediente protagonista. De desayunos a piezas de mesa larga.',
+  isPartOf: { '@id': `${site}#website` },
+  publisher: { '@id': `${site}#org` },
+  numberOfItems: 20,
+};
+
+/* Recipe schema para /recetario/[slug] — rich snippets de Google.
+   Cuando un usuario busca "receta de aguachile rojo", Google muestra el
+   card con foto + tiempo + ingredientes si este schema está bien formado. */
+const recipeSchema = receta ? {
+  '@type': 'Recipe',
+  '@id': `${site}/recetario/${receta.slug}#recipe`,
+  name: receta.titulo,
+  image: [`${site}${receta.imagen}`],
+  description: `${receta.titulo} — receta del recetario de AMBROSIA, salsa picante mexicana ultra-lujo. Categoría: ${receta.categoria}.`,
+  author: { '@id': `${site}#org` },
+  publisher: { '@id': `${site}#org` },
+  datePublished: '2024-09-01',  // fecha de publicación del recetario AMBROSIA
+  inLanguage: locale === 'es' ? 'es-MX' : 'en-US',
+  recipeCategory: receta.categoria,
+  recipeCuisine: 'Mexican',
+  recipeYield: receta.rinde,
+  totalTime: isoDuration(receta.tiempo),
+  recipeIngredient: receta.ingredientes,
+  recipeInstructions: receta.procedimiento.map((step, i) => ({
+    '@type': 'HowToStep',
+    position: i + 1,
+    text: step,
+  })),
+  ...(receta.nota && { suggestedAnswer: receta.nota }),
+  isPartOf: { '@id': `${site}/recetario#collection` },
+} : null;
+
+/* ItemList — lista de recetas para que Google entienda el grid de /recetario */
+const recipeItemList = recetas ? {
+  '@type': 'ItemList',
+  '@id': `${site}/recetario#itemlist`,
+  name: locale === 'es' ? 'Recetario AMBROSIA — 20 recetas' : 'AMBROSIA Recipe Book — 20 recipes',
+  numberOfItems: recetas.length,
+  itemListElement: recetas.map((r, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    url: `${site}/${locale === 'en' ? 'en/recipe-book' : 'recetario'}/${r.slug}`,
+    name: r.titulo,
+    image: `${site}${r.imagen}`,
+  })),
+} : null;
+
+/* BreadcrumbList — Google muestra la jerarquía bajo el title en SERP */
+const breadcrumbList = breadcrumbs && breadcrumbs.length > 0 ? {
+  '@type': 'BreadcrumbList',
+  '@id': `${site}${Astro.url.pathname}#breadcrumb`,
+  itemListElement: breadcrumbs.map((b, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: b.name,
+    item: b.url.startsWith('http') ? b.url : `${site}${b.url}`,
+  })),
+} : null;
+
+let graph: any[] = [];
+
+if (type === 'home') {
+  graph = [organization, website];
+}
+if (type === 'product') {
+  graph = [organization, website, product];
+}
+if (type === 'restaurant-list') {
+  graph = [organization, website, jabalina, carnesRamos];
+}
+if (type === 'concierge') {
+  graph = [organization, website, faqConcierge];
+}
+if (type === 'origen') {
+  graph = [organization, website, origenArticle];
+}
+if (type === 'recetario') {
+  graph = [organization, website, recetarioCollection];
+}
+if (type === 'recipe' && recipeSchema) {
+  graph = [organization, website, recipeSchema];
+}
+if (type === 'recipe-list' && recipeItemList) {
+  graph = [organization, website, recetarioCollection, recipeItemList];
+}
+
+// Breadcrumbs se acumulan en cualquier type si se pasan
+if (breadcrumbList) {
+  graph.push(breadcrumbList);
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': graph,
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline></script>

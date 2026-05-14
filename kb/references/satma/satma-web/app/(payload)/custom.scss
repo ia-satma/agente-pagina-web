@@ -1,0 +1,874 @@
+/* ---------------------------------------------------------------------------
+ * SATMA admin — UX/UI Pro adaptation of Payload's chrome to the brand book.
+ * Tokens, typography, accents, login screen, nav, dashboard.
+ * ------------------------------------------------------------------------- */
+
+/* SATMA brand tokens — used everywhere below */
+:root,
+[data-theme="light"],
+[data-theme="dark"] {
+  --satma-navy: #181a21;
+  --satma-navy-soft: #2a2e3a;
+  --satma-paper: #f4f6fb;
+  --satma-paper-warm: #ffffff;
+  --satma-periwinkle: #b3cbff;
+  --satma-periwinkle-deep: #6e90db;
+  --satma-periwinkle-deeper: #4f72c4;
+  --satma-mist: #dde4f4;
+  --satma-lilac: #e0d8f0;
+  --satma-line: #e6e9f1;
+  --satma-line-strong: #d3d8e3;
+  --satma-mute: #8b93a7;
+  --satma-mute-soft: #b6bccc;
+  --satma-success: #1f9d6e;
+  --satma-error: #d04848;
+  --satma-warning: #c98a1d;
+}
+
+/* Override Payload's default theme variables (light) ------------------------ */
+[data-theme="light"] {
+  /* Surface */
+  --theme-bg: var(--satma-paper);
+  --theme-input-bg: var(--satma-paper-warm);
+  --theme-elevation-0: var(--satma-paper-warm);
+  --theme-elevation-50: var(--satma-paper);
+  --theme-elevation-100: var(--satma-line);
+  --theme-elevation-150: var(--satma-line-strong);
+  --theme-elevation-200: #cfd5e3;
+  --theme-elevation-300: var(--satma-mute-soft);
+  --theme-elevation-400: var(--satma-mute);
+  --theme-elevation-500: #6b7282;
+  --theme-elevation-600: #4d5466;
+  --theme-elevation-700: var(--satma-navy-soft);
+  --theme-elevation-800: var(--satma-navy);
+  --theme-elevation-900: #0e0f14;
+  --theme-elevation-1000: #000;
+
+  --color-base-0: var(--satma-paper-warm);
+  --color-base-50: var(--satma-paper);
+  --color-base-100: var(--satma-line);
+  --color-base-150: var(--satma-line-strong);
+  --color-base-200: #cfd5e3;
+  --color-base-300: var(--satma-mute-soft);
+  --color-base-400: var(--satma-mute);
+  --color-base-500: #6b7282;
+  --color-base-600: #4d5466;
+  --color-base-700: var(--satma-navy-soft);
+  --color-base-800: var(--satma-navy);
+  --color-base-1000: var(--satma-navy);
+
+  /* Text */
+  --theme-text: var(--satma-navy);
+  --theme-input-text: var(--satma-navy);
+
+  /* Accents — primary action becomes SATMA periwinkle */
+  --theme-success-50: #e8f5ee;
+  --theme-success-500: var(--satma-success);
+  --theme-success-750: #157852;
+  --theme-success-800: #157852;
+
+  --theme-warning-500: var(--satma-warning);
+  --theme-error-500: var(--satma-error);
+}
+
+/* Typography in admin chrome ------------------------------------------------ */
+body,
+.payload-default-template,
+.template-default,
+.payload__container,
+.payload-app {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+.dashboard__label,
+.collection-list__heading,
+.doc-header__title,
+.global-header__title,
+.list-header__title,
+.nav__label,
+.satma-card__head-title h2,
+.satma-dash__title {
+  font-family:
+    "Bricolage Grotesque",
+    "Inter",
+    sans-serif !important;
+  letter-spacing: -0.015em;
+}
+
+/* Top header / nav --------------------------------------------------------- */
+.app-header,
+.template-default__nav,
+.nav,
+.nav-toggler {
+  background: var(--satma-paper-warm) !important;
+  border-color: var(--satma-line) !important;
+}
+
+.app-header {
+  border-bottom: 1px solid var(--satma-line) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* Buttons polish ----------------------------------------------------------- */
+.btn--style-primary {
+  background: var(--satma-navy) !important;
+  border-color: var(--satma-navy) !important;
+  color: var(--satma-paper) !important;
+  border-radius: 999px !important;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition: all 0.16s ease !important;
+
+  &:hover,
+  &:focus {
+    background: var(--satma-navy-soft) !important;
+    border-color: var(--satma-navy-soft) !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(24, 26, 33, 0.12);
+  }
+}
+
+.btn--style-secondary {
+  border-color: var(--satma-line-strong) !important;
+  color: var(--satma-navy) !important;
+  border-radius: 999px !important;
+  background: var(--satma-paper-warm) !important;
+
+  &:hover {
+    border-color: var(--satma-periwinkle-deep) !important;
+    color: var(--satma-periwinkle-deep) !important;
+  }
+}
+
+.btn--style-pill {
+  border-radius: 999px !important;
+}
+
+/* Inputs ------------------------------------------------------------------- */
+.field-type input,
+.field-type textarea,
+.field-type select,
+.react-select__control {
+  background: var(--satma-paper-warm) !important;
+  border: 1px solid var(--satma-line) !important;
+  border-radius: 10px !important;
+  color: var(--satma-navy) !important;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--satma-line-strong) !important;
+  }
+
+  &:focus,
+  &:focus-within {
+    border-color: var(--satma-periwinkle-deep) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 4px rgba(110, 144, 219, 0.12) !important;
+  }
+}
+
+.field-label {
+  color: var(--satma-mute) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Links ------------------------------------------------------------------- */
+a {
+  color: var(--satma-periwinkle-deep);
+
+  &:hover {
+    color: var(--satma-periwinkle-deeper);
+  }
+}
+
+/* Table / list rows -------------------------------------------------------- */
+.collection-list__wrap,
+.collection-edit__form {
+  background: var(--satma-paper-warm);
+}
+
+.list-controls,
+.collection-list__header {
+  background: var(--satma-paper) !important;
+}
+
+table thead th {
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-size: 11px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase;
+  color: var(--satma-mute) !important;
+}
+
+table tbody tr:hover {
+  background: rgba(244, 246, 251, 0.7) !important;
+}
+
+/* Pills / badges in collection lists --------------------------------------- */
+.pill,
+.label--type-default {
+  border-radius: 999px !important;
+  background: rgba(110, 144, 219, 0.1) !important;
+  color: var(--satma-periwinkle-deep) !important;
+  border: none !important;
+}
+
+/* Scrollbars (subtle) ------------------------------------------------------ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--satma-line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--satma-paper);
+
+  &:hover {
+    background: var(--satma-mute-soft);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ *  LOGIN PAGE
+ * ------------------------------------------------------------------------- */
+/* Login wrap must be TRANSPARENT — otherwise its own white background
+   creates a second "card" above the form card and the brand sits inside
+   a phantom box. We let the parent (.template-minimal) carry the soft
+   gradient page background and only the form card itself has a white
+   surface. */
+.template-minimal__wrap {
+  background: transparent !important;
+}
+
+.template-minimal {
+  background:
+    radial-gradient(80% 60% at 80% 0%, rgba(179, 203, 255, 0.18), transparent 60%),
+    radial-gradient(80% 60% at 0% 100%, rgba(224, 216, 240, 0.16), transparent 60%),
+    var(--satma-paper) !important;
+}
+
+/* Login brand area — locked to a deterministic 28px-tall, transparent
+   container so the wordmark sits cleanly above the form card without
+   creating a second visual "card" of its own.
+   The SVG itself has explicit width/height attributes (28×206) in
+   payload/components/Logo.tsx, so layout is correct even before this
+   CSS loads — these rules are belt-and-suspenders to neutralize any
+   stray Payload defaults. */
+.template-minimal__brand,
+.login__brand {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 28px !important;
+  margin: 0 0 28px 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+
+  // Any wrapper inside the brand container — keep it transparent and
+  // line-height-zero so SVG metrics don't add phantom vertical space.
+  & > * {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+    max-height: 28px !important;
+  }
+
+  svg {
+    display: block !important;
+    height: 28px !important;
+    width: 206px !important;
+    max-width: 100% !important;
+    color: var(--satma-navy) !important;
+  }
+}
+
+/* Admin chrome icon — square monogram (just the "s" letterform) inside
+   Payload's nav header. The slot is small (~30px), so a square 24×24
+   crop is what fits cleanly. Lockdown rules match what the Icon
+   component already ships in attrs — defensive in case Payload's
+   default `svg { ... }` rules try to stretch it. */
+.nav__header,
+.nav-icon-button,
+.app-header__nav-toggler,
+.template-default__nav-toggler-container {
+  svg[aria-hidden="true"][role="img"] {
+    height: 24px !important;
+    width: 24px !important;
+    max-width: 24px !important;
+    display: block !important;
+    color: var(--satma-navy) !important;
+  }
+
+  span[aria-label="satma"] {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    line-height: 0 !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+.login__form,
+.create-first-user__form,
+.forgot-password__form {
+  border: 1px solid var(--satma-line) !important;
+  border-radius: 18px !important;
+  padding: 40px !important;
+  background: var(--satma-paper-warm) !important;
+  box-shadow:
+    0 1px 0 rgba(24, 26, 33, 0.02),
+    0 22px 60px -28px rgba(24, 26, 33, 0.18) !important;
+}
+
+.login__title,
+.create-first-user__heading {
+  font-family: "Bricolage Grotesque", sans-serif !important;
+  font-size: 32px !important;
+  letter-spacing: -0.02em !important;
+  color: var(--satma-navy) !important;
+  margin-bottom: 6px !important;
+}
+
+/* ---------------------------------------------------------------------------
+ *  SATMA "LOGO" component (top-left of admin + login)
+ * ------------------------------------------------------------------------- */
+.satma-admin-logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: var(--satma-navy);
+
+  &__mark {
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  &__dot {
+    color: var(--satma-periwinkle-deep);
+    font-size: 24px;
+    line-height: 1;
+    margin-left: -1px;
+  }
+
+  &__sub {
+    margin-left: 14px;
+    padding-left: 14px;
+    border-left: 1px solid var(--satma-line-strong);
+    font-family: "Inter", sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--satma-mute);
+  }
+
+  &--full {
+    .satma-admin-logo__mark {
+      font-size: 56px;
+    }
+
+    .satma-admin-logo__dot {
+      font-size: 56px;
+    }
+
+    .satma-admin-logo__sub {
+      display: none;
+    }
+  }
+}
+
+.satma-admin-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--satma-navy);
+  color: var(--satma-paper);
+  font-family: "Bricolage Grotesque", "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+  position: relative;
+
+  &__dot {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--satma-periwinkle);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ *  "Ver sitio público" CTA — registered as afterNavLinks
+ * ------------------------------------------------------------------------- */
+.satma-view-site {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 16px 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    var(--satma-navy) 0%,
+    var(--satma-navy-soft) 100%
+  );
+  color: var(--satma-paper);
+  text-decoration: none;
+  transition: all 0.18s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      120% 120% at 100% 0%,
+      rgba(179, 203, 255, 0.25),
+      transparent 60%
+    );
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px -8px rgba(24, 26, 33, 0.4);
+
+    &::before {
+      opacity: 1.4;
+    }
+
+    .satma-view-site__arrow {
+      transform: translate(2px, -2px);
+    }
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--satma-periwinkle);
+    box-shadow: 0 0 0 3px rgba(179, 203, 255, 0.25);
+    flex-shrink: 0;
+    animation: satma-pulse 2.4s ease-in-out infinite;
+  }
+
+  &__label {
+    flex: 1;
+    line-height: 1.2;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__top {
+    font-family: "Bricolage Grotesque", "Inter", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  &__sub {
+    margin-top: 3px;
+    font-size: 11px;
+    color: rgba(244, 246, 251, 0.6);
+    letter-spacing: 0.05em;
+  }
+
+  &__arrow {
+    font-size: 14px;
+    color: var(--satma-periwinkle);
+    transition: transform 0.2s ease;
+  }
+}
+
+@keyframes satma-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(179, 203, 255, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(179, 203, 255, 0.1);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ *  CUSTOM DASHBOARD (existing styles preserved + tighter to the new chrome)
+ * ------------------------------------------------------------------------- */
+.satma-dash {
+  --satma-bg: var(--satma-paper);
+  --satma-card: var(--satma-paper-warm);
+  --satma-ink: var(--satma-navy);
+  --satma-ink-soft: #4d5466;
+  --satma-mute: #8b93a7;
+  --satma-line-d: var(--satma-line);
+  --satma-line-strong-d: var(--satma-line-strong);
+  --satma-radius: 14px;
+
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 28px 64px;
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--satma-ink);
+  background: var(--satma-bg);
+  min-height: 100vh;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  &__hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  &__eyebrow {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--satma-mute);
+  }
+
+  &__title {
+    margin: 6px 0 4px;
+    font-family: "Bricolage Grotesque", "Inter", sans-serif;
+    font-size: clamp(28px, 3.6vw, 44px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--satma-ink);
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: 15px;
+    color: var(--satma-ink-soft);
+    max-width: 560px;
+  }
+
+  &__view-site {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid var(--satma-line-strong-d);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--satma-ink);
+    background: var(--satma-card);
+    text-decoration: none;
+    transition: all 0.18s ease;
+
+    &:hover {
+      border-color: var(--satma-periwinkle-deep);
+      color: var(--satma-periwinkle-deep);
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 20px;
+
+    @media (max-width: 960px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.satma-card {
+  background: var(--satma-paper-warm);
+  border: 1px solid var(--satma-line);
+  border-radius: var(--satma-radius, 14px);
+  padding: 24px;
+  box-shadow: 0 1px 0 rgba(24, 26, 33, 0.02);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  &__head-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    h2 {
+      margin: 0;
+      font-family: "Bricolage Grotesque", "Inter", sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--satma-navy);
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    color: var(--satma-mute);
+  }
+
+  &__link {
+    font-size: 13px;
+    color: var(--satma-mute);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--satma-navy);
+    }
+  }
+}
+
+.satma-activity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  &__row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--satma-line);
+    border-radius: 10px;
+    transition: all 0.18s ease;
+
+    & + & {
+      margin-top: 10px;
+    }
+
+    &:hover {
+      border-color: var(--satma-line-strong);
+      background: rgba(244, 246, 251, 0.6);
+      transform: translateX(2px);
+    }
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0 0 8px;
+    font-family: "Bricolage Grotesque", "Inter", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--satma-navy);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__date {
+    font-size: 12px;
+    color: var(--satma-mute);
+  }
+
+  &__edit {
+    align-self: center;
+    color: #4d5466;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: all 0.16s ease;
+
+    &:hover {
+      color: var(--satma-navy);
+      background: var(--satma-paper);
+      border-color: var(--satma-line-strong);
+    }
+  }
+}
+
+.satma-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(110, 144, 219, 0.12);
+  color: var(--satma-periwinkle-deep);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+
+  &--soft {
+    background: rgba(24, 26, 33, 0.06);
+    color: #4d5466;
+  }
+}
+
+.satma-empty {
+  text-align: center;
+  padding: 40px 20px;
+  border: 2px dashed var(--satma-line);
+  border-radius: 10px;
+
+  p {
+    margin: 0 0 16px;
+    color: var(--satma-mute);
+  }
+}
+
+.satma-actions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  &__divider {
+    margin: 14px 4px 6px;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--satma-mute);
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--satma-navy);
+    text-decoration: none;
+    transition: all 0.16s ease;
+
+    &:hover {
+      background: var(--satma-paper);
+      color: var(--satma-navy);
+      transform: translateX(2px);
+    }
+
+    &--primary {
+      background: var(--satma-navy);
+      color: #ffffff !important;
+      font-weight: 500;
+
+      &:hover {
+        background: var(--satma-navy-soft);
+        color: #ffffff !important;
+        box-shadow: 0 6px 18px -6px rgba(24, 26, 33, 0.4);
+      }
+
+      .satma-actions__icon {
+        background: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
+      }
+    }
+
+    &--muted {
+      color: var(--satma-mute);
+
+      &:hover {
+        color: var(--satma-navy);
+      }
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: rgba(24, 26, 33, 0.06);
+    color: #4d5466;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+}
+
+.satma-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.18s ease;
+
+  &--primary {
+    background: var(--satma-navy);
+    color: #ffffff;
+
+    &:hover {
+      background: var(--satma-navy-soft);
+    }
+  }
+}
+
+/* Hide Payload's default empty dashboard sibling chrome */
+.satma-dash + * {
+  display: none;
+}

@@ -1,0 +1,58 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node / build artifacts (por si alguien corre los proyectos de kb/references/)
+node_modules/
+.next/
+dist/
+build/
+.astro/
+.cache/
+.parcel-cache/
+*.tsbuildinfo
+
+# Env / secrets — NUNCA commitearlos
+.env
+.env.local
+.env.*.local
+*.env
+
+# Claude Code local settings (personales por usuario, no del proyecto)
+.claude/settings.local.json
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# DBs locales
+*.db
+*.sqlite
+*.sqlite3
+.data/
+
+# Output del pipeline — datos de clientes, no van al template
+# (si quieres versionar un cliente específico, hazlo en su propio sub-repo o
+#  quita la línea correspondiente puntualmente)
+output/*/
+!output/.gitkeep
+
+# Briefs de clientes reales — NO commitear datos de clientes al template público
+# (el template _template/ SÍ se commitea)
+briefs/*/
+!briefs/_template/
+!briefs/.gitkeep
+
+# Zips y binarios pesados ocasionales
+*.zip
+*.tar.gz

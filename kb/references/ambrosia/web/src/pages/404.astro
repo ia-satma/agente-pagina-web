@@ -1,0 +1,81 @@
+---
+export const prerender = true;
+/**
+ * 404 — Pagina de error editorial luxury silencioso.
+ * No se aleja del tono AMBROSIA. Sugerencia de mundos canonicos para
+ * que el usuario perdido reencuentre el camino.
+ */
+import Base from '~/layouts/Base.astro';
+
+const locale = 'es' as const;
+---
+
+<Base title="AMBROSIA — Pagina no encontrada" locale={locale} description="La pagina que buscas no existe. Vuelve al inicio para descubrir los cinco mundos de AMBROSIA.">
+  <main class="error-404">
+    <p class="error-404__num">404</p>
+    <h1 class="error-404__title">
+      Esta <em>pagina</em> se perdio en el Olimpo.
+    </h1>
+    <p class="error-404__body">
+      Lo que buscas no esta aqui. Pero los cinco mundos de AMBROSIA siguen abiertos.
+    </p>
+
+    <nav class="error-404__nav" aria-label="Volver a los mundos canonicos">
+      <a class="btn btn--quiet" href="/">Inicio</a>
+      <a class="btn btn--quiet" href="/origen">El Origen</a>
+      <a class="btn btn--quiet" href="/la-salsa">La Salsa</a>
+      <a class="btn btn--quiet" href="/recetario">El Recetario</a>
+      <a class="btn btn--quiet" href="/concierge">Concierge</a>
+    </nav>
+  </main>
+</Base>
+
+<style>
+  .error-404 {
+    min-height: 80vh;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    padding: clamp(4rem, 10vw, 8rem) 1.5rem;
+    background: var(--bg-page);
+    color: var(--navy);
+  }
+  .error-404__num {
+    margin: 0 0 1.5rem;
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 12vw, 9rem);
+    line-height: 1;
+    color: color-mix(in srgb, var(--navy) 14%, transparent);
+    letter-spacing: -0.02em;
+    font-variant-numeric: lining-nums;
+  }
+  .error-404__title {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+  }
+  .error-404__title em {
+    color: var(--red);
+    font-style: normal;
+  }
+  .error-404__body {
+    margin: 0 0 3rem;
+    max-width: 32rem;
+    font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+    line-height: 1.6;
+    color: var(--navy);
+    opacity: 0.78;
+    margin-inline: auto;
+  }
+  .error-404__nav {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    justify-content: center;
+    max-width: 40rem;
+    margin-inline: auto;
+  }
+</style>

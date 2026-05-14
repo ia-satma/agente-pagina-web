@@ -1,0 +1,644 @@
+---
+/**
+ * BottleGallery — galeria editorial de la botella AMBROSIA.
+ *
+ * UX: scroll-snap horizontal CSS-only + arrow controls + dot indicators.
+ * Funciona como carrusel responsivo:
+ *   - Desktop: 3 cards visibles, la central enfocada (snap mandatory)
+ *   - Mobile: 1 card por viewport, swipe natural
+ *
+ * Reactividad:
+ *   - Hover en card: subtle lift + caption opacity full
+ *   - Click arrows: smooth scroll a sibling
+ *   - IntersectionObserver: card central marca dot activo
+ *   - Auto-advance opcional (8s, pausable on hover)
+ */
+import { pathFor, type Locale } from '~/i18n';
+import { getGalleryImages } from '~/lib/settings';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+/* Si el admin configura imagenes en settings (gallery.home), las usa.
+   De lo contrario, usa el array hardcodeado abajo (las 4 default). */
+const adminImages = getGalleryImages();
+
+const t = locale === 'es'
+  ? {
+      eyebrow: 'La botella',
+      title: 'Hecha <em class="brand">pieza por pieza</em>',
+      body: 'Cuatro angulos de la misma divinidad. Cobalto soplado, lacre rojo, etiqueta Otomi impresa a mano.',
+      prev: 'Imagen anterior',
+      next: 'Imagen siguiente',
+      discover: 'Descubrir',
+    }
+  : {
+      eyebrow: 'The bottle',
+      title: 'Crafted <em class="brand">piece by piece</em>',
+      body: 'Four angles of the same divinity. Blown cobalt glass, red wax seal, hand-printed Otomi label.',
+      prev: 'Previous image',
+      next: 'Next image',
+      discover: 'Discover',
+    };
+
+/* Cada imagen enlaza a la pagina/seccion donde su tema cobra sentido:
+ *  01 Cobalto       → /la-salsa  (el producto en sus notas y maridajes)
+ *  02 Etiqueta Otomi→ /origen    (la herencia cultural mexicana)
+ *  03 Lacre 485     → /la-salsa#boutique (compra directa, sello del producto)
+ *  04 Ceremonial    → /mesas     (donde la pieza se sirve)
+ */
+const defaultImages = [
+  {
+    src: '/images/bottle/bottle-01.webp',
+    alt: locale === 'es' ? 'Botella AMBROSIA cobalto sobre fondo neutro' : 'Cobalt AMBROSIA bottle on neutral background',
+    caption: locale === 'es' ? 'Cobalto soplado' : 'Blown cobalt',
+    href: pathFor(locale, 'la-salsa'),
+    linkLabel: locale === 'es' ? 'La Salsa' : 'The Sauce',
+  },
+  {
+    src: '/images/bottle/bottle-02.webp',
+    alt: locale === 'es' ? 'Detalle de la etiqueta Otomi impresa a mano' : 'Hand-printed Otomi label detail',
+    caption: locale === 'es' ? 'Etiqueta Otomi' : 'Otomi label',
+    href: pathFor(locale, 'origen'),
+    linkLabel: locale === 'es' ? 'El Origen' : 'The Origin',
+  },
+  {
+    src: '/images/bottle/bottle-03.webp',
+    alt: locale === 'es' ? 'Lacre rojo Pantone 485 sellando la botella' : 'Pantone 485 red wax sealing the bottle',
+    caption: locale === 'es' ? 'Lacre Pantone 485' : 'Pantone 485 wax',
+    href: pathFor(locale, 'la-salsa') + '#boutique',
+    linkLabel: locale === 'es' ? 'Boutique' : 'Boutique',
+  },
+  {
+    src: '/images/bottle/bottle-04.webp',
+    alt: locale === 'es' ? 'Composicion editorial de la botella en ambiente intimo' : 'Editorial composition of the bottle in intimate setting',
+    caption: locale === 'es' ? 'Pieza ceremonial' : 'Ceremonial piece',
+    href: pathFor(locale, 'mesas'),
+    linkLabel: locale === 'es' ? 'Mesas' : 'Tables',
+  },
+];
+
+/* Si el admin configuro imagenes via backend, las usa. Mapea a la forma esperada. */
+const images = adminImages.length > 0
+  ? adminImages.map((img) => ({
+      src: img.src,
+      alt: locale === 'es' ? img.alt_es : img.alt_en,
+      caption: locale === 'es' ? img.caption_es : img.caption_en,
+      href: img.href,
+      linkLabel: locale === 'es' ? img.linkLabel_es : img.linkLabel_en,
+    }))
+  : defaultImages;
+---
+
+<section class="bottle-gallery" data-bottle-gallery>
+  <div class="bottle-gallery__header">
+    <p class="eyebrow bottle-gallery__eyebrow" data-anim="up">{t.eyebrow}</p>
+    <h2 class="bottle-gallery__title" data-anim="up" set:html={t.title}></h2>
+    <p class="bottle-gallery__body" data-anim="up">{t.body}</p>
+  </div>
+
+  <div class="bottle-gallery__viewport">
+    <button class="bottle-gallery__nav bottle-gallery__nav--prev" type="button" aria-label={t.prev} data-gallery-prev>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+        <path d="M16 4 L8 12 L16 20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    {/* Track con TRIPLE clonacion para infinite loop seamless.
+        Render: [clones_leading, originals, clones_trailing]
+        El JS posiciona scroll en originals (center) e intercepta cuando
+        entra a leading/trailing → jump silencioso al equivalente en center. */}
+    <div class="bottle-gallery__track" data-gallery-track data-loop-len={images.length}>
+      {[...images, ...images, ...images].map((img, k) => {
+        const i = k % images.length;
+        const copy = Math.floor(k / images.length); /* 0 leading, 1 center, 2 trailing */
+        return (
+          <button
+            class="bottle-gallery__card"
+            data-gallery-item
+            data-logical-i={i}
+            data-copy={copy}
+            data-href={img.href}
+            data-link-label={img.linkLabel}
+            style={`--i:${i}`}
+            type="button"
+            aria-hidden={copy !== 1 ? 'true' : 'false'}
+            tabindex={copy !== 1 ? -1 : 0}
+            aria-label={`${img.caption} — ${locale === 'es' ? 'Ir a' : 'Go to'} ${img.linkLabel}`}
+          >
+            <img
+              class="bottle-gallery__img"
+              src={img.src}
+              alt=""
+              loading={i === 0 && copy === 1 ? 'eager' : 'lazy'}
+              decoding="async"
+              width="1200"
+              height="1600"
+            />
+            <span class="bottle-gallery__cta" aria-hidden="true">
+              <span class="bottle-gallery__cta-label">{img.linkLabel}</span>
+              <span class="bottle-gallery__cta-arrow">
+                <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
+                  <path d="M0 5h13M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </span>
+            <span class="sr-only">{img.caption}</span>
+          </button>
+        );
+      })}
+    </div>
+
+    <button class="bottle-gallery__nav bottle-gallery__nav--next" type="button" aria-label={t.next} data-gallery-next>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+        <path d="M8 4 L16 12 L8 20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  {/* Indicadores como lista nativa <ol>/<li> — sin role="tablist" porque
+      lighthouse detecta que role="tablist" sobre <ol> rompe la relación
+      semántica con sus <li> hijos. La aria-label sigue dando contexto. */}
+  <ol class="bottle-gallery__dots" aria-label={locale === 'es' ? 'Indicador de imagen actual' : 'Current image indicator'}>
+    {images.map((_, i) => (
+      <li>
+        <button
+          class="bottle-gallery__dot"
+          type="button"
+          data-gallery-dot={i}
+          aria-label={`${locale === 'es' ? 'Imagen' : 'Image'} ${i + 1}`}
+          aria-current={i === 0 ? 'true' : 'false'}
+        ></button>
+      </li>
+    ))}
+  </ol>
+</section>
+
+<style>
+  .bottle-gallery {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(3rem, 6vw, 5rem) 0;
+    overflow: hidden;
+  }
+
+  .bottle-gallery__header {
+    text-align: center;
+    max-width: 48rem;
+    margin: 0 auto clamp(2.25rem, 3.5vw, 3.25rem);
+    padding: 0 1.5rem;
+  }
+  .bottle-gallery__eyebrow {
+    margin: 0 0 1.15rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.36em;
+  }
+  .bottle-gallery__title {
+    margin: 0 0 1.15rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    color: var(--navy);
+    text-wrap: balance;
+  }
+  .bottle-gallery__title :global(em.brand) {
+    font-style: normal;
+    color: var(--red);
+  }
+  .bottle-gallery__body {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    line-height: 1.55;
+    color: var(--navy);
+    opacity: 0.72;
+    max-width: 38rem;
+    margin-left: auto;
+    margin-right: auto;
+    text-wrap: balance;
+  }
+
+  /* Viewport: relativo para arrows absolutas + overflow visible para sombras */
+  .bottle-gallery__viewport {
+    position: relative;
+    width: 100%;
+  }
+
+  /* Track Clase Azul coverflow: card central GRANDE (50% viewport) y laterales
+     reducidas a ~45% scale con peek visible. Gap pequeno para que las laterales
+     queden cercanas a la central pero claramente separadas. */
+  .bottle-gallery__track {
+    --card-w: clamp(280px, 48vw, 680px);
+    --gap: clamp(0.5rem, 1vw, 1rem);
+
+    display: flex;
+    gap: var(--gap);
+    padding-inline: calc(50% - var(--card-w) / 2);
+    padding-block: 2rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .bottle-gallery__track::-webkit-scrollbar { display: none; }
+
+  /* Cards Clase Azul style: inactive 38% scale (dramaticamente mas pequenas
+     que la activa), opacity 0.85 para visibilidad clara, transform-origin
+     en el lado interior para que se "abracen" hacia la card central. */
+  .bottle-gallery__card {
+    flex: 0 0 var(--card-w);
+    scroll-snap-align: center;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--bg-card);
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    border-radius: 6px;
+    cursor: pointer;
+    touch-action: manipulation;
+    transform: scale(0.42);
+    opacity: 0.82;
+    box-shadow: 0 6px 16px -10px color-mix(in srgb, var(--navy) 22%, transparent);
+    transition:
+      transform var(--dur-divine) var(--ease-divine),
+      opacity var(--dur-divine) var(--ease-divine),
+      box-shadow var(--dur-divine) var(--ease-divine);
+    will-change: transform, opacity;
+  }
+  .bottle-gallery__card.is-active {
+    transform: scale(1);
+    opacity: 1;
+    z-index: 2;
+    box-shadow: 0 36px 72px -28px color-mix(in srgb, var(--navy) 50%, transparent);
+  }
+  .bottle-gallery__card:hover:not(.is-active) {
+    opacity: 0.95;
+    transform: scale(0.46);
+  }
+  .bottle-gallery__card:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 6px;
+  }
+
+  /* Mobile: card central casi full viewport, laterales scale mas amable */
+  @media (max-width: 600px) {
+    .bottle-gallery__track { --card-w: 80vw; --gap: 0.5rem; }
+    .bottle-gallery__card { transform: scale(0.6); }
+  }
+
+  .bottle-gallery__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Caption visually hidden (a11y solo) */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* CTA overlay — solo visible en card activa, indica destino al click */
+  .bottle-gallery__cta {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    padding: clamp(0.85rem, 1.6vw, 1.25rem) 1.5rem;
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--navy) 82%, transparent) 100%);
+    color: #FFFFFF;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition:
+      opacity var(--dur-medium) var(--ease-divine),
+      transform var(--dur-medium) var(--ease-divine);
+  }
+  .bottle-gallery__card.is-active .bottle-gallery__cta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .bottle-gallery__cta-arrow {
+    display: inline-flex;
+    color: var(--red);
+    transition: transform var(--dur-medium) var(--ease-divine), gap var(--dur-medium) var(--ease-divine);
+  }
+  .bottle-gallery__card.is-active:hover .bottle-gallery__cta {
+    gap: 1rem;
+  }
+  .bottle-gallery__card.is-active:hover .bottle-gallery__cta-arrow {
+    transform: translateX(4px);
+  }
+
+  /* Arrows luxury silenciosas, posicionadas absolutas a los lados del viewport */
+  .bottle-gallery__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--navy) 22%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: var(--navy);
+    cursor: pointer;
+    touch-action: manipulation;
+    z-index: 5;
+    transition:
+      background-color var(--dur-medium) var(--ease-divine),
+      color var(--dur-medium) var(--ease-divine),
+      border-color var(--dur-medium) var(--ease-divine),
+      transform var(--dur-medium) var(--ease-divine),
+      box-shadow var(--dur-medium) var(--ease-divine);
+  }
+  .bottle-gallery__nav--prev { left: clamp(0.75rem, 2vw, 1.5rem); }
+  .bottle-gallery__nav--next { right: clamp(0.75rem, 2vw, 1.5rem); }
+  .bottle-gallery__nav:hover {
+    background: var(--navy);
+    color: var(--bg-card);
+    border-color: var(--navy);
+    transform: translateY(-50%) scale(1.06);
+    box-shadow: 0 8px 22px -10px color-mix(in srgb, var(--navy) 42%, transparent);
+  }
+  .bottle-gallery__nav:active { transform: translateY(-50%) scale(0.92); transition-duration: 120ms; }
+  .bottle-gallery__nav:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 4px;
+  }
+  .bottle-gallery__nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  @media (max-width: 600px) {
+    .bottle-gallery__nav { display: none; }  /* en mobile, swipe nativo */
+  }
+
+  /* Dots indicators */
+  .bottle-gallery__dots {
+    list-style: none;
+    margin: clamp(1.5rem, 3vw, 2.5rem) 0 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+  }
+  .bottle-gallery__dot {
+    width: 24px;
+    height: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--navy) 20%, transparent);
+    cursor: pointer;
+    transition: background-color var(--dur-medium) var(--ease-divine), width var(--dur-medium) var(--ease-divine);
+    touch-action: manipulation;
+  }
+  .bottle-gallery__dot:hover { background: color-mix(in srgb, var(--navy) 40%, transparent); }
+  .bottle-gallery__dot[aria-current="true"] {
+    background: var(--red);
+    width: 36px;
+  }
+  .bottle-gallery__dot:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 4px;
+  }
+
+  /* Reveal */
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine) var(--ease-divine), transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-anim='up'].is-in { opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bottle-gallery__track { scroll-behavior: auto; }
+    .bottle-gallery__card,
+    .bottle-gallery__nav,
+    .bottle-gallery__dot {
+      transition: none !important;
+    }
+    .bottle-gallery__card { transform: scale(1) !important; opacity: 1 !important; }
+  }
+</style>
+
+<script>
+  // Reveal observer (eyebrow / title / body)
+  if ('IntersectionObserver' in window) {
+    const sec = document.querySelector('[data-bottle-gallery]');
+    if (sec) {
+      const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            items.forEach((el, i) => setTimeout(() => el.classList.add('is-in'), i * 70));
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.2 });
+      io.observe(sec);
+    }
+  }
+
+  /**
+   * Carrusel infinito seamless:
+   * - Triplica los slides: [leading, center, trailing]
+   * - Inicia scroll en center
+   * - Al detectar scroll en leading/trailing, jump silent (sin smooth) al
+   *   equivalente en center, manteniendo posicion visual identica.
+   * - Dots reflejan el logical-index (0..N-1) no el fisico (0..3N-1).
+   */
+  const root = document.querySelector('[data-bottle-gallery]');
+  if (root) {
+    const track = root.querySelector<HTMLElement>('[data-gallery-track]');
+    const prev = root.querySelector<HTMLButtonElement>('[data-gallery-prev]');
+    const next = root.querySelector<HTMLButtonElement>('[data-gallery-next]');
+    const allCards = Array.from(root.querySelectorAll<HTMLElement>('[data-gallery-item]'));
+    const dots = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-gallery-dot]'));
+
+    if (track && allCards.length > 0) {
+      const loopLen = parseInt(track.dataset.loopLen ?? '0', 10) || dots.length;
+      const total = allCards.length; // = loopLen * 3
+      let currentIdx = loopLen; // primer card del bloque center
+      let isSnapping = false;   // flag para evitar onScroll mid-jump
+      let initialized = false;
+
+      const setActive = (idx: number) => {
+        currentIdx = idx;
+        const logical = ((idx % loopLen) + loopLen) % loopLen;
+        allCards.forEach((c, i) => c.classList.toggle('is-active', i === idx));
+        dots.forEach((d, i) => d.setAttribute('aria-current', i === logical ? 'true' : 'false'));
+      };
+
+      const scrollToCard = (idx: number, smooth = true) => {
+        const card = allCards[idx];
+        if (!card) return;
+        card.scrollIntoView({
+          behavior: smooth ? 'smooth' : 'instant',
+          block: 'nearest',
+          inline: 'center',
+        });
+      };
+
+      // Detecta la card mas cercana al centro
+      const findClosestIdx = () => {
+        const trackRect = track.getBoundingClientRect();
+        const trackCenter = trackRect.left + trackRect.width / 2;
+        let closestIdx = currentIdx;
+        let closestDist = Infinity;
+        allCards.forEach((c, i) => {
+          const r = c.getBoundingClientRect();
+          const cardCenter = r.left + r.width / 2;
+          const dist = Math.abs(cardCenter - trackCenter);
+          if (dist < closestDist) {
+            closestDist = dist;
+            closestIdx = i;
+          }
+        });
+        return closestIdx;
+      };
+
+      const updateActive = () => {
+        if (isSnapping || !initialized) return;
+        const idx = findClosestIdx();
+        setActive(idx);
+        // Si estamos en zona leading (idx 0..loopLen-1) o trailing (idx 2*loopLen..)
+        // hacemos jump silencioso al bloque center mientras el user no esta scrolleando activamente.
+        // Solo activamos jump cuando el scroll esta cerca de un snap point (no en mid-scroll).
+        if (idx < loopLen) {
+          // En leading → jump a center equivalente
+          isSnapping = true;
+          scrollToCard(idx + loopLen, false);
+          requestAnimationFrame(() => {
+            setActive(idx + loopLen);
+            setTimeout(() => { isSnapping = false; }, 60);
+          });
+        } else if (idx >= loopLen * 2) {
+          // En trailing → jump a center equivalente
+          isSnapping = true;
+          scrollToCard(idx - loopLen, false);
+          requestAnimationFrame(() => {
+            setActive(idx - loopLen);
+            setTimeout(() => { isSnapping = false; }, 60);
+          });
+        }
+      };
+
+      // Throttle con rAF + debounce para esperar fin de scroll
+      let rafId: number | null = null;
+      let scrollEndTimer: number | null = null;
+      const onScroll = () => {
+        if (rafId !== null) return;
+        rafId = requestAnimationFrame(() => {
+          if (!isSnapping) {
+            const idx = findClosestIdx();
+            const logical = ((idx % loopLen) + loopLen) % loopLen;
+            allCards.forEach((c, i) => c.classList.toggle('is-active', i === idx));
+            dots.forEach((d, i) => d.setAttribute('aria-current', i === logical ? 'true' : 'false'));
+            currentIdx = idx;
+          }
+          rafId = null;
+        });
+        // Esperar fin de scroll para hacer jump silent
+        if (scrollEndTimer !== null) clearTimeout(scrollEndTimer);
+        scrollEndTimer = window.setTimeout(updateActive, 180);
+      };
+      track.addEventListener('scroll', onScroll, { passive: true });
+
+      // Click logic
+      allCards.forEach((c, i) => {
+        c.addEventListener('click', () => {
+          if (c.getAttribute('aria-hidden') === 'true') return;
+          if (c.classList.contains('is-active')) {
+            const href = c.getAttribute('data-href');
+            if (href) window.location.href = href;
+          } else {
+            scrollToCard(i, true);
+          }
+        });
+      });
+
+      // Arrows: siempre avanzan +1/-1 desde el currentIdx fisico
+      prev?.addEventListener('click', () => {
+        if (isSnapping) return;
+        scrollToCard(currentIdx - 1, true);
+      });
+      next?.addEventListener('click', () => {
+        if (isSnapping) return;
+        scrollToCard(currentIdx + 1, true);
+      });
+
+      // Dots → ir al logical-index en el bloque center
+      dots.forEach((d, i) => {
+        d.addEventListener('click', () => {
+          if (isSnapping) return;
+          scrollToCard(loopLen + i, true);
+        });
+      });
+
+      // Keyboard nav
+      track.tabIndex = 0;
+      track.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); scrollToCard(currentIdx - 1, true); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); scrollToCard(currentIdx + 1, true); }
+      });
+
+      // Init: posicionar scroll en el bloque CENTER (primer card)
+      // requiere doble rAF para esperar layout
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          isSnapping = true;
+          scrollToCard(loopLen, false);
+          setTimeout(() => {
+            setActive(loopLen);
+            initialized = true;
+            isSnapping = false;
+          }, 100);
+        });
+      });
+
+      // Resize: reposicionar al center si se desfasó
+      window.addEventListener('resize', () => {
+        if (isSnapping) return;
+        isSnapping = true;
+        const logical = ((currentIdx % loopLen) + loopLen) % loopLen;
+        scrollToCard(loopLen + logical, false);
+        setTimeout(() => {
+          setActive(loopLen + logical);
+          isSnapping = false;
+        }, 80);
+      }, { passive: true });
+    }
+  }
+</script>

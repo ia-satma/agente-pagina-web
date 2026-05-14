@@ -1,0 +1,660 @@
+---
+import { Image } from 'astro:assets';
+import { t, type Locale } from '~/i18n';
+
+import godMexica from '~/assets/parallax/god-mexica.png';
+import godGreco  from '~/assets/parallax/god-greco.png';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+---
+
+<section class="hero" data-hero data-hero-pin>
+    {/*
+      Stack de capas (scroll-driven Apple-style — currentTime via scroll progress).
+      Z-stacking (de fondo a frente):
+        0 fondo.mp4   (cielo animado, scroll-driven currentTime)
+        2 god-mexica + god-greco (parallax scale + translateY)
+        3 bottle.webm (botella alpha, scroll-driven currentTime + zoom)
+        4 veil        (gradiente blanco para legibilidad de UI)
+
+      Atributos:
+        - SIN autoplay ni loop (el JS pausa post-loadedmetadata y mapea
+          currentTime al progress 0→1 de ScrollTrigger)
+        - muted + playsinline OBLIGATORIO para Safari currentTime seek
+        - data-parallax-speed → JS itera y aplica --scale + --ty
+    */}
+    <div class="hero__stage cursor-target" data-hero-stage>
+      <video
+        class="hero__layer hero__layer--video"
+        data-parallax-speed="0"
+        muted
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+      >
+        <source src="/video/fondo.mp4" type="video/mp4" />
+      </video>
+
+      <Image
+        class="hero__layer hero__layer--mexica"
+        src={godMexica}
+        alt="Deidad mexica con penacho de oro ofreciendo la botella de AMBROSIA"
+        widths={[1080, 1440, 1920, 2560]}
+        sizes="(max-width: 768px) 100vw, 100vw"
+        format="webp"
+        quality={86}
+        loading="eager"
+        data-parallax-speed="0.20"
+      />
+
+      <Image
+        class="hero__layer hero__layer--greco"
+        src={godGreco}
+        alt="Deidad griega recibiendo la botella en gesto de creacion divina"
+        widths={[1080, 1440, 1920, 2560]}
+        sizes="(max-width: 768px) 100vw, 100vw"
+        format="webp"
+        quality={86}
+        loading="eager"
+        data-parallax-speed="0.20"
+      />
+
+      <video
+        class="hero__layer hero__layer--bottle"
+        data-parallax-speed="0.40"
+        muted
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+      >
+        {/* Safari/iOS toma HEVC con alpha (hvc1) primero — descodifica en hardware */}
+        <source src="/video/bottle.mp4"  type='video/mp4; codecs="hvc1"' />
+        {/* Chrome/Firefox toma WebM con VP9 alpha como fallback */}
+        <source src="/video/bottle.webm" type="video/webm" />
+      </video>
+
+      <div class="hero__veil" aria-hidden="true"></div>
+    </div>
+
+    <div class="hero__scroll" aria-hidden="true">
+      <span>{dict.hero.scroll_hint}</span>
+      <span class="hero__scroll-line"></span>
+    </div>
+
+    {/* ─── SVG filter: knockout del halo blanco del alpha de la botella.
+        Las codificaciones HEVC/VP9 con alpha suelen dejar un contorno
+        blanco fringe alrededor de los bordes (premultiplied alpha mal
+        compositado). Este feColorMatrix:
+          · Detecta pixels casi-blancos (RGB altos)
+          · Resta su contribución del canal alpha
+          · Deja intactos los colores del cuerpo de la botella
+        Matemática del row alpha: -1.2R -1.2G -1.2B + 2.8A + 0.3
+          · pixel blanco (1,1,1,1) → -0.5 → clamped 0 → transparente
+          · pixel negro (0,0,0,1) → 3.1 → clamped 1 → opaco
+          · pixel rojo (1,0,0,1) → 1.9 → opaco
+          · pixel navy (0.1,0.1,0.2,1) → 2.6 → opaco */}
+    <svg
+      class="hero__filter-defs"
+      width="0"
+      height="0"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <filter id="bottle-knockout-white" color-interpolation-filters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="1 0 0 0 0
+                    0 1 0 0 0
+                    0 0 1 0 0
+                    -1.2 -1.2 -1.2 2.8 0.3"
+          />
+        </filter>
+      </defs>
+    </svg>
+</section>
+
+<style>
+  /* ─── Hero — ScrollTrigger.pin maneja el pinning programáticamente.
+       Razón: Lenis (smooth-scroll) aplica overflow:hidden en html/body
+       que rompe position:sticky. ScrollTrigger.pin usa transform +
+       pin-spacer interno → compatible con Lenis. */
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--bg-page);
+    color: var(--navy);
+    /* OPT #10: containment fuerte — aísla repaints/layouts del resto de la página.
+       Crítico durante el pin: cada frame del scroll repinta solo el hero, no el doc. */
+    contain: layout paint style;
+    /* content-visibility removido a propósito — rompe el pin (ScrollTrigger
+       no puede medir off-screen content). */
+  }
+
+  /* ─── Stage de capas parallax ─── */
+  /* @property registra --tx, --ty, --scale, --rot para interpolación GPU */
+  @property --tx {
+    syntax: '<length-percentage>';
+    inherits: false;
+    initial-value: 0px;
+  }
+  @property --ty {
+    syntax: '<length-percentage>';
+    inherits: false;
+    initial-value: 0px;
+  }
+  @property --scale {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 1;
+  }
+  @property --rot {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  .hero__stage {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    /* GPU layer separation para cada child con will-change */
+    transform-style: preserve-3d;
+    /* Containment: aísla repaints al stage (no afecta page layout) */
+    contain: layout paint;
+  }
+  .hero__layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* GPU compositing optimizations */
+    /* will-change se setea inline desde JS (solo durante pin engagement) */
+    transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--rot)) scale(var(--scale));
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    /* Layer no debe interferir con scroll/clicks */
+    pointer-events: none;
+    --tx: 0px;
+    --ty: 0px;
+    --scale: 1;
+    --rot: 0deg;
+  }
+  .hero__layer--video  { z-index: 0; }
+  .hero__layer--mexica { z-index: 2; object-position: left center; }
+  .hero__layer--greco  { z-index: 2; object-position: right center; }
+  .hero__layer--bottle {
+    z-index: 3;
+    object-fit: contain;
+    object-position: center 52%;
+    /* Inicia mas pequena — crece con scroll del pin */
+    --scale: 0.7;
+  }
+
+  /* ─── Color grading unificado AMBROSIA (cinematic film look)
+     Estrategia: TODAS las capas comparten el MISMO grade primario.
+     La botella se trata IGUAL que gods/sky para que se sienta como parte
+     de la escena, no superpuesta. Drop-shadow navy ancla la botella. */
+  .hero__layer--mexica,
+  .hero__layer--greco,
+  .hero__layer--video {
+    filter:
+      saturate(0.78)      /* desaturación editorial */
+      contrast(1.06)      /* punch sutil */
+      brightness(0.94)    /* mood cinematic */
+      hue-rotate(-3deg);  /* shift hacia el navy brand */
+  }
+  /* Botella — grade MÁS profundo que los dioses para igualar luminancia
+     percibida. El video fuente de la botella tiene brillo base alto (vidrio
+     azul + lacre rojo POP); aunque le aplicáramos el mismo filtro que a los
+     dioses (sat 0.78 / cont 1.06 / bright 0.94), seguiría saliendo del mood
+     atmosférico. Bajo saturación, contraste y brightness más agresivamente
+     para que se integre al chiaroscuro de los dioses. */
+  .hero__layer--bottle {
+    filter:
+      /* PRIMER paso: knockout del halo blanco del alpha (fix del fringe) */
+      url(#bottle-knockout-white)
+      /* Color grade unificado-pero-profundizado para matching perceptual */
+      saturate(0.62)        /* era 0.78 — el rojo/azul ya no pop */
+      contrast(0.96)        /* era 1.06 — menos punch para no saltar */
+      brightness(0.78)      /* era 0.94 — clave: alinea con el mood oscuro */
+      hue-rotate(-3deg)
+      /* Drop-shadow doble: proyección (suelo) + atmosférica (ambient) */
+      drop-shadow(0 40px 60px rgba(21, 23, 61, 0.42))
+      drop-shadow(0 0 90px rgba(21, 23, 61, 0.22));
+  }
+  /* hero__filter-defs es un SVG hidden con el filter def */
+  .hero__filter-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* ─── Base dark unifier (mismo patrón que PageHero / VideoReel)
+     Capa negra detrás de los dioses pero delante del sky video.
+     Ancla toda la composición sobre un base oscuro consistente con
+     el resto de las pestañas. z:1 → no toca a gods/bottle/veil. */
+  .hero__stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.22) 0%,
+      rgba(0, 0, 0, 0.32) 50%,
+      rgba(0, 0, 0, 0.42) 100%
+    );
+  }
+
+  /* ─── Color-match overlay: capa final que tira TODA la escena hacia
+     el palette brand (navy frío + cream cálido). mix-blend-mode 'soft-light'
+     unifica sin oscurecer (no es viñeta). Equivalente al "color grade"
+     final de un colorista de cine. */
+  .hero__stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--cream) 50%, transparent) 0%,
+      transparent 38%,
+      transparent 62%,
+      color-mix(in srgb, var(--navy) 45%, transparent) 100%
+    );
+    mix-blend-mode: soft-light;
+    opacity: 0.85;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    /* Reduced motion: dejamos color-grade activo (no es animacion) */
+  }
+
+  /* ─── Entrada lateral de los dioses al cargar (3.6s lento) ─── */
+  /* Usamos % en ambos extremos para que la interpolacion @property sea consistente */
+  @keyframes godEnterLeft {
+    from { --tx: -30%; opacity: 0; }
+    to   { --tx: 0%;   opacity: 1; }
+  }
+  @keyframes godEnterRight {
+    from { --tx: 30%;  opacity: 0; }
+    to   { --tx: 0%;   opacity: 1; }
+  }
+  .hero__layer--mexica {
+    animation: godEnterLeft  3600ms var(--ease-divine) both;
+  }
+  .hero__layer--greco {
+    animation: godEnterRight 3600ms var(--ease-divine) both;
+  }
+
+  /* ─── Botella: fade-in lento al cargar (3s, retraso 600ms) ─── */
+  @keyframes bottleFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .hero__layer--bottle {
+    opacity: 0;
+    animation: bottleFadeIn 3000ms var(--ease-divine) 600ms forwards;
+  }
+
+  /* Veil al frente de las capas pero detras del UI.
+     opacity se anima inline desde el script (reveal effect 0.35 → 0). */
+  .hero__veil {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    will-change: opacity;
+    background:
+      linear-gradient(to bottom, rgba(251, 247, 239, 0) 60%, rgba(251, 247, 239, 0.5) 88%, var(--color-cream) 100%),
+      linear-gradient(to top, rgba(251, 247, 239, 0) 78%, rgba(251, 247, 239, 0.25) 100%);
+  }
+
+  /* Mobile: pin desactivado por JS, hero queda 100vh estático.
+     Videos autoplay loop via JS. */
+  @media (max-width: 768px) {
+    .hero {
+      position: relative;
+      height: auto;
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+    .hero__layer--video { display: none; }
+    .hero__layer {
+      transform: none !important;
+    }
+    .hero__layer--mexica,
+    .hero__layer--greco,
+    .hero__layer--bottle {
+      animation: none;
+      opacity: 1;
+    }
+  }
+
+  /* prefers-reduced-motion: idem mobile */
+  @media (prefers-reduced-motion: reduce) {
+    .hero {
+      position: relative;
+      height: auto;
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+    .hero__layer--video { display: none; }
+    .hero__layer {
+      transform: none !important;
+    }
+    .hero__layer--mexica,
+    .hero__layer--greco,
+    .hero__layer--bottle {
+      animation: none;
+      opacity: 1;
+    }
+  }
+
+  .hero__scroll {
+    position: absolute;
+    bottom: 2.4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 0.62rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.5;
+    /* opacity se anima inline durante el scroll-pin (fade-out) */
+    will-change: opacity;
+    z-index: 5;
+  }
+
+  .hero__scroll-line {
+    width: 1px;
+    height: 36px;
+    background: linear-gradient(to bottom, var(--navy), transparent);
+    animation: scroll-pulse 2.4s var(--ease-divine) infinite;
+    transform-origin: top;
+  }
+
+  @keyframes scroll-pulse {
+    0% { transform: scaleY(0.2); opacity: 0.2; }
+    50% { transform: scaleY(1); opacity: 0.7; }
+    100% { transform: scaleY(0.2); opacity: 0.2; }
+  }
+
+  /* Animaciones de entrada */
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity var(--dur-divine) var(--ease-divine), transform var(--dur-divine) var(--ease-divine);
+  }
+  [data-anim='up'].is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 640px) {
+    .hero__inner { padding: 7rem 1.25rem 5rem; }
+  }
+</style>
+
+<script>
+  // ─── Reveal staggered del texto del hero (eyebrow, título, CTA) ───
+  const items = document.querySelectorAll<HTMLElement>('.hero [data-anim="up"]');
+  items.forEach((el, i) => {
+    setTimeout(() => el.classList.add('is-in'), 80 + i * 85);
+  });
+
+  // ─── Scroll-driven cinematic Apple-style ───────────────────────────
+  // El PIN lo hace ScrollTrigger.create({ pin: true }) — NO CSS sticky.
+  // Razón: Lenis (smooth-scroll) aplica overflow:hidden en html/body
+  // que rompe position:sticky en descendants. ScrollTrigger.pin usa
+  // transform + pin-spacer interno, funciona con Lenis sin colision.
+  // Lenis ya wirea `lenis.on('scroll', ScrollTrigger.update)` en motion.ts,
+  // así que las updates llegan sin trabajo extra.
+  // ──────────────────────────────────────────────────────────────────
+  const pin = document.querySelector<HTMLElement>('[data-hero-pin]');
+  const layers = document.querySelectorAll<HTMLElement>('.hero__stage [data-parallax-speed]');
+  const skyVideo = document.querySelector<HTMLVideoElement>('video.hero__layer--video');
+  const bottleVideo = document.querySelector<HTMLVideoElement>('video.hero__layer--bottle');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+  // Helper: pausa video tras loadedmetadata para que JS controle currentTime
+  const setupScrollVideo = (v: HTMLVideoElement | null) => {
+    if (!v) return;
+    const onMeta = () => { try { v.pause(); } catch {} };
+    if (v.readyState >= 1) onMeta();
+    else v.addEventListener('loadedmetadata', onMeta, { once: true });
+  };
+
+  // Cache de elementos parallax (evita querySelector cada frame)
+  const mexica = document.querySelector<HTMLElement>('.hero__layer--mexica');
+  const greco = document.querySelector<HTMLElement>('.hero__layer--greco');
+  const bottle = document.querySelector<HTMLElement>('.hero__layer--bottle');
+  const veil = document.querySelector<HTMLElement>('.hero__veil');
+  const scrollHint = document.querySelector<HTMLElement>('.hero__scroll');
+
+  if (pin && layers.length && !reduced && !isMobile) {
+    setupScrollVideo(skyVideo);
+    setupScrollVideo(bottleVideo);
+
+    // Preload agresivo: trigger metadata + first frames
+    if (skyVideo) skyVideo.load();
+    if (bottleVideo) bottleVideo.load();
+
+    // Safari: currentTime seek frame-by-frame causa jitter. Threshold
+    // adaptativo: Safari/iOS más alto, Chrome/Firefox más bajo (más fluido).
+    const ua = navigator.userAgent;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    const isIOS = /iPad|iPhone|iPod/.test(ua);
+    // OPT #1: Throttles más agresivos para máxima fluidez
+    const seekThreshold = isSafari || isIOS ? 0.04 : 0.018;
+    const lerpFactor = isSafari || isIOS ? 0.24 : 0.32;
+    const skyRef = { t: 0 };
+    const bottleRef = { t: 0 };
+
+    // OPT #2: requestVideoFrameCallback fallback (sharper sync cuando disponible)
+    const hasRVFC = typeof HTMLVideoElement.prototype.requestVideoFrameCallback === 'function';
+
+    // driveVideo con dead-band (evita seek innecesario cerca del target).
+    // Para el bottle usamos un lerpFactor MENOR (más inercia = movimiento
+    // más fluido) y un seekThreshold MENOR (más frames intermedios = sin
+    // saltos visibles). El sky usa el lerp normal.
+    const driveVideo = (
+      v: HTMLVideoElement | null,
+      ref: { t: number },
+      progress: number,
+      opts?: { lerp?: number; threshold?: number }
+    ) => {
+      if (!v || !Number.isFinite(v.duration) || v.duration <= 0) return;
+      const lerp = opts?.lerp ?? lerpFactor;
+      const thresh = opts?.threshold ?? seekThreshold;
+      const target = progress * v.duration;
+      ref.t += (target - ref.t) * lerp;
+      const diff = Math.abs(ref.t - v.currentTime);
+      if (diff > thresh && diff < v.duration * 0.5) {
+        try { v.currentTime = ref.t; } catch {}
+      }
+    };
+
+    // Lerp+threshold específico para bottle: más suave que sky
+    // (sky cambia de cielo a cielo, bottle es el foco visual → necesita
+    // movimiento más fluido frame-by-frame)
+    const bottleLerp = isSafari || isIOS ? 0.18 : 0.22;     // menor que sky → más inercia
+    const bottleThreshold = isSafari || isIOS ? 0.025 : 0.012; // menor que sky → seeks más frecuentes
+
+    // OPT #3: Eases asymmetric — cada capa con su curva (depth illusion)
+    // power3.out simulado sin import: t → 1 - (1-t)^3
+    const easeOutCubic = (t: number) => 1 - (1 - t) * (1 - t) * (1 - t);
+    const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+    const easeInOutSine = (t: number) => -(Math.cos(Math.PI * t) - 1) / 2;
+
+    // GSAP ScrollTrigger — Lenis ya wirea las updates globalmente vía motion.ts
+    (async () => {
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/ScrollTrigger'),
+      ]);
+      gsap.registerPlugin(ScrollTrigger);
+
+      // OPT #4: quickSetter es ~10x más rápido que el.style.setProperty
+      // Crea setters compilados que evitan reparse de strings cada frame
+      const setMexicaScale = mexica ? gsap.quickSetter(mexica, '--scale') : null;
+      const setMexicaTx = mexica ? gsap.quickSetter(mexica, '--tx', 'px') : null;
+      const setMexicaTy = mexica ? gsap.quickSetter(mexica, '--ty', 'px') : null;
+      const setMexicaRot = mexica ? gsap.quickSetter(mexica, '--rot', 'deg') : null;
+      const setGrecoScale = greco ? gsap.quickSetter(greco, '--scale') : null;
+      const setGrecoTx = greco ? gsap.quickSetter(greco, '--tx', 'px') : null;
+      const setGrecoTy = greco ? gsap.quickSetter(greco, '--ty', 'px') : null;
+      const setGrecoRot = greco ? gsap.quickSetter(greco, '--rot', 'deg') : null;
+      const setBottleScale = bottle ? gsap.quickSetter(bottle, '--scale') : null;
+      const setBottleTy = bottle ? gsap.quickSetter(bottle, '--ty', 'px') : null;
+      const setVeilOpacity = veil ? gsap.quickSetter(veil, 'opacity') : null;
+      const setHintOpacity = scrollHint ? gsap.quickSetter(scrollHint, 'opacity') : null;
+
+      // OPT #5: applyParallax usa quickSetter + eases asymmetric por capa
+      const applyParallax = (p: number) => {
+        const eq = easeOutQuart(p);  // gods — entrada lateral fuerte
+        const eb = easeInOutSine(p); // bottle — curva SUAVE en ambos extremos
+        const es = easeInOutSine(p); // veil — fade simétrico
+
+        // Mexica: izq + rotación sutil (-2° → 0°)
+        if (mexica) {
+          setMexicaScale!(1 + p * 0.08);
+          setMexicaTx!((1 - eq) * -50);
+          setMexicaTy!(p * -25);
+          setMexicaRot!((1 - eq) * -1.5);
+        }
+        // Greco: der + rotación sutil (+2° → 0°)
+        if (greco) {
+          setGrecoScale!(1 + p * 0.08);
+          setGrecoTx!((1 - eq) * 50);
+          setGrecoTy!(p * -25);
+          setGrecoRot!((1 - eq) * 1.5);
+        }
+        // Bottle: zoom subtle 0.85 → 1.12 con easeInOutSine (sin bob Y).
+        // Range reducido (0.27 vs 0.58 antes) + ease simétrico → movimiento
+        // FLUIDO sin saltos. Sin sale Y porque añadía noise visual.
+        if (bottle) {
+          setBottleScale!(0.85 + eb * 0.27);
+          setBottleTy!(0);
+        }
+        // Veil: fade simétrico con sine (más cinematic que linear)
+        if (veil) {
+          setVeilOpacity!(Math.max(0, 0.38 * (1 - es)));
+        }
+        // Hint: fade-out rápido tras 12% (no se queda)
+        if (scrollHint) {
+          setHintOpacity!(Math.max(0, 1 - p * 6));
+        }
+      };
+
+      ScrollTrigger.create({
+        trigger: pin,
+        start: 'top top',
+        end: '+=1500',
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1,
+        scrub: 0.5,             // 0.25 → 0.5: más smoothing (movimiento fluido)
+        fastScrollEnd: true,    // si scrolleas muy rápido al final, snap al estado final
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const p = self.progress;
+          applyParallax(p);
+          driveVideo(skyVideo, skyRef, p);
+          // Bottle con lerp/threshold suaves específicos
+          driveVideo(bottleVideo, bottleRef, p, {
+            lerp: bottleLerp,
+            threshold: bottleThreshold,
+          });
+        },
+        onEnter: () => {
+          // OPT #8: will-change activo solo durante el pin (libera GPU memory después)
+          [mexica, greco, bottle, veil, scrollHint].forEach((el) => {
+            if (el) el.style.willChange = 'transform, opacity';
+          });
+        },
+        onLeave: () => {
+          [mexica, greco, bottle, veil, scrollHint].forEach((el) => {
+            if (el) el.style.willChange = '';
+          });
+        },
+        onEnterBack: () => {
+          [mexica, greco, bottle, veil, scrollHint].forEach((el) => {
+            if (el) el.style.willChange = 'transform, opacity';
+          });
+        },
+        onLeaveBack: () => {
+          [mexica, greco, bottle, veil, scrollHint].forEach((el) => {
+            if (el) el.style.willChange = '';
+          });
+        },
+      });
+
+      // OPT #9: requestVideoFrameCallback para video sync más preciso (Chrome/Edge)
+      if (hasRVFC) {
+        const rvfcLoop = (v: HTMLVideoElement | null, ref: { t: number }) => {
+          if (!v) return;
+          const cb = () => {
+            // Re-aplicar currentTime si Lenis está parado y hay diff acumulado
+            const diff = Math.abs(ref.t - v.currentTime);
+            if (diff > seekThreshold && diff < v.duration * 0.5) {
+              try { v.currentTime = ref.t; } catch {}
+            }
+            v.requestVideoFrameCallback!(cb);
+          };
+          v.requestVideoFrameCallback!(cb);
+        };
+        rvfcLoop(skyVideo, skyRef);
+        rvfcLoop(bottleVideo, bottleRef);
+      }
+
+      // Refresh tras carga de videos pesados + fonts
+      window.addEventListener('load', () => ScrollTrigger.refresh());
+      // Refresh también después de que videos carguen metadata
+      [skyVideo, bottleVideo].forEach((v) => {
+        v?.addEventListener('loadedmetadata', () => ScrollTrigger.refresh(), { once: true });
+      });
+    })().catch((err) => {
+      // Sin GSAP → fallback nativo: hero estático 100vh + videos autoplay loop
+      // (mejor que un pin manual janky sin la lib instalada).
+      console.warn('GSAP load failed, falling back to autoplay loop:', err);
+      [skyVideo, bottleVideo].forEach((v) => {
+        if (!v) return;
+        v.setAttribute('loop', '');
+        v.setAttribute('autoplay', '');
+        v.play().catch(() => {});
+      });
+    });
+  } else {
+    // Mobile / reduced-motion: videos autoplay loop nativo (sin scroll-driven)
+    [skyVideo, bottleVideo].forEach((v) => {
+      if (!v) return;
+      v.setAttribute('loop', '');
+      v.setAttribute('autoplay', '');
+      v.play().catch(() => {});
+    });
+  }
+</script>

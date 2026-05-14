@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/alejandromtz-flowwork/Movies/satma/AGENTE PAGINA WEB/**)",
+      "Write(//Users/alejandromtz-flowwork/Movies/satma/AGENTE PAGINA WEB/**)",
+      "Edit(//Users/alejandromtz-flowwork/Movies/satma/AGENTE PAGINA WEB/**)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(tree:*)",
+      "Bash(du:*)",
+      "Bash(file:*)",
+      "Bash(pnpm install*)",
+      "Bash(pnpm dev*)",
+      "Bash(pnpm build*)",
+      "Bash(pnpm preview*)",
+      "Bash(pnpm start*)",
+      "Bash(pnpm exec:*)",
+      "Bash(node --test:*)",
+      "Bash(npx:*)",
+      "WebFetch(domain:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)"
+    ]
+  }
+}

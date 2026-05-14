@@ -1,0 +1,96 @@
+---
+/**
+ * RecipeNav — anterior / siguiente dentro del array global de recetas.
+ * Si no hay anterior o siguiente, ese lado queda vacio.
+ */
+import { adyacentes } from '~/data/recetas';
+import { pathFor, type Locale } from '~/i18n';
+
+interface Props {
+  slug: string;
+  locale: Locale;
+}
+
+const { slug, locale } = Astro.props;
+const { prev, next } = adyacentes(slug);
+const labelPrev = locale === 'es' ? 'Anterior' : 'Previous';
+const labelNext = locale === 'es' ? 'Siguiente' : 'Next';
+---
+
+<nav class="recipe-nav" aria-label={locale === 'es' ? 'Navegacion entre recetas' : 'Recipe pagination'}>
+  <div class="recipe-nav__inner">
+    <div class="recipe-nav__side recipe-nav__side--prev">
+      {prev ? (
+        <a class="recipe-nav__link" href={pathFor(locale, `recetario/${prev.slug}`)}>
+          <span class="recipe-nav__label">← {labelPrev}</span>
+          <span class="recipe-nav__title">{prev.titulo}</span>
+        </a>
+      ) : (
+        <span class="recipe-nav__placeholder" aria-hidden="true"></span>
+      )}
+    </div>
+
+    <div class="recipe-nav__side recipe-nav__side--next">
+      {next ? (
+        <a class="recipe-nav__link recipe-nav__link--right" href={pathFor(locale, `recetario/${next.slug}`)}>
+          <span class="recipe-nav__label">{labelNext} →</span>
+          <span class="recipe-nav__title">{next.titulo}</span>
+        </a>
+      ) : (
+        <span class="recipe-nav__placeholder" aria-hidden="true"></span>
+      )}
+    </div>
+  </div>
+</nav>
+
+<style>
+  .recipe-nav {
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(2rem, 4.5vw, 4rem) 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
+  }
+  .recipe-nav__inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  @media (max-width: 720px) {
+    .recipe-nav__inner { grid-template-columns: 1fr; }
+  }
+  .recipe-nav__side {
+    display: flex;
+    flex-direction: column;
+  }
+  .recipe-nav__side--next { text-align: right; align-items: flex-end; }
+
+  .recipe-nav__link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--navy);
+    transition: gap var(--dur-medium) var(--ease-medium);
+  }
+  .recipe-nav__link:hover { gap: 0.75rem; }
+
+  .recipe-nav__label {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--red);
+  }
+  .recipe-nav__title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    line-height: 1.2;
+    color: var(--navy);
+  }
+
+  .recipe-nav__placeholder { display: block; min-height: 2.5rem; }
+</style>

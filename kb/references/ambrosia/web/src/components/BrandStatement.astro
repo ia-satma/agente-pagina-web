@@ -1,0 +1,234 @@
+---
+/**
+ * Brand Statement — bloque editorial post-Hero.
+ * Tamanos proporcionados, monocromo (ink/purple sobre cream),
+ * tipografia con respiracion. Sin stagger letter-by-letter — entrada
+ * limpia en bloque para evitar ruido visual.
+ */
+import Phonetic from '~/components/Phonetic.astro';
+import { t, pathFor, type Locale } from '~/i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = t(locale);
+---
+
+<section class="brand-statement" data-brand-statement>
+  <div class="brand-statement__inner">
+    <p class="brand-statement__eyebrow" data-anim="up">
+      {locale === 'es' ? 'Manifiesto' : 'Manifesto'}
+    </p>
+
+    <h1 class="brand-statement__logo" data-anim="up">AMBROSIA</h1>
+
+    <p class="brand-statement__tagline" data-anim="up">{dict.hero.tagline}</p>
+
+    <p class="brand-statement__phon" data-anim="up"><Phonetic tone="auto" /></p>
+
+    {/* ─── Modelo 3D de la botella AMBROSIA ───
+        Estático (sin auto-rotate). `reveal="interaction"` evita descargar
+        los 11MB del GLB hasta que el usuario haga click/tap — crítico
+        para mobile y LCP. AR habilitado en iOS/Android. */}
+    <div class="brand-statement__model-wrap" data-anim="up">
+      <model-viewer
+        class="brand-statement__model"
+        src="/models/ambrosia-bottle.glb"
+        alt={locale === 'es' ? 'Botella de Salsa AMBROSIA en 3D' : 'AMBROSIA hot sauce bottle 3D'}
+        camera-controls
+        interaction-prompt="none"
+        exposure="1.0"
+        shadow-intensity="0.8"
+        shadow-softness="0.7"
+        environment-image="neutral"
+        loading="lazy"
+        reveal="interaction"
+        ar
+        ar-modes="webxr scene-viewer quick-look"
+        touch-action="pan-y"
+      ></model-viewer>
+    </div>
+
+    <div class="brand-statement__actions" data-anim="up">
+      <a class="btn btn--primary btn--lg" href={pathFor(locale, 'origen')}>
+        <span>{dict.hero.cta}</span>
+        <span data-arrow aria-hidden="true">
+          <svg width="16" height="11" viewBox="0 0 14 10" fill="none">
+            <path d="M0 5h13M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      </a>
+      <a class="btn btn--quiet btn--sm" href={pathFor(locale, 'la-salsa')}>
+        <span>{locale === 'es' ? 'Ver la salsa' : 'See the sauce'}</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .brand-statement {
+    /* Stack reveal pronunciado: BrandStatement sube y se sobrepone al final
+       del Hero pin con sobreposicion de 30vh (desktop). z-index alto + bg
+       opaco + sombra superior dramatica + border-radius superior dan el
+       efecto de "carta editorial" deslizandose sobre el Hero.
+       motion.ts anade el slide-up cinematico con ScrollTrigger.scrub. */
+    position: relative;
+    z-index: 5;
+    background: var(--bg-page);
+    color: var(--navy);
+    padding: clamp(2.25rem, 5vw, 4.5rem) 1.5rem clamp(2rem, 4vw, 3.5rem);
+    text-align: center;
+    margin-top: 0;
+  }
+  @media (min-width: 769px) {
+    .brand-statement {
+      margin-top: -30vh;
+      padding-top: clamp(7rem, 14vw, 12rem);
+      border-top-left-radius: clamp(24px, 4vw, 64px);
+      border-top-right-radius: clamp(24px, 4vw, 64px);
+      box-shadow:
+        0 -40px 80px -36px color-mix(in srgb, var(--navy) 38%, transparent),
+        0 -2px 0 0 color-mix(in srgb, var(--navy) 8%, transparent);
+    }
+  }
+
+  .brand-statement__inner {
+    max-width: 900px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .brand-statement__eyebrow {
+    margin: 0 0 1.15rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: 0.55;
+  }
+
+  .brand-statement__logo {
+    margin: 0 auto 1rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    /* Tamano grande pero seguro: en mobile 320px viewport, font-size ~52px
+       (8 letras de AMBROSIA × ~0.62 ratio = ~258px, cabe en 320 con padding) */
+    /* Optimus Princeps tiene letras anchas. En mobile 375 inner=327px, 8 letras
+       de "AMBROSIA" con min 2.25rem (36px) ocupan ~200px → margen ~127px libre. */
+    font-size: clamp(2.25rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: 0.015em;
+    color: var(--navy);
+    text-transform: uppercase;
+    /* Evita overflow horizontal; si no cabe en una linea, balancea */
+    text-wrap: balance;
+    word-break: keep-all;
+    overflow-wrap: normal;
+    max-width: 100%;
+  }
+
+  .brand-statement__tagline {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.25rem, 2.4vw, 2rem);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-display);
+    line-height: 1.3;
+    color: var(--navy);
+    opacity: 0.85;
+  }
+
+  .brand-statement__phon {
+    margin: 0 0 1.75rem;
+    font-size: 0.7rem;
+    letter-spacing: var(--tracking-eyebrow);
+    color: var(--navy);
+    opacity: 0.55;
+  }
+
+  /* ─── Wrapper del modelo 3D — centrado, alturas responsive ─── */
+  .brand-statement__model-wrap {
+    margin: 0 auto 2.25rem;
+    width: 100%;
+    max-width: 640px;
+    /* Aspect ratio fijo para evitar CLS antes de que <model-viewer> hidrate */
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand-statement__model {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    --poster-color: transparent;
+    /* Sutil sombra debajo de la botella para anclarla en el blanco puro */
+    filter: drop-shadow(0 18px 28px color-mix(in srgb, var(--navy) 14%, transparent));
+    outline: none;
+    border-radius: 0;
+  }
+
+  /* Mobile: el modelo se reduce un poco para no dominar la primera vista */
+  @media (max-width: 768px) {
+    .brand-statement__model-wrap {
+      max-width: 420px;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  .brand-statement__actions {
+    /* Block-level flex centrado: ocupa su propia fila independiente del hint */
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Reveal con stagger al entrar viewport */
+  [data-anim='up'] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--dur-divine, 1200ms) var(--ease-divine),
+                transform var(--dur-divine, 1200ms) var(--ease-divine);
+  }
+  [data-anim='up'].is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-anim='up'] { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+
+<script>
+  if ('IntersectionObserver' in window) {
+    const sec = document.querySelector<HTMLElement>('[data-brand-statement]');
+    if (sec) {
+      const items = sec.querySelectorAll<HTMLElement>('[data-anim="up"]');
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            items.forEach((el, i) => {
+              setTimeout(() => el.classList.add('is-in'), 50 + i * 70);
+            });
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.2 });
+      io.observe(sec);
+    }
+  } else {
+    document.querySelectorAll('[data-brand-statement] [data-anim="up"]').forEach((el) => el.classList.add('is-in'));
+  }
+
+</script>
