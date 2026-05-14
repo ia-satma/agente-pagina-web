@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "satma-agentes",
+  "description": "Marketplace privado de SATMA con agentes Claude Code para servicios de consultoría y desarrollo web.",
+  "owner": {
+    "name": "SATMA",
+    "email": "ia@satma.mx"
+  },
+  "plugins": [
+    {
+      "name": "agente-pagina-web",
+      "description": "Sistema multi-agente para industrializar la creación de sitios web. Pipeline: research → strategy → design → mockup → code (Next/Astro/HTML) → QA → handoff.",
+      "author": {
+        "name": "SATMA",
+        "email": "ia@satma.mx"
+      },
+      "category": "development",
+      "source": ".",
+      "homepage": "https://github.com/ia-satma/agente-pagina-web"
+    }
+  ]
+}
