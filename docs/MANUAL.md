@@ -208,7 +208,7 @@ El plugin tiene la plantilla `briefs/_template/` internamente, así que el orche
 O reinstalar:
 ```
 /plugin uninstall agente-pagina-web
-/plugin install ia-satma/agente-pagina-web
+/plugin install agente-pagina-web@satma-agentes
 ```
 
 ## Probar cambios locales antes de publicarlos
@@ -230,9 +230,10 @@ Dentro de la sesión, tras editar un agente:
    ```bash
    gh repo add-collaborator ia-satma/agente-pagina-web <github-username>
    ```
-2. El colega instala `gh` + autentica + corre:
+2. El colega instala `gh` + autentica + corre los dos comandos:
    ```
-   /plugin install ia-satma/agente-pagina-web
+   /plugin marketplace add ia-satma/agente-pagina-web
+   /plugin install agente-pagina-web@satma-agentes
    ```
 
 ## Desinstalar
@@ -375,7 +376,9 @@ git clone https://github.com/ia-satma/agente-pagina-web.git ~/Movies/satma/agent
 
 # Vía 2 (plugin)
 /plugin uninstall agente-pagina-web
-/plugin install ia-satma/agente-pagina-web
+/plugin marketplace remove satma-agentes
+/plugin marketplace add ia-satma/agente-pagina-web
+/plugin install agente-pagina-web@satma-agentes
 ```
 
 ---
