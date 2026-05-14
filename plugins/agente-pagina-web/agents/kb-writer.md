@@ -424,6 +424,57 @@ Antes de entregar, mental-check:
 - ¿Las secciones que no aplican dicen "N/A" o están omitidas conscientemente?
 - ¿El roadmap recoge TODOS los `[FALTA: ...]` activos del pipeline?
 
+### Paso 5 — Generar LESSONS.md del proyecto (obligatorio)
+
+Además del `KNOWLEDGE_BASE.md`, generar `output/<slug>/LESSONS.md` con aprendizajes que pueden mejorar el sistema. Este archivo es la fuente que alimenta el `improvement-curator`.
+
+**Estructura:**
+
+```markdown
+# Lecciones — proyecto <slug>
+
+> Aprendizajes capturados durante este proyecto, para mejorar el sistema AGENTE PAGINA WEB.
+> Generado por kb-writer el YYYY-MM-DD.
+
+## 🟢 Lo que funcionó (patterns)
+
+- **<Patrón observado>** — qué se usó, por qué funcionó, en qué fase. Ej:
+  "Diptych con bg=cyan + align=right resaltó perfectamente la paleta navy del cliente."
+- **...**
+
+## 🔴 Lo que falló (antipatterns)
+
+- **<Cosa que falló>** — qué falló, qué agente la generó, cómo se corrigió. Ej:
+  "El brand-researcher infirió un testimonio que no existía. Hubo que corregirlo manualmente."
+- **...**
+
+## 💡 Propuestas para el sistema
+
+> Cosas concretas que deberían incorporarse al playbook o a los prompts de los agentes.
+
+- [ ] **<Agente afectado>** — qué cambio sugerir. Ej:
+  "brand-researcher: agregar regla más estricta — prohibido inferir testimonios; si no hay, marcar [FALTA: testimonial verificable]."
+- [ ] **<Agente afectado>** — otra propuesta.
+
+## 📊 Métricas del proyecto
+
+- Páginas generadas: N
+- Stack: <stack>
+- Duración total del pipeline: ~X horas
+- Fases pausadas para input humano: <fase1>, <fase2>
+- Cantidad de `[FALTA: ...]` final: N
+- Cantidad de placeholders activos: N
+- Build pasa: ✅ / ❌
+- Tests pasan: N/N
+```
+
+**Reglas para esta sección:**
+- Capturar **mínimo 2 patterns + 2 antipatterns + 1 propuesta**. Si no se ven, preguntarse "¿qué se aprendió aquí?" — siempre hay algo.
+- Las propuestas deben ser **accionables**: nombre del agente afectado + cambio específico, no genérico.
+- Las métricas deben ser numéricas, no narrativas.
+
+**Importante:** LESSONS.md vive en `output/<slug>/LESSONS.md` (no en el repo del sistema). Es el `improvement-curator` quien luego decide qué de ahí sube al sistema oficial.
+
 ## Reglas estrictas
 
 ### NUNCA

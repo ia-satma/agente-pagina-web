@@ -1,7 +1,7 @@
 {
   "name": "agente-pagina-web",
   "description": "Sistema multi-agente Claude Code para industrializar la creación de sitios web. Pipeline: research → strategy → design → mockup → code (Next/Astro/HTML) → QA → handoff. Por SATMA (https://satma.mx).",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "SATMA",
     "email": "ia@satma.mx",
