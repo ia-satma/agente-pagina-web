@@ -105,23 +105,24 @@ output/clinica-vital/
 
 ---
 
-## Estructura del sistema
+## Estructura del sistema (Claude Code Plugin v1)
 
 ```
-AGENTE PAGINA WEB/
-├── .claude/
-│   ├── agents/                    ← 10 subagentes (definidos en este repo)
-│   │   ├── web-orchestrator.md
-│   │   ├── brand-researcher.md
-│   │   ├── site-architect.md
-│   │   ├── design-director.md
-│   │   ├── mockup-builder.md
-│   │   ├── code-gen-next.md
-│   │   ├── code-gen-astro.md
-│   │   ├── code-gen-html.md
-│   │   ├── qa-reviewer.md
-│   │   └── kb-writer.md
-│   └── settings.json              ← permisos consolidados
+agente-pagina-web/
+├── .claude-plugin/
+│   └── plugin.json                ← manifest del plugin (name, version, author…)
+├── agents/                        ← 10 subagentes
+│   ├── web-orchestrator.md
+│   ├── brand-researcher.md
+│   ├── site-architect.md
+│   ├── design-director.md
+│   ├── mockup-builder.md
+│   ├── code-gen-next.md
+│   ├── code-gen-astro.md
+│   ├── code-gen-html.md
+│   ├── qa-reviewer.md
+│   └── kb-writer.md
+├── settings.json                  ← permisos por defecto del plugin
 ├── kb/                            ← conocimiento del sistema
 │   ├── playbook.md                ← patrones SATMA destilados (tokens, motion, SEO, mobile…)
 │   └── references/                ← proyectos vivos de referencia
@@ -130,10 +131,45 @@ AGENTE PAGINA WEB/
 ├── briefs/                        ← un directorio por cliente
 │   └── _template/                 ← plantilla con los 11 archivos del knowledge-base
 ├── output/                        ← un directorio por proyecto generado
-│   └── <cliente>/
+│   └── <cliente>/                 (gitignored — datos de clientes)
 ├── AGENTS.md                      ← reglas globales del proyecto
 ├── CLAUDE.md → @AGENTS.md
 └── README.md                      ← este archivo
+```
+
+## Instalar como plugin
+
+Desde cualquier sesión de Claude Code:
+
+```
+/plugin install ia-satma/agente-pagina-web
+```
+
+Tras instalar:
+- Los 10 agentes quedan disponibles globalmente vía `Agent({ subagent_type: '...' })`.
+- Los permisos de `settings.json` aplican por defecto.
+- El `kb/`, `briefs/_template/` y `AGENTS.md` quedan accesibles dentro del plugin.
+
+### Probar localmente (sin publicar cambios)
+
+```bash
+claude --plugin-dir "/Users/alejandromtz-flowwork/Movies/satma/AGENTE PAGINA WEB"
+```
+
+Dentro de la sesión:
+```
+/reload-plugins     # tras editar un agente
+/agents             # lista los agentes cargados
+```
+
+### Usar como repo (sin plugin)
+
+También puedes clonar el repo y abrirlo con Claude Code directamente — los agentes en `agents/` se cargan automáticamente:
+
+```bash
+git clone https://github.com/ia-satma/agente-pagina-web.git
+cd agente-pagina-web
+claude
 ```
 
 ---
@@ -170,7 +206,7 @@ AGENTE PAGINA WEB/
 
 ## Decisiones tomadas en este sistema
 
-1. **Hospedaje:** Claude Code (local o nube de Anthropic). Subagentes en `.claude/agents/` portables.
+1. **Hospedaje:** Claude Code (local, nube de Anthropic, o como plugin instalable). Subagentes en `agents/` portables.
 2. **Stack default por cliente:** lo elige el usuario al invocar (next | astro | html).
 3. **Aprobación obligatoria del mockup** antes del repo final.
 4. **Knowledge-base con 11 archivos numerados** — mismo formato que `satma-web/knowledge-base/`.
@@ -187,7 +223,7 @@ El sistema mismo es código. Mejóralo:
 - **Patrones nuevos** → agregar a `kb/playbook.md`.
 - **Nuevos clientes con stack distinto** → puede valer crear un nuevo `code-gen-<stack>.md`.
 - **Nuevas secciones en el knowledge-base** → editar `briefs/_template/knowledge-base/` y el agente `brand-researcher`.
-- **Mejoras a un agente** → editar su archivo `.md` en `.claude/agents/`.
+- **Mejoras a un agente** → editar su archivo `.md` en `agents/` (luego `/reload-plugins` si lo estás probando como plugin).
 
 Versionar con git:
 

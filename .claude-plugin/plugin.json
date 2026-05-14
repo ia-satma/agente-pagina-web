@@ -1,0 +1,26 @@
+{
+  "name": "agente-pagina-web",
+  "description": "Sistema multi-agente Claude Code para industrializar la creación de sitios web. Pipeline: research → strategy → design → mockup → code (Next/Astro/HTML) → QA → handoff. Por SATMA (https://satma.mx).",
+  "version": "1.0.0",
+  "author": {
+    "name": "SATMA",
+    "email": "ia@satma.mx",
+    "url": "https://satma.mx"
+  },
+  "homepage": "https://github.com/ia-satma/agente-pagina-web",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ia-satma/agente-pagina-web.git"
+  },
+  "keywords": [
+    "satma",
+    "web",
+    "agent-pipeline",
+    "site-generator",
+    "nextjs",
+    "astro",
+    "tailwind",
+    "spanish"
+  ],
+  "license": "UNLICENSED"
+}
