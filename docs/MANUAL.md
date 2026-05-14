@@ -148,17 +148,24 @@ rm -rf ~/Movies/satma/agente-pagina-web
 
 ## Instalación
 
-Abre cualquier sesión de Claude Code (en cualquier proyecto) y escribe:
+Claude Code 2.x usa el modelo **marketplace + plugin**: primero registras el marketplace (el repo), después instalas el plugin.
+
+Abre cualquier sesión de Claude Code y corre **estos dos comandos**:
 
 ```
-/plugin install ia-satma/agente-pagina-web
+/plugin marketplace add ia-satma/agente-pagina-web
+```
+
+```
+/plugin install agente-pagina-web@satma-agentes
 ```
 
 Claude Code:
-1. Clona el repo a `~/.claude/plugins/agente-pagina-web/`.
-2. Lee `.claude-plugin/plugin.json`.
-3. Registra los agentes en `agents/` globalmente.
-4. Aplica permisos de `settings.json`.
+1. Clona el repo a `~/.claude/plugins/marketplaces/satma-agentes/`.
+2. Lee `.claude-plugin/marketplace.json` → encuentra el plugin "agente-pagina-web".
+3. Lee `.claude-plugin/plugin.json` → registra metadata.
+4. Registra los 10 agentes en `agents/` globalmente.
+5. Aplica permisos de `settings.json`.
 
 ## Verificar instalación
 
@@ -324,14 +331,28 @@ Configurar gh como helper:
 gh auth setup-git
 ```
 
-### `/plugin install` falla con "repo not found"
-- Verificar acceso: `gh repo view ia-satma/agente-pagina-web`.
-- Si "not found": no tienes permisos sobre el repo. Pídele al owner que te agregue como colaborador.
+### `/plugin install` devuelve "isn't available in this environment"
+- Estás corriendo en un entorno que no soporta plugins (ej: sesión del SDK, Claude Code Web).
+- Verificar versión: `claude --version` debe ser **2.1.x o superior**.
+- Verificar que existe el marketplace agregado: ver contenido de `~/.claude/plugins/known_marketplaces.json`.
 
-### `/agents` no muestra los agentes después de `/plugin install`
-- Verificar `/plugin list` — ¿se instaló?
-- Reinciar Claude Code (cerrar y abrir).
+### `/plugin marketplace add` falla con "repo not found"
+- Verificar acceso: `gh repo view ia-satma/agente-pagina-web`.
+- Si "not found": no tienes permisos. Pídele al owner que te agregue como colaborador.
+- Asegúrate de tener `gh auth status` con sesión activa (Claude Code usa esa credencial para repos privados).
+
+### `/agents` no muestra los agentes después de instalar
+- Verificar `/plugin list` — ¿se ve "agente-pagina-web"?
+- Reiniciar Claude Code (cerrar y abrir).
 - `/reload-plugins`.
+
+### Quiero forzar reinstalar el plugin
+```
+/plugin uninstall agente-pagina-web
+/plugin marketplace remove satma-agentes
+/plugin marketplace add ia-satma/agente-pagina-web
+/plugin install agente-pagina-web@satma-agentes
+```
 
 ### `claude remote-control` dice "comando no encontrado"
 - Actualizar Claude Code: ver instrucciones en https://code.claude.com/docs.

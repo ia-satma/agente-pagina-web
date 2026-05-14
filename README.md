@@ -139,10 +139,11 @@ agente-pagina-web/
 
 ## Instalar como plugin
 
-Desde cualquier sesión de Claude Code:
+Desde cualquier sesión de Claude Code 2.1+ (dos comandos):
 
 ```
-/plugin install ia-satma/agente-pagina-web
+/plugin marketplace add ia-satma/agente-pagina-web
+/plugin install agente-pagina-web@satma-agentes
 ```
 
 > **¿Quieres usarlo desde web o iPhone?** Ver [docs/CLOUD.md](docs/CLOUD.md) — opciones de Remote Control y Claude Code en la Web.
