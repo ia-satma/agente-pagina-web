@@ -7,6 +7,38 @@ Sistema multi-agente que recibe un **brief de cliente** (investigación 360° de
 
 ---
 
+## Cómo invocar al sistema (atajos verbales y slash commands)
+
+### Slash commands (la forma más rápida)
+
+| Comando | Qué hace |
+|---|---|
+| `/web-nuevo "Nombre Cliente"` | Crea estructura de brief desde la plantilla. |
+| `/web-genera <slug> <stack>` | Lanza el pipeline completo (research → mockup). Pausa para aprobación. |
+| `/web-aprobar <slug>` | Aprueba el mockup y continúa al repo final + QA + KB. |
+| `/web-estado <slug>` | Muestra progreso del pipeline para un cliente. |
+| `/web-list` | Lista todos los clientes (briefs + outputs). |
+
+### Lenguaje natural (sin slash command)
+
+El usuario puede invocar el sistema con frases naturales. Cuando Claude detecta cualquiera de estos patrones, delega al agente correspondiente:
+
+| Si el usuario escribe… | Claude debe invocar… |
+|---|---|
+| "Crea/genera/arma/haz una **página web/sitio/landing** para X" | `web-orchestrator` |
+| "Necesito una web para X", "Hagamos el sitio de X", "Rediseña la web de X" | `web-orchestrator` |
+| "Usa el **agente web**" / "agente página" / "agente sitio" | `web-orchestrator` |
+| "Investiga la marca de X", "Research del cliente X", "Completa el KB de X" | `brand-researcher` |
+| "Define la arquitectura de X", "Sitemap de X", "Estrategia del sitio de X" | `site-architect` |
+| "Diseño visual de X", "Paleta para X", "Tipografía para X", "Moodboard de X" | `design-director` |
+| "Mockup de X", "Preview HTML de X", "Cómo se va a ver la web de X" | `mockup-builder` |
+| "QA del repo de X", "Audita la web de X", "Smoke tests de X" | `qa-reviewer` |
+| "KB final de X", "Doc de transferencia de X", "Documenta el sitio de X" | `kb-writer` |
+
+**Regla cuando hay ambigüedad:** si el usuario solo dice "usa el agente web" o "agente página" sin más contexto, invocar al `web-orchestrator` que es el coordinador del pipeline — él decidirá qué sub-agentes invocar.
+
+---
+
 ## Reglas globales del proyecto
 
 ### 1. Idioma y voz

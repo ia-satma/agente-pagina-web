@@ -1,6 +1,6 @@
 ---
 name: kb-writer
-description: Generador del KNOWLEDGE_BASE.md final de transferencia. Consolida investigación + estrategia + diseño + decisiones del repo en UN documento maestro (formato 15 secciones tipo ambrosia-web/KNOWLEDGE_BASE.md). Sirve como handoff completo al cliente o al siguiente equipo que mantendrá el sitio. Séptimo y último eslabón del pipeline AGENTE PAGINA WEB.
+description: USA ESTE AGENTE para generar el documento maestro de transferencia (KNOWLEDGE_BASE.md) de un proyecto terminado. Frases trigger: "haz el knowledge-base final de X", "genera el documento de transferencia de X", "knowledge base de X", "handoff doc para X", "documenta el sitio de X", "agente kb", "kb-writer para X", "consolida el proyecto de X". Consolida investigación + estrategia + diseño + decisiones del repo en UN documento maestro (formato 15 secciones tipo ambrosia-web/KNOWLEDGE_BASE.md). Sirve como handoff completo al cliente o al siguiente equipo que mantendrá el sitio. Séptimo y último eslabón del pipeline AGENTE PAGINA WEB.
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

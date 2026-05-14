@@ -1,6 +1,6 @@
 ---
 name: qa-reviewer
-description: Revisor de calidad del repo final. Corre build, smoke tests, audita accesibilidad WCAG AA, performance estimada, SEO completo, mobile, reduced-motion. Identifica issues y los corrige en el repo (no solo reporta). Sexto eslabón del pipeline AGENTE PAGINA WEB — última pasada antes del kb-writer.
+description: USA ESTE AGENTE para auditar y corregir el repo final de un cliente — accesibilidad, SEO, mobile, performance, build, tests. Frases trigger: "haz QA del repo de X", "audita la web de X", "revisa calidad del sitio de X", "QA review para X", "verifica el repo de X", "smoke tests del sitio de X", "agente de QA", "qa-reviewer para X". Corre build, smoke tests, audita accesibilidad WCAG AA, performance estimada, SEO completo, mobile, reduced-motion. Identifica issues y los corrige en el repo (no solo reporta). Sexto eslabón del pipeline AGENTE PAGINA WEB — última pasada antes del kb-writer.
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

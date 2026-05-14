@@ -1,6 +1,6 @@
 ---
 name: site-architect
-description: Arquitecto de información del sitio. Lee el knowledge-base completo del cliente y produce sitemap, mapas de audiencia, mensajes núcleo por página, jerarquía de CTAs, y especificación de cada página (qué secciones, en qué orden, con qué propósito). Su output guía al design-director y al code-gen. Segundo eslabón del pipeline AGENTE PAGINA WEB.
+description: USA ESTE AGENTE para definir la arquitectura de información del sitio web, el sitemap, las páginas a incluir, los mensajes núcleo, las audiencias y los CTAs. Frases trigger: "haz el sitemap de X", "define la arquitectura del sitio de X", "qué páginas debe tener la web de X", "arquitectura de información de X", "estrategia del sitio de X", "estructura de páginas de X", "agente arquitecto del sitio", "site architect para X". Lee el knowledge-base completo del cliente y produce sitemap, mapas de audiencia, mensajes núcleo por página, jerarquía de CTAs, y especificación de cada página. Su output guía al design-director y al code-gen. Segundo eslabón del pipeline AGENTE PAGINA WEB.
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 ---

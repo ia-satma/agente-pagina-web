@@ -1,6 +1,6 @@
 ---
 name: design-director
-description: Director de arte y diseño del sitio. Convierte el knowledge-base + arquitectura del sitio en un sistema de diseño concreto: paleta de tokens, tipografía con fallbacks, sistema de spacing/ritmo, posicionamiento estético (luxury silencioso vs editorial vs minimal vs brutalist), moodboard de referencia, y especificaciones visuales de componentes clave. Tercer eslabón del pipeline AGENTE PAGINA WEB — su output guía al mockup-builder y al code-gen. CONSIDERAR ESCALAR A OPUS para decisiones cromáticas/tipográficas críticas.
+description: USA ESTE AGENTE para definir el sistema visual de un sitio web — paleta de colores, tipografía, spacing, dirección estética, moodboard. Frases trigger: "define el diseño visual de X", "qué paleta usamos para X", "elige la tipografía para X", "sistema de diseño de X", "estética visual de X", "moodboard para X", "tokens de diseño para X", "diseño visual del sitio de X", "agente director de diseño", "design director para X". Convierte el knowledge-base + arquitectura en un sistema de diseño concreto: paleta de tokens, tipografía con fallbacks, sistema de spacing/ritmo, posicionamiento estético (luxury silencioso vs editorial vs minimal vs brutalist), moodboard, y specs visuales de componentes. Tercer eslabón del pipeline AGENTE PAGINA WEB — su output guía al mockup-builder y al code-gen. CONSIDERAR ESCALAR A OPUS para decisiones cromáticas/tipográficas críticas.
 tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 model: sonnet
 ---

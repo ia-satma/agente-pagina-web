@@ -1,6 +1,6 @@
 ---
 name: brand-researcher
-description: Investigador de marca 360°. Recibe brief de cliente (potencialmente incompleto) + URL del sitio actual del cliente, y produce un knowledge-base completo con los 11 archivos numerados del formato SATMA. Investiga online cuando falta info, marca [FALTA: ...] cuando no puede verificar. Es el primer eslabón del pipeline AGENTE PAGINA WEB — su output alimenta a site-architect y kb-writer.
+description: USA ESTE AGENTE para investigar una marca/cliente, completar un knowledge-base, hacer investigación 360°, analizar la web actual de un cliente, o destilar todo lo que se sabe de un cliente. Frases trigger — TODAS lo activan: "investiga la marca de X", "investigación 360 de X", "completa el knowledge-base de X", "analiza la web actual de X", "qué sabes de X", "destila la marca de X", "research del cliente X", "agente de investigación de marca", "brand researcher para X". Recibe brief de cliente (potencialmente incompleto) + URL del sitio actual, y produce un knowledge-base completo con los 11 archivos numerados del formato SATMA. Investiga online cuando falta info, marca [FALTA: ...] cuando no puede verificar. Primer eslabón del pipeline AGENTE PAGINA WEB — su output alimenta a site-architect y kb-writer.
 tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
 model: sonnet
 ---

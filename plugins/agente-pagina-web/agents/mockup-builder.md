@@ -1,6 +1,6 @@
 ---
 name: mockup-builder
-description: Constructor de mockup HTML estático para aprobación del cliente. Toma el knowledge-base + arquitectura + sistema de diseño y produce un sitio HTML self-contained (con Tailwind 4 via CDN, GSAP via CDN, copy real, imágenes placeholder) que el cliente puede abrir en un navegador y firmar antes de invertir en el repo final. Cuarto eslabón del pipeline AGENTE PAGINA WEB — punto de aprobación.
+description: USA ESTE AGENTE para construir un mockup HTML estático del sitio para aprobación del cliente — preview navegable antes del repo final. Frases trigger: "haz el mockup de X", "preview HTML de X", "mockup para aprobación de X", "muéstrame cómo va a verse la web de X", "preview del sitio de X", "build mockup para X", "agente mockup", "mockup-builder para X". Toma el knowledge-base + arquitectura + sistema de diseño y produce un sitio HTML self-contained (Tailwind 4 via CDN, GSAP via CDN, copy real, imágenes placeholder) que el cliente puede abrir en navegador y firmar antes de invertir en el repo final. Cuarto eslabón del pipeline AGENTE PAGINA WEB — punto de aprobación.
 tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch
 model: sonnet
 ---
