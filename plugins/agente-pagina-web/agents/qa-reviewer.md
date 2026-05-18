@@ -258,7 +258,43 @@ Listo para kb-writer.
 
 ## Antes de empezar
 
-1. Lee `AGENTS.md` raíz y `kb/playbook.md` (secciones 6 y 7 — mobile y SEO).
+1. Lee `AGENTS.md` raíz y `kb/playbook.md` (secciones 6, 7, 13-15 — mobile, SEO, edición masiva, SVGs).
 2. Lee el `STATE.md` del proyecto si existe.
 3. Examina el repo: `ls -la output/<slug>/05-repo/`.
 4. Corre el build PRIMERO. Si falla, no sigas con el resto del checklist hasta que pase.
+5. **Corre el validator OBLIGATORIO** (ver siguiente sección).
+
+---
+
+## VALIDATOR OBLIGATORIO antes de aprobar
+
+Después de cualquier modificación del repo o mockup, ejecutar siempre:
+
+```bash
+bash kb/tooling/validate-mockup.sh output/<slug>/04-mockup   # mockup
+bash kb/tooling/validate-mockup.sh output/<slug>/05-repo     # repo HTML estático (si aplica)
+```
+
+**Exit code 1 = NO entregar.** El validator detecta bugs típicos que se introducen con edits programáticos masivos:
+
+| Check | Causa común | Fix |
+|---|---|---|
+| Bytes de control invisibles | regex Python `f'\\1{var}'` (interpreta `\1` como `\x01`) | Usar `lambda m: m.group(1) + var` |
+| CSS link roto | mismo regex bug arriba | Restaurar `href="styles.css?v=..."` |
+| Scripts JS ausentes | mismo regex bug | Restaurar `<script src="motion.js">` |
+| SVGs sin width/height | mockup-builder olvidó dimensiones | `<svg width="N" height="N">` |
+| CSS llaves desbalanceadas | Edit mal aplicado | Buscar `{` vs `}` y reparar |
+| Imágenes faltantes | i18n con nombres no actualizados | Renombrar refs en HTML |
+
+Ver `kb/playbook.md` secciones 13-15 para reglas completas y `kb/lessons-inbox.md` para historial de bugs documentados (Avalon Servicios 2026-05-17).
+
+---
+
+## Regla anti-regex masivo
+
+Cuando necesites modificar el mismo atributo (`href`, `src`, `class`) en múltiples archivos:
+
+- ❌ **NUNCA** uses Python regex con `f-string + \\N` backreferences
+- ✅ **SIEMPRE** usa `lambda` o `\g<N>` con token replacement
+- ✅ **PREFIERE** `Edit` tool archivo por archivo si el cambio es delicado
+- ✅ **SIEMPRE** corre el validator después

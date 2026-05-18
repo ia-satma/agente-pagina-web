@@ -325,3 +325,136 @@ node --test tests/smoke.test.mjs
 ```bash
 rm -rf .next dist node_modules/.cache
 ```
+
+---
+
+## 13. Edición masiva de HTML: REGLA DE ORO
+
+> Aprendido en **Avalon Servicios** (2026-05-17): un script Python con regex masivo destruyó `<link rel="stylesheet">` y `<script src>` en 60 archivos por un bug de f-string + backreferences. Ver `kb/lessons-inbox.md`.
+
+### Cuándo SÍ usar regex masivo
+
+- Reemplazos triviales sin atributos críticos (`text → text`)
+- Cambios de un solo string literal sin grupos de captura
+- Si el cambio es delicado: usar `Edit` tool por archivo
+
+### Cuándo NUNCA usar regex masivo
+
+- Modificar atributos críticos: `href`, `src`, `class` principales
+- Mezclar f-strings con backreferences `\1`, `\2`, `\g<N>`
+- Loops sed/awk con replacements complejos
+
+### Patrones seguros de regex en Python
+
+```python
+# ❌ ANTIPATRÓN — Python interpreta \1 \3 como bytes \x01 \x03
+re.sub(pattern, f'\\1{var}\\3', content)
+
+# ✅ Patrón A — lambda (recomendado)
+re.sub(pattern, lambda m: m.group(1) + var + m.group(3), content)
+
+# ✅ Patrón B — token replacement
+re.sub(pattern, r'\1__TOKEN__\3', content).replace('__TOKEN__', var)
+
+# ✅ Patrón C — raw string + concatenación
+re.sub(pattern, r'\1' + re.escape(var) + r'\3', content)
+```
+
+### Después de CUALQUIER edit programático masivo:
+
+1. **Correr el validator**:
+   ```bash
+   bash kb/tooling/validate-mockup.sh output/<cliente>/04-mockup
+   ```
+
+2. **Verificar bytes invisibles**:
+   ```bash
+   grep -rlP '[\x00-\x08\x0B\x0E-\x1F]' output/<cliente>/04-mockup --include='*.html'
+   ```
+
+3. **Smoke test HTTP** (si hay servidor):
+   ```bash
+   python3 -c "
+   import urllib.request
+   r = urllib.request.urlopen('http://localhost:PORT/')
+   c = r.read().decode()
+   assert '<link rel=\"stylesheet\" href=' in c, 'CSS LINK ROTO'
+   print('OK')
+   "
+   ```
+
+---
+
+## 14. SVGs inline: dimensiones OBLIGATORIAS
+
+> Aprendido en **Avalon Servicios** (2026-05-17): un SVG sin `width`/`height` attributes se renderizó al tamaño del viewport cuando debía ser 16×16px. Ver `kb/lessons-inbox.md`.
+
+### Regla absoluta
+
+**TODO `<svg>` inline en HTML debe tener atributos `width` y `height` directos, no solo CSS.**
+
+```html
+<!-- ❌ ANTIPATRÓN — puede explotar al viewport -->
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">...</svg>
+
+<!-- ✅ CORRECTO -->
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">...</svg>
+```
+
+### Tamaños canónicos por contexto
+
+| Contexto | width/height |
+|---|---|
+| Labels en formularios (`label > svg`) | 14px |
+| Nav links, lang-picker, theme-toggle | 16-18px |
+| Botones (`.btn svg`) | 18-20px |
+| Cards de servicio/feature | 24px |
+| Featured/hero icons | 28-32px |
+| Contact channel | 20px |
+
+### Red de seguridad CSS bulletproof
+
+Agregar siempre al `styles.css` global:
+
+```css
+/* Fallback: SVG sin dimensiones → 1em (evita explosión al viewport) */
+svg:not([width]):not([height]) { width: 1em; height: 1em; }
+
+/* Overrides por contexto con !important */
+label svg, .quote-field label svg { width: 14px !important; height: 14px !important; flex-shrink: 0; }
+button svg, .btn svg { max-width: 22px; max-height: 22px; flex-shrink: 0; }
+.servicio-icon svg, .estandar-card-icon svg { width: 24px !important; height: 24px !important; }
+.theme-toggle svg { width: 18px !important; height: 18px !important; }
+.lang-picker > svg { width: 16px !important; height: 16px !important; }
+```
+
+---
+
+## 15. Checklist post-build OBLIGATORIO
+
+Después de cualquier generación masiva (mockup-builder, code-gen-*, qa-reviewer), correr SIEMPRE:
+
+```bash
+# 1. Validator integral
+bash kb/tooling/validate-mockup.sh output/<cliente>/04-mockup
+
+# 2. Smoke test del servidor (si está activo)
+curl -s http://localhost:PORT/ | grep -q '<link rel="stylesheet" href=' && echo "CSS OK" || echo "CSS ROTO"
+
+# 3. Búsqueda de SVGs sin dimensiones
+python3 -c "
+import re, os
+for root, dirs, files in os.walk('output/<cliente>/04-mockup'):
+    for f in files:
+        if f.endswith('.html'):
+            p = os.path.join(root, f)
+            c = open(p).read()
+            svgs = re.findall(r'<svg[^>]*?>', c, re.DOTALL)
+            broken = [s for s in svgs if not re.search(r'(^|\\s)width=', s)]
+            if broken:
+                print(f'{p}: {len(broken)} SVGs sin width')
+"
+```
+
+**Si el validator devuelve exit code 1 → NO entregar el mockup al cliente.**
+**Si devuelve exit code 2 → solo warnings, decidir caso por caso.**

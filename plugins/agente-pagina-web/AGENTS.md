@@ -18,6 +18,8 @@ Sistema multi-agente que recibe un **brief de cliente** (investigación 360° de
 | `/web-aprobar <slug>` | Aprueba el mockup y continúa al repo final + QA + KB. |
 | `/web-estado <slug>` | Muestra progreso del pipeline para un cliente. |
 | `/web-list` | Lista todos los clientes (briefs + outputs). |
+| `/web-validar <slug> [mockup\|repo]` | **Valida un mockup/repo antes de entregar**: bytes invisibles, CSS link, scripts JS, SVGs, llaves CSS, imágenes faltantes. Exit code 1 = NO entregar. |
+| `/web-aprende <texto>` | Captura una lección del uso real para que el `improvement-curator` la consolide en `playbook.md`. |
 
 ### Lenguaje natural (sin slash command)
 

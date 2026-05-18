@@ -317,7 +317,61 @@ Aprobación pedida al usuario antes de pasar al repo final.
 
 ## Antes de empezar
 
-1. Lee `AGENTS.md`, `kb/playbook.md`.
+1. Lee `AGENTS.md`, `kb/playbook.md` (en especial secciones 13, 14, 15 — edición masiva, SVGs, checklist post-build).
 2. Lee TODO `output/<slug>/01-research/`, `02-strategy/`, `03-design/`.
 3. Examina `briefs/<slug>/assets/` para inventario de imágenes/videos disponibles.
 4. Mira el mockup mental: cuando el cliente abra `index.html`, ¿qué firma? Pensar como el cliente.
+
+---
+
+## REGLAS DE ORO (evitar bugs reales documentados)
+
+### 1. SVGs inline SIEMPRE con `width` y `height` attributes
+
+```html
+<!-- ❌ ANTIPATRÓN — explota al viewport en algunos browsers -->
+<svg viewBox="0 0 24 24" stroke="currentColor">...</svg>
+
+<!-- ✅ CORRECTO -->
+<svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor">...</svg>
+```
+
+Tamaños canónicos: 14px (labels), 16-18px (nav), 20px (botones), 24px (cards de servicio).
+
+Agregar al CSS global como red de seguridad:
+```css
+svg:not([width]):not([height]) { width: 1em; height: 1em; }
+```
+
+### 2. NUNCA usar regex Python con `f-string + \\N` backreferences
+
+```python
+# ❌ DESTRUYE EL HTML — Python interpreta \1 como byte \x01 invisible
+re.sub(pattern, f'\\1?v={version}\\3', content)
+
+# ✅ Usar lambda
+re.sub(pattern, lambda m: m.group(1) + f'?v={version}' + m.group(3), content)
+```
+
+### 3. CHECK OBLIGATORIO al terminar el mockup
+
+```bash
+# Validator integral
+bash kb/tooling/validate-mockup.sh output/<slug>/04-mockup
+
+# Si exit code = 1 → NO entregar para aprobación
+# Si exit code = 2 (warnings) → revisar cada warning, decidir si es bloqueante
+```
+
+### 4. Smoke test antes de presentar al cliente
+
+```bash
+cd output/<slug>/04-mockup
+python3 -m http.server 4322 &
+sleep 1
+curl -s http://localhost:4322/ | grep -q '<link rel="stylesheet" href=' && echo "✓ CSS OK"
+curl -s http://localhost:4322/ | grep -q 'src=".*\.js' && echo "✓ JS OK"
+open http://localhost:4322
+```
+
+Ver `kb/lessons-inbox.md` entrada Avalon 2026-05-17 para detalle de bugs reales que esto evita.

@@ -344,7 +344,57 @@ Listo para qa-reviewer.
 
 ## Antes de empezar
 
-1. Lee `AGENTS.md` raíz y `kb/playbook.md`.
+1. Lee `AGENTS.md` raíz y `kb/playbook.md` (en especial secciones 13, 14, 15 — edición masiva, SVGs, checklist post-build).
 2. Lee TODO `output/<slug>/02-strategy/`, `03-design/`.
 3. **Examina el mockup aprobado** — es tu referencia más cercana. El repo final es prácticamente el mockup + Tailwind compilado + sitemap/llms.txt + crédito SATMA pulido.
 4. Si el mockup ya está perfecto, **el código final es 70% extraer y limpiar**.
+
+---
+
+## REGLAS DE ORO (de bugs reales documentados)
+
+### 1. SVGs inline SIEMPRE con `width` y `height` attributes
+
+```html
+<!-- ❌ NUNCA -->
+<svg viewBox="0 0 24 24" stroke="currentColor">...</svg>
+
+<!-- ✅ SIEMPRE -->
+<svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor">...</svg>
+```
+
+Tamaños canónicos: 14px (labels), 16-18px (nav), 20px (botones), 24px (cards), 28-32px (hero).
+
+Agregar al CSS global como red de seguridad:
+```css
+svg:not([width]):not([height]) { width: 1em; height: 1em; }
+```
+
+### 2. NUNCA usar regex masivo Python con `f-string` + backreferences
+
+```python
+# ❌ DESTRUYE EL HTML — Python interpreta \1 como \x01 invisible
+re.sub(pattern, f'\\1?v={version}\\3', content)
+
+# ✅ Usar lambda
+re.sub(pattern, lambda m: m.group(1) + f'?v={version}' + m.group(3), content)
+```
+
+Cuando modifiques `href`, `src`, attributes críticos: **PREFIERE `Edit` tool por archivo**.
+
+### 3. Después de generar el repo: VALIDATOR OBLIGATORIO
+
+```bash
+bash kb/tooling/validate-mockup.sh output/<slug>/05-repo
+```
+
+Si el validator sale con exit code 1: NO marcar como completado. Arreglar y reintentar.
+
+### 4. Verificar bytes invisibles en cada deploy
+
+```bash
+grep -rlP '[\x00-\x08\x0B\x0E-\x1F]' output/<slug>/05-repo --include='*.html'
+# Debe devolver vacío. Si encuentra algo: HTML corrupto.
+```
+
+Ver `kb/lessons-inbox.md` (entrada Avalon 2026-05-17) para el desastre que esto evita.
